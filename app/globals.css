@@ -10,6 +10,9 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-brewery-green: #56c99b;
+  --color-brewery-dark: #333333;
+  --color-brewery-light: #f2f2f2;
 }
 
 @media (prefers-color-scheme: dark) {

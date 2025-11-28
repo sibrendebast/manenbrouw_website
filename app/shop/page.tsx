@@ -1,22 +1,12 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import { useProductStore } from "@/store/productStore";
+import { getProducts } from "@/app/actions/productActions";
 import { ArrowRight } from "lucide-react";
-import { useEffect, useState } from "react";
 
-export default function ShopPage() {
-    const products = useProductStore((state) => state.products);
-    const [mounted, setMounted] = useState(false);
+export const dynamic = 'force-dynamic';
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    if (!mounted) {
-        return null; // Or a loading skeleton
-    }
+export default async function ShopPage() {
+    const products = await getProducts();
 
     return (
         <div className="bg-white min-h-screen py-16">
@@ -36,7 +26,7 @@ export default function ShopPage() {
                         >
                             <div className="relative h-64 w-full bg-gray-100">
                                 <Image
-                                    src={product.image}
+                                    src={product.images[0]}
                                     alt={product.name}
                                     fill
                                     className="object-cover"

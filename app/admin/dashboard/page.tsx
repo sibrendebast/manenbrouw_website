@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
-import { useProductStore } from "@/store/productStore";
-import { Plus, Trash2, LogOut, Upload, X } from "lucide-react";
+import { getProducts, createProduct, deleteProduct, updateStock, updateStockCount } from "@/app/actions/productActions";
+import { Plus, Trash2, LogOut, Upload, X, RefreshCw } from "lucide-react";
 import Image from "next/image";
 
 export default function AdminDashboard() {
     const { isAuthenticated, logout } = useAdminStore();
-    const { products, addProduct, removeProduct, updateStock } = useProductStore();
+    const [products, setProducts] = useState<any[]>([]);
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
 
@@ -22,14 +22,22 @@ export default function AdminDashboard() {
         price: "",
         description: "",
         images: [] as string[],
+        stockCount: 0,
     });
 
     const [uploading, setUploading] = useState(false);
+
+    const loadProducts = async () => {
+        const data = await getProducts();
+        setProducts(data);
+    };
 
     useEffect(() => {
         setMounted(true);
         if (!isAuthenticated) {
             router.push("/admin/login");
+        } else {
+            loadProducts();
         }
     }, [isAuthenticated, router]);
 
@@ -73,11 +81,11 @@ export default function AdminDashboard() {
         }));
     };
 
-    const handleAddProduct = (e: React.FormEvent) => {
+    const handleAddProduct = async (e: React.FormEvent) => {
         e.preventDefault();
         const slug = newProduct.name.toLowerCase().replace(/ /g, "-");
-        addProduct({
-            id: Date.now().toString(),
+
+        const result = await createProduct({
             slug,
             name: newProduct.name,
             style: newProduct.style,
@@ -85,21 +93,26 @@ export default function AdminDashboard() {
             volume: newProduct.volume,
             price: parseFloat(newProduct.price),
             description: newProduct.description,
-            images:
-                newProduct.images.length > 0
-                    ? newProduct.images
-                    : ["https://placehold.co/600x600/png"],
+            images: newProduct.images.length > 0 ? newProduct.images : ["https://placehold.co/600x600/png"],
             inStock: true,
+            stockCount: Number(newProduct.stockCount),
         });
-        setNewProduct({
-            name: "",
-            style: "",
-            abv: "",
-            volume: "33cl",
-            price: "",
-            description: "",
-            images: [],
-        });
+
+        if (result.success) {
+            loadProducts();
+            setNewProduct({
+                name: "",
+                style: "",
+                abv: "",
+                volume: "33cl",
+                price: "",
+                description: "",
+                images: [],
+                stockCount: 0,
+            });
+        } else {
+            alert("Failed to add product");
+        }
     };
 
     const handleLogout = () => {
@@ -170,6 +183,7 @@ export default function AdminDashboard() {
                                         />
                                     </div>
                                 </div>
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-bold mb-1">
@@ -200,6 +214,20 @@ export default function AdminDashboard() {
                                             className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
                                         />
                                     </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-1">
+                                        Stock Count
+                                    </label>
+                                    <input
+                                        required
+                                        type="number"
+                                        value={newProduct.stockCount}
+                                        onChange={(e) =>
+                                            setNewProduct({ ...newProduct, stockCount: parseInt(e.target.value) })
+                                        }
+                                        className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-bold mb-1">
@@ -310,9 +338,10 @@ export default function AdminDashboard() {
                                                     type="checkbox"
                                                     className="sr-only"
                                                     checked={product.inStock}
-                                                    onChange={(e) =>
-                                                        updateStock(product.id, e.target.checked)
-                                                    }
+                                                    onChange={async (e) => {
+                                                        await updateStock(product.id, e.target.checked);
+                                                        loadProducts();
+                                                    }}
                                                 />
                                                 <div
                                                     className={`block w-14 h-8 rounded-full border-2 border-black transition-colors ${product.inStock ? "bg-green-500" : "bg-gray-300"
@@ -327,10 +356,28 @@ export default function AdminDashboard() {
                                                 {product.inStock ? "In Stock" : "Out of Stock"}
                                             </span>
                                         </label>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold text-sm">Stock:</span>
+                                            <input
+                                                type="number"
+                                                className="w-20 px-2 py-1 border-2 border-black"
+                                                value={product.stockCount}
+                                                onChange={async (e) => {
+                                                    // Optimistic update could be done here, but for now just trigger action
+                                                    await updateStockCount(product.id, parseInt(e.target.value));
+                                                    loadProducts();
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                                 <button
-                                    onClick={() => removeProduct(product.id)}
+                                    onClick={async () => {
+                                        if (confirm('Are you sure?')) {
+                                            await deleteProduct(product.id);
+                                            loadProducts();
+                                        }
+                                    }}
                                     className="p-3 text-red-600 hover:bg-red-50 border-2 border-transparent hover:border-red-600 transition-all rounded-none"
                                     title="Remove Product"
                                 >
@@ -340,7 +387,7 @@ export default function AdminDashboard() {
                         ))}
                     </div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

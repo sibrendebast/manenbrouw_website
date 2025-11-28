@@ -29,7 +29,7 @@ export const useProductStore = create<ProductState>()(
             getProduct: (slug) => get().products.find((p) => p.slug === slug),
         }),
         {
-            name: "product-storage",
+            name: "product-storage-v1",
         }
     )
 );

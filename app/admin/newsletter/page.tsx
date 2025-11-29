@@ -3,6 +3,7 @@ import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft, Mail } from "lucide-react";
 import DeleteSubscriberButton from "./DeleteSubscriberButton";
+import CopyEmailsButton from "./CopyEmailsButton";
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,8 @@ export default async function AdminNewsletterPage() {
             createdAt: 'desc'
         }
     });
+
+    const emails = subscribers.map(s => s.email);
 
     return (
         <div className="min-h-screen bg-gray-50 py-12 text-black">
@@ -28,8 +31,11 @@ export default async function AdminNewsletterPage() {
                             <Mail className="h-10 w-10 mr-4" />
                             Newsletter Subscribers
                         </h1>
-                        <div className="bg-white px-4 py-2 border-2 border-black font-bold">
-                            Total: {subscribers.length}
+                        <div className="flex items-center gap-4">
+                            <CopyEmailsButton emails={emails} />
+                            <div className="bg-white px-4 py-2 border-2 border-black font-bold">
+                                Total: {subscribers.length}
+                            </div>
                         </div>
                     </div>
                 </div>

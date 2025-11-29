@@ -1,4 +1,5 @@
 import { Beer, Users, MapPin } from "lucide-react";
+import Image from "next/image";
 
 export default function AboutPage() {
     return (
@@ -22,33 +23,58 @@ export default function AboutPage() {
                         <p className="text-gray-700 mb-4 leading-relaxed">
                             Man & Brouw started as a passion project between friends who shared a
                             love for unique, flavorful beers. What began as small experiments in
-                            a garage has grown into a local microbrewery dedicated to pushing
+                            a kitchen has grown into a local microbrewery located in a shipping container. The brewery is dedicated to pushing
                             the boundaries of traditional brewing.
                         </p>
                         <p className="text-gray-700 mb-4 leading-relaxed">
                             We believe in quality over quantity, using only the finest
-                            ingredients and taking the time to perfect each recipe. From our
-                            signature Golden Stouts to our innovative Cider-Saison hybrids,
-                            every bottle tells a story of creativity and craftsmanship.
+                            ingredients and taking the time to perfect each batch. From our
+                            signature Fruited sours to our innovative Spiced Saisons,
+                            every batch tells a story of creativity and craftsmanship.
+                        </p>
+                        <p className="text-gray-700 mb-4 leading-relaxed">
+                            What makes us truly unique is our commitment to brewing each beer
+                            only once. This philosophy stems from our love for creative freedom
+                            and the true homebrewing spirit we fell in love with. We brew what
+                            we want, when we want it. While a beer might return, there will
+                            always be a new twist—keeping every batch exciting and unique.
+                            We brew one batch per month, so if you don't want to miss our new
+                            beers, follow us on social media or subscribe to our mailing list!
                         </p>
                     </div>
-                    <div className="bg-gray-100 h-80 flex items-center justify-center border-2 border-black">
-                        {/* Placeholder for brewery image */}
-                        <Beer className="h-24 w-24 text-gray-300" />
+                    <div className="relative w-full max-w-sm mx-auto aspect-square border-2 border-black overflow-hidden">
+                        <Image
+                            src="/about/beer_assortment.jpg"
+                            alt="Man & Brouw Beer Assortment"
+                            width={3064}
+                            height={3064}
+                            className="object-cover w-full h-full"
+                        />
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                    <div className="p-6 bg-brewery-light border-2 border-black">
-                        <div className="bg-white w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border-2 border-black">
-                            <Beer className="h-8 w-8 text-brewery-green" />
+                    <div className="relative p-6 border-2 border-black overflow-hidden group min-h-[300px] flex flex-col justify-center">
+                        <Image
+                            src="/about/abrikozen.jpg"
+                            alt="Fresh Apricots"
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-black/60"></div>
+                        <div className="relative z-10">
+                            <div className="bg-white w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border-2 border-black">
+                                <Beer className="h-8 w-8 text-brewery-green" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2 text-white">Unique Flavors</h3>
+                            <p className="text-gray-200">
+                                We love experimenting with whole fruits, spices, and herbs.
+                                But no matter the twist, the base of our beers is always
+                                high-quality craft-malted local grains.
+                            </p>
                         </div>
-                        <h3 className="text-xl font-bold mb-2">Unique Flavors</h3>
-                        <p className="text-gray-600">
-                            We experiment with bold ingredients like coffee, cacao, and tonka
-                            beans to create unforgettable taste experiences.
-                        </p>
                     </div>
+
                     <div className="p-6 bg-brewery-light border-2 border-black">
                         <div className="bg-white w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border-2 border-black">
                             <Users className="h-8 w-8 text-brewery-green" />
@@ -71,6 +97,6 @@ export default function AboutPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

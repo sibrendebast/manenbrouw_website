@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
 import { ArrowRight } from "lucide-react";
+import NewsletterForm from "@/components/NewsletterForm";
 
 export default function Home() {
   return (
@@ -121,20 +122,7 @@ export default function Home() {
           <p className="text-xl mb-8 opacity-90">
             Don't miss out on our new creations: Subscribe to our newsletter
           </p>
-          <form className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email address"
-              className="flex-grow px-6 py-4 text-gray-900 font-medium focus:outline-none border-2 border-black"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-white text-brewery-green font-bold py-4 px-8 hover:bg-opacity-90 transition-all border-2 border-black"
-            >
-              Subscribe
-            </button>
-          </form>
+          <NewsletterForm />
         </div>
       </section>
 

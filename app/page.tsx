@@ -43,7 +43,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             {/* Beer 1 */}
             <div className="flex flex-col md:flex-row gap-8 items-center bg-gray-50 p-6 hover:shadow-xl transition-shadow border-2 border-black">
-              <div className="relative w-full md:w-1/2 h-64 md:h-80 overflow-hidden border-2 border-black">
+              <div className="relative w-full md:w-1/2 aspect-square overflow-hidden border-2 border-black">
                 <Image
                   src="https://www.manenbrouw.be/wp-content/uploads/2025/05/PXL_20250506_180954534-EDIT.jpg"
                   alt="Betoverende Becca"
@@ -73,7 +73,7 @@ export default function Home() {
 
             {/* Beer 2 */}
             <div className="flex flex-col md:flex-row gap-8 items-center bg-gray-50 p-6 hover:shadow-xl transition-shadow border-2 border-black">
-              <div className="relative w-full md:w-1/2 h-64 md:h-80 overflow-hidden border-2 border-black">
+              <div className="relative w-full md:w-1/2 aspect-square overflow-hidden border-2 border-black">
                 <Image
                   src="https://www.manenbrouw.be/wp-content/uploads/2025/04/PXL_20250402_1732125882-scaled.jpg"
                   alt="Passionele Pommelien"
@@ -109,6 +109,32 @@ export default function Home() {
               View All Beers
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className="py-20 bg-brewery-green text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            We brew a new beer every month.
+          </h2>
+          <p className="text-xl mb-8 opacity-90">
+            Don't miss out on our new creations: Subscribe to our newsletter
+          </p>
+          <form className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
+            <input
+              type="email"
+              placeholder="Enter your email address"
+              className="flex-grow px-6 py-4 text-gray-900 font-medium focus:outline-none border-2 border-black"
+              required
+            />
+            <button
+              type="submit"
+              className="bg-white text-brewery-green font-bold py-4 px-8 hover:bg-opacity-90 transition-all border-2 border-black"
+            >
+              Subscribe
+            </button>
+          </form>
         </div>
       </section>
 

@@ -114,3 +114,18 @@ export async function updateStockCount(id: string, count: number) {
         return { success: false, error }
     }
 }
+
+export async function updatePrice(id: string, price: number) {
+    try {
+        await prisma.product.update({
+            where: { id },
+            data: { price },
+        })
+        revalidatePath('/shop')
+        revalidatePath('/admin/dashboard')
+        return { success: true }
+    } catch (error) {
+        console.error('Failed to update price:', error)
+        return { success: false, error }
+    }
+}

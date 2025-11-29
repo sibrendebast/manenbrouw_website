@@ -23,7 +23,7 @@ export default function AdminLogin() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 text-black">
             <div className="bg-white p-8 border-2 border-black shadow-xl w-full max-w-md">
                 <div className="flex justify-center mb-6">
                     <div className="bg-brewery-green p-4 border-2 border-black">
@@ -40,7 +40,7 @@ export default function AdminLogin() {
                 )}
                 <form onSubmit={handleLogin} className="space-y-6">
                     <div>
-                        <label className="block text-sm font-bold mb-2 text-gray-700">
+                        <label className="block text-sm font-bold mb-2">
                             Username
                         </label>
                         <input
@@ -52,7 +52,7 @@ export default function AdminLogin() {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold mb-2 text-gray-700">
+                        <label className="block text-sm font-bold mb-2">
                             Password
                         </label>
                         <input

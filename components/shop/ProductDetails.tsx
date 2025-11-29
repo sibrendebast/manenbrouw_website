@@ -50,7 +50,7 @@ export default function ProductDetails({ product }: { product: any }) {
                 </Link>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <div className="relative h-96 md:h-[600px] overflow-hidden bg-gray-100 border-2 border-black">
+                    <div className="relative aspect-square overflow-hidden bg-gray-100 border-2 border-black">
                         <Image
                             src={product.images[0]}
                             alt={product.name}

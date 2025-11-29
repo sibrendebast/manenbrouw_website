@@ -118,15 +118,12 @@ export default function CartPage() {
                                     <span>€{getTotalPrice().toFixed(2)}</span>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => {
-                                    alert("Checkout functionality coming soon!");
-                                    clearCart();
-                                }}
-                                className="w-full bg-brewery-dark text-white font-bold py-4 hover:bg-opacity-90 transition-colors shadow-lg border-2 border-black"
+                            <Link
+                                href="/checkout"
+                                className="block w-full bg-brewery-dark text-white font-bold py-4 text-center hover:bg-opacity-90 transition-colors shadow-lg border-2 border-black"
                             >
                                 Proceed to Checkout
-                            </button>
+                            </Link>
                             <Link
                                 href="/shop"
                                 className="block text-center mt-4 text-gray-500 hover:text-brewery-green transition-colors text-sm"

@@ -21,4 +21,37 @@ model Product {
   stockCount  Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  OrderItem   OrderItem[]
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress String // Stored as JSON string
+  shippingMethod  String // "shipment" | "pickup"
+  totalAmount     Float
+  status          String      @default("pending") // "pending", "pending_payment", "paid", "shipped", "completed", "cancelled"
+  stripeSessionId String?
+  paymentMethod   String? // "bancontact", "card", "payconiq"
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
 }

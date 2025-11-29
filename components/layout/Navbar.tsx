@@ -21,10 +21,20 @@ export default function Navbar() {
 
     const totalItems = useCartStore((state) => state.getTotalItems());
     const [mounted, setMounted] = useState(false);
+    const [cartPulse, setCartPulse] = useState(false);
+    const [prevTotalItems, setPrevTotalItems] = useState(0);
 
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    useEffect(() => {
+        if (mounted && totalItems > prevTotalItems) {
+            setCartPulse(true);
+            setTimeout(() => setCartPulse(false), 600);
+        }
+        setPrevTotalItems(totalItems);
+    }, [totalItems, mounted, prevTotalItems]);
 
     return (
         <nav className="bg-white text-brewery-dark sticky top-0 z-50 border-b-2 border-black">
@@ -55,7 +65,8 @@ export default function Navbar() {
                             ))}
                             <Link
                                 href="/cart"
-                                className="p-3 border-2 border-black hover:bg-brewery-green hover:text-white transition-colors relative flex items-center"
+                                className={`p-3 border-2 border-black hover:bg-brewery-green hover:text-white transition-colors relative flex items-center ${cartPulse ? 'animate-pulse' : ''
+                                    }`}
                             >
                                 <ShoppingCart className="h-6 w-6" />
                                 {mounted && totalItems > 0 && (

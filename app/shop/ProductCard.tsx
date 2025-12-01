@@ -18,6 +18,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
     const [quantity, setQuantity] = useState(1);
     const [isAdded, setIsAdded] = useState(false);
+    const [imageError, setImageError] = useState(false);
     const addItem = useCartStore((state) => state.addItem);
 
     const handleIncrement = () => {
@@ -36,14 +37,19 @@ export default function ProductCard({ product }: ProductCardProps) {
         }, 2000);
     };
 
+    const imageSrc = (imageError || !product.images || product.images.length === 0 || product.images[0].includes("placehold.co"))
+        ? "/logo.png"
+        : product.images[0];
+
     return (
         <div className="bg-white border-2 border-black overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full">
             <Link href={`/shop/${product.slug}`} className="relative aspect-square w-full bg-gray-100">
                 <Image
-                    src={product.images[0]}
+                    src={imageSrc}
                     alt={product.name}
                     fill
                     className="object-cover"
+                    onError={() => setImageError(true)}
                 />
                 {!product.inStock && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">

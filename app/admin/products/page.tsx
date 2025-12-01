@@ -94,7 +94,7 @@ export default function AdminDashboard() {
             volume: newProduct.volume,
             price: parseFloat(newProduct.price),
             description: newProduct.description,
-            images: newProduct.images.length > 0 ? newProduct.images : ["https://placehold.co/600x600/png"],
+            images: newProduct.images,
             inStock: true,
             stockCount: Number(newProduct.stockCount),
         });
@@ -240,13 +240,13 @@ export default function AdminDashboard() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-bold mb-1 text-black">
-                                        Images
+                                        Images <span className="text-red-600">*</span>
                                     </label>
                                     <div className="flex items-center justify-center w-full">
-                                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-black border-dashed cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                        <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed cursor-pointer hover:bg-gray-100 ${newProduct.images.length === 0 ? 'border-red-300 bg-red-50' : 'border-black bg-gray-50'}`}>
                                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                <Upload className="w-8 h-8 mb-2 text-black" />
-                                                <p className="text-sm text-black font-semibold">
+                                                <Upload className={`w-8 h-8 mb-2 ${newProduct.images.length === 0 ? 'text-red-400' : 'text-black'}`} />
+                                                <p className={`text-sm font-semibold ${newProduct.images.length === 0 ? 'text-red-500' : 'text-black'}`}>
                                                     {uploading
                                                         ? "Uploading..."
                                                         : "Click to upload images"}
@@ -305,8 +305,8 @@ export default function AdminDashboard() {
                                 </div>
                                 <button
                                     type="submit"
-                                    className="w-full bg-brewery-dark text-white font-bold py-3 px-4 hover:bg-opacity-90 transition-colors border-2 border-black"
-                                    disabled={uploading}
+                                    className="w-full bg-brewery-dark text-white font-bold py-3 px-4 hover:bg-opacity-90 transition-colors border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={uploading || newProduct.images.length === 0}
                                 >
                                     {uploading ? "Uploading..." : "Add Product"}
                                 </button>
@@ -324,7 +324,7 @@ export default function AdminDashboard() {
                             >
                                 <div className="relative h-32 w-32 flex-shrink-0 border-2 border-black">
                                     <Image
-                                        src={product.images[0]}
+                                        src={(!product.images || product.images.length === 0 || product.images[0].includes("placehold.co")) ? "/logo.png" : product.images[0]}
                                         alt={product.name}
                                         fill
                                         className="object-cover"

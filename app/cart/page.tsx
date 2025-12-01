@@ -11,6 +11,20 @@ export default function CartPage() {
         useCartStore();
     const [mounted, setMounted] = useState(false);
 
+    // Helper function to safely get images array
+    const getProductImages = (item: any): string[] => {
+        if (!item.images) return [];
+        if (typeof item.images === 'string') {
+            try {
+                return JSON.parse(item.images);
+            } catch {
+                return [item.images];
+            }
+        }
+        if (Array.isArray(item.images)) return item.images;
+        return [];
+    };
+
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -53,19 +67,47 @@ export default function CartPage() {
                                 key={item.id}
                                 className="flex flex-col sm:flex-row items-center gap-6 p-6 border-2 border-black shadow-sm"
                             >
-                                <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden bg-gray-100 border border-black">
-                                    <Image
-                                        src={item.images[0]}
-                                        alt={item.name}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
+                                {item.itemType === "product" && (
+                                    <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden bg-gray-100 border border-black">
+                                        <Image
+                                            src={(() => {
+                                                const images = getProductImages(item);
+                                                return (!images || images.length === 0 || images[0].includes("placehold.co")) ? "/logo.png" : images[0];
+                                            })()}
+                                            alt={item.name}
+                                            fill
+                                            className="object-cover"
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement;
+                                                target.srcset = "/logo.png";
+                                                target.src = "/logo.png";
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                                {item.itemType === "ticket" && (
+                                    <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden bg-brewery-green/10 border-2 border-brewery-green flex items-center justify-center">
+                                        <span className="text-4xl">🎟️</span>
+                                    </div>
+                                )}
                                 <div className="flex-grow text-center sm:text-left">
                                     <h3 className="text-lg font-bold text-brewery-dark">
-                                        {item.name}
+                                        {item.itemType === "product" ? item.name : item.title}
                                     </h3>
-                                    <p className="text-sm text-gray-500">{item.style}</p>
+                                    {item.itemType === "product" && item.style && <p className="text-sm text-gray-500">{item.style}</p>}
+                                    {item.itemType === "ticket" && (
+                                        <div className="text-sm text-gray-600 space-y-1 mt-1">
+                                            <p>{new Date(item.date).toLocaleDateString("en-US", {
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                                hour12: false,
+                                            })}</p>
+                                            <p>{item.location}</p>
+                                        </div>
+                                    )}
                                     <p className="text-brewery-green font-bold mt-1">
                                         €{item.price.toFixed(2)}
                                     </p>

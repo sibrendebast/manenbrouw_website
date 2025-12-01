@@ -37,8 +37,8 @@ export async function POST(req: NextRequest) {
                 price_data: {
                     currency: "eur",
                     product_data: {
-                        name: item.name,
-                        description: item.style,
+                        name: item.itemType === "product" ? item.name : item.title,
+                        description: item.itemType === "product" ? item.style : `Event at ${item.location}`,
                     },
                     unit_amount: Math.round(item.price * 100), // Convert to cents
                 },

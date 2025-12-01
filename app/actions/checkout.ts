@@ -5,9 +5,23 @@ import { Product } from "@/data/products";
 
 export interface CartItem extends Product {
     quantity: number;
+    itemType: "product";
 }
 
-export async function placeOrder(formData: FormData, cartItems: CartItem[]) {
+export interface EventTicketItem {
+    id: string;
+    title: string;
+    date: Date;
+    location: string;
+    price: number;
+    quantity: number;
+    itemType: "ticket";
+    eventId: string;
+}
+
+type CartItemUnion = CartItem | EventTicketItem;
+
+export async function placeOrder(formData: FormData, cartItems: CartItemUnion[]) {
     const customerName = formData.get("customerName") as string;
     const customerEmail = formData.get("customerEmail") as string;
     const customerPhone = formData.get("customerPhone") as string;
@@ -22,11 +36,14 @@ export async function placeOrder(formData: FormData, cartItems: CartItem[]) {
         return { success: false, error: "Missing required fields" };
     }
 
-    if (shippingMethod === "shipment" && (!street || !city || !zip || !country)) {
+    // Check if there are any products that require shipping
+    const hasProducts = cartItems.some(item => item.itemType === "product");
+
+    if (hasProducts && shippingMethod === "shipment" && (!street || !city || !zip || !country)) {
         return { success: false, error: "Missing address fields" };
     }
 
-    if (shippingMethod === "shipment" && country !== "Belgium") {
+    if (hasProducts && shippingMethod === "shipment" && country !== "Belgium") {
         return { success: false, error: "Shipping is only available in Belgium" };
     }
 
@@ -34,29 +51,54 @@ export async function placeOrder(formData: FormData, cartItems: CartItem[]) {
         // Recalculate total to prevent tampering
         let totalAmount = 0;
         const orderItemsData = [];
+        const ticketData = [];
 
         for (const item of cartItems) {
-            const product = await prisma.product.findUnique({
-                where: { id: item.id },
-            });
+            if (item.itemType === "product") {
+                const product = await prisma.product.findUnique({
+                    where: { id: item.id },
+                });
 
-            if (!product) {
-                throw new Error(`Product not found: ${item.id}`);
+                if (!product) {
+                    throw new Error(`Product not found: ${item.id}`);
+                }
+
+                totalAmount += product.price * item.quantity;
+                orderItemsData.push({
+                    productId: product.id,
+                    quantity: item.quantity,
+                    price: product.price,
+                });
+            } else if (item.itemType === "ticket") {
+                const event = await prisma.event.findUnique({
+                    where: { id: item.eventId },
+                });
+
+                if (!event) {
+                    throw new Error(`Event not found: ${item.eventId}`);
+                }
+
+                if (!event.isPaid || !event.ticketPrice) {
+                    throw new Error(`Event is not a paid event: ${item.eventId}`);
+                }
+
+                totalAmount += event.ticketPrice * item.quantity;
+                ticketData.push({
+                    eventId: event.id,
+                    buyerName: customerName,
+                    buyerEmail: customerEmail,
+                    quantity: item.quantity,
+                    totalPrice: event.ticketPrice * item.quantity,
+                });
             }
-
-            totalAmount += product.price * item.quantity;
-            orderItemsData.push({
-                productId: product.id,
-                quantity: item.quantity,
-                price: product.price,
-            });
         }
 
-        const shippingCost = shippingMethod === "shipment" ? 10 : 0;
+        // Only add shipping cost if there are products
+        const shippingCost = hasProducts && shippingMethod === "shipment" ? 10 : 0;
         totalAmount += shippingCost;
 
         const shippingAddress =
-            shippingMethod === "shipment"
+            hasProducts && shippingMethod === "shipment"
                 ? JSON.stringify({ street, city, zip, country })
                 : "";
 
@@ -66,14 +108,29 @@ export async function placeOrder(formData: FormData, cartItems: CartItem[]) {
                 customerEmail,
                 customerPhone,
                 shippingAddress,
-                shippingMethod,
+                shippingMethod: hasProducts ? shippingMethod : "pickup",
                 totalAmount,
                 status: "pending_payment",
-                items: {
+                items: orderItemsData.length > 0 ? {
                     create: orderItemsData,
-                },
+                } : undefined,
+                tickets: ticketData.length > 0 ? {
+                    create: ticketData,
+                } : undefined,
             },
         });
+
+        // Update tickets sold count for each event
+        for (const ticket of ticketData) {
+            await prisma.event.update({
+                where: { id: ticket.eventId },
+                data: {
+                    ticketsSold: {
+                        increment: ticket.quantity
+                    }
+                }
+            });
+        }
 
         if (newsletter) {
             try {

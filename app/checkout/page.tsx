@@ -16,6 +16,20 @@ export default function CheckoutPage() {
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
 
+    // Helper function to safely get images array
+    const getProductImages = (item: any): string[] => {
+        if (!item.images) return [];
+        if (typeof item.images === 'string') {
+            try {
+                return JSON.parse(item.images);
+            } catch {
+                return [item.images];
+            }
+        }
+        if (Array.isArray(item.images)) return item.images;
+        return [];
+    };
+
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -269,15 +283,29 @@ export default function CheckoutPage() {
                                     <div key={item.id} className="flex justify-between items-center border-b border-gray-200 pb-4 last:border-0 last:pb-0">
                                         <div className="flex items-center">
                                             <div className="relative w-16 h-16 mr-4 bg-gray-100 border border-black overflow-hidden flex-shrink-0">
-                                                <Image
-                                                    src={item.images[0]}
-                                                    alt={item.name}
-                                                    fill
-                                                    className="object-cover"
-                                                />
+                                                {item.itemType === "product" ? (
+                                                    <Image
+                                                        src={(() => {
+                                                            const images = getProductImages(item);
+                                                            return (!images || images.length === 0 || images[0].includes("placehold.co")) ? "/logo.png" : images[0];
+                                                        })()}
+                                                        alt={(item as any).name || (item as any).title}
+                                                        fill
+                                                        className="object-cover"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            target.srcset = "/logo.png";
+                                                            target.src = "/logo.png";
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-brewery-green/10 border-2 border-brewery-green flex items-center justify-center">
+                                                        <span className="text-2xl">🎟️</span>
+                                                    </div>
+                                                )}
                                             </div>
                                             <div>
-                                                <h3 className="font-medium text-brewery-dark">{item.name}</h3>
+                                                <h3 className="font-medium text-brewery-dark">{item.itemType === "product" ? item.name : item.title}</h3>
                                                 <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                                             </div>
                                         </div>

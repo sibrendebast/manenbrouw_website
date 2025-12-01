@@ -3,11 +3,19 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle } from "lucide-react";
+import { useCartStore } from "@/store/cartStore";
+import { useEffect } from "react";
 
 export default function CheckoutSuccessPage() {
     const searchParams = useSearchParams();
     const orderId = searchParams.get("orderId") || searchParams.get("order_id");
     const sessionId = searchParams.get("session_id");
+    const clearCart = useCartStore((state) => state.clearCart);
+
+    // Clear the cart when the success page loads
+    useEffect(() => {
+        clearCart();
+    }, [clearCart]);
 
     return (
         <div className="min-h-screen bg-white py-16 flex flex-col items-center justify-center text-center px-4">

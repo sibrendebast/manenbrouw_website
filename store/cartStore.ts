@@ -4,13 +4,28 @@ import { Product } from "@/data/products";
 
 export interface CartItem extends Product {
     quantity: number;
+    itemType: "product";
 }
 
+export interface EventTicketItem {
+    id: string;
+    title: string;
+    date: Date;
+    location: string;
+    price: number;
+    quantity: number;
+    itemType: "ticket";
+    eventId: string;
+}
+
+type CartItemUnion = CartItem | EventTicketItem;
+
 interface CartState {
-    items: CartItem[];
+    items: CartItemUnion[];
     addItem: (product: Product, quantity?: number) => void;
-    removeItem: (productId: string) => void;
-    updateQuantity: (productId: string, quantity: number) => void;
+    addTicket: (event: any, quantity?: number) => void;
+    removeItem: (itemId: string) => void;
+    updateQuantity: (itemId: string, quantity: number) => void;
     clearCart: () => void;
     getTotalItems: () => number;
     getTotalPrice: () => number;
@@ -22,30 +37,57 @@ export const useCartStore = create<CartState>()(
             items: [],
             addItem: (product, quantity = 1) => {
                 const items = get().items;
-                const existingItem = items.find((item) => item.id === product.id);
+                const existingItem = items.find((item) => item.id === product.id && item.itemType === "product");
 
                 if (existingItem) {
                     set({
                         items: items.map((item) =>
-                            item.id === product.id
+                            item.id === product.id && item.itemType === "product"
                                 ? { ...item, quantity: item.quantity + quantity }
                                 : item
                         ),
                     });
                 } else {
-                    set({ items: [...items, { ...product, quantity }] });
+                    set({ items: [...items, { ...product, quantity, itemType: "product" as const }] });
                 }
             },
-            removeItem: (productId) => {
-                set({ items: get().items.filter((item) => item.id !== productId) });
+            addTicket: (event, quantity = 1) => {
+                const items = get().items;
+                const ticketId = `ticket-${event.id}`;
+                const existingTicket = items.find((item) => item.id === ticketId && item.itemType === "ticket");
+
+                if (existingTicket) {
+                    set({
+                        items: items.map((item) =>
+                            item.id === ticketId && item.itemType === "ticket"
+                                ? { ...item, quantity: item.quantity + quantity }
+                                : item
+                        ),
+                    });
+                } else {
+                    const ticketItem: EventTicketItem = {
+                        id: ticketId,
+                        title: event.title,
+                        date: event.date,
+                        location: event.location,
+                        price: event.ticketPrice,
+                        quantity,
+                        itemType: "ticket" as const,
+                        eventId: event.id,
+                    };
+                    set({ items: [...items, ticketItem] });
+                }
             },
-            updateQuantity: (productId, quantity) => {
+            removeItem: (itemId) => {
+                set({ items: get().items.filter((item) => item.id !== itemId) });
+            },
+            updateQuantity: (itemId, quantity) => {
                 if (quantity <= 0) {
-                    get().removeItem(productId);
+                    get().removeItem(itemId);
                 } else {
                     set({
                         items: get().items.map((item) =>
-                            item.id === productId ? { ...item, quantity } : item
+                            item.id === itemId ? { ...item, quantity } : item
                         ),
                     });
                 }

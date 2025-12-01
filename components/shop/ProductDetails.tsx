@@ -52,10 +52,15 @@ export default function ProductDetails({ product }: { product: any }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <div className="relative aspect-square overflow-hidden bg-gray-100 border-2 border-black">
                         <Image
-                            src={product.images[0]}
+                            src={(!product.images || product.images.length === 0 || product.images[0].includes("placehold.co")) ? "/logo.png" : product.images[0]}
                             alt={product.name}
                             fill
                             className="object-cover"
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.srcset = "/logo.png";
+                                target.src = "/logo.png";
+                            }}
                         />
                     </div>
 

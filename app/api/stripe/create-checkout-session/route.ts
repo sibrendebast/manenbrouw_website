@@ -4,6 +4,14 @@ import Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
     try {
+        // Validate Stripe key at runtime
+        if (!process.env.STRIPE_SECRET_KEY) {
+            return NextResponse.json(
+                { error: "Stripe is not configured" },
+                { status: 500 }
+            );
+        }
+
         const body = await req.json();
         const {
             orderId,

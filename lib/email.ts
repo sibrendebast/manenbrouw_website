@@ -1,7 +1,8 @@
 import { Resend } from 'resend';
 import { OrderInvoice } from '@/app/emails/OrderInvoice';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Use a fallback key during build time to prevent build failures
+const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder');
 
 export async function sendOrderConfirmationEmail(order: any) {
     if (!process.env.RESEND_API_KEY) {

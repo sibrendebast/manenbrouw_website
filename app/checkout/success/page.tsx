@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
     const searchParams = useSearchParams();
     const orderId = searchParams.get("orderId") || searchParams.get("order_id");
     const sessionId = searchParams.get("session_id");
@@ -43,5 +43,20 @@ export default function CheckoutSuccessPage() {
                 Continue Shopping
             </Link>
         </div>
+    );
+}
+
+export default function CheckoutSuccessPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-white py-16 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brewery-green mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Loading...</p>
+                </div>
+            </div>
+        }>
+            <CheckoutSuccessContent />
+        </Suspense>
     );
 }

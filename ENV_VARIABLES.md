@@ -15,7 +15,8 @@ RESEND_API_KEY=<your_resend_api_key>
 
 ## Cloudinary (Image Uploads)
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=<your_cloudinary_cloud_name>
-NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=<your_cloudinary_upload_preset>
+CLOUDINARY_API_KEY=<your_cloudinary_api_key>
+CLOUDINARY_API_SECRET=<your_cloudinary_api_secret>
 
 ---
 
@@ -34,9 +35,10 @@ NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=<your_cloudinary_upload_preset>
 
 ### Cloudinary Credentials
 1. Go to https://console.cloudinary.com/
-2. Find your Cloud Name on the dashboard → Use for NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-3. Go to Settings → Upload → Upload presets
-4. Create or use existing preset → Use for NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+2. Find your **Cloud Name** on the dashboard → Use for NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+3. Find your **API Key** on the dashboard → Use for CLOUDINARY_API_KEY
+4. Click "Reveal" next to API Secret → Use for CLOUDINARY_API_SECRET
+5. Copy all three values
 
 ---
 

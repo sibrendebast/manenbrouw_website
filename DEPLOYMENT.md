@@ -24,7 +24,8 @@ RESEND_API_KEY="re_..."  # Your Resend API key
 ### Cloudinary (Image Uploads)
 ```
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your-cloud-name"
-NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET="your-upload-preset"
+CLOUDINARY_API_KEY="your-api-key"
+CLOUDINARY_API_SECRET="your-api-secret"
 ```
 
 ## Deployment Steps

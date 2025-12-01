@@ -30,7 +30,8 @@ Go to App settings → Environment variables and add:
 - [ ] `STRIPE_WEBHOOK_SECRET` = (get after webhook setup)
 - [ ] `RESEND_API_KEY` = (your key)
 - [ ] `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` = (your cloud name)
-- [ ] `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` = (your preset)
+- [ ] `CLOUDINARY_API_KEY` = (your API key)
+- [ ] `CLOUDINARY_API_SECRET` = (your API secret)
 
 See `ENV_VARIABLES.md` for details on getting these values.
 

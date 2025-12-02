@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { XCircle } from "lucide-react";
+import { Suspense } from "react";
 
-export default function CheckoutCancelPage() {
+function CancelContent() {
     const searchParams = useSearchParams();
     const orderId = searchParams.get("order_id");
 
@@ -34,5 +35,13 @@ export default function CheckoutCancelPage() {
                 </Link>
             </div>
         </div>
+    );
+}
+
+export default function CheckoutCancelPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <CancelContent />
+        </Suspense>
     );
 }

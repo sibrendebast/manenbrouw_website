@@ -14,7 +14,7 @@ export default async function AdminNewsletterPage() {
         }
     });
 
-    const emails = subscribers.map(s => s.email);
+    const emails = subscribers.map((s: any) => s.email);
 
     return (
         <div className="min-h-screen bg-gray-50 py-12 text-black">

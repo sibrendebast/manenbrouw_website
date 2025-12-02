@@ -25,8 +25,8 @@ export default function EventsPage() {
     const now = new Date();
 
     // Separate upcoming and past events
-    const upcomingEvents = events.filter(event => new Date(event.date) >= now);
-    const pastEvents = events.filter(event => new Date(event.date) < now);
+    const upcomingEvents = events.filter((event: any) => new Date(event.date) >= now);
+    const pastEvents = events.filter((event: any) => new Date(event.date) < now);
 
     const formatDate = (date: Date) => {
         return new Date(date).toLocaleDateString("en-US", {
@@ -138,8 +138,8 @@ export default function EventsPage() {
                                 onClick={handleAddTickets}
                                 disabled={isAdded}
                                 className={`w-full flex items-center justify-center font-bold py-3 px-6 transition-colors border-2 border-black ${isAdded
-                                        ? 'bg-green-500 text-white'
-                                        : 'bg-brewery-dark text-white hover:bg-opacity-90'
+                                    ? 'bg-green-500 text-white'
+                                    : 'bg-brewery-dark text-white hover:bg-opacity-90'
                                     }`}
                             >
                                 {isAdded ? (
@@ -190,7 +190,7 @@ export default function EventsPage() {
                     <div className="mb-16">
                         <h2 className="text-3xl font-bold text-brewery-dark mb-8">Upcoming Events</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {upcomingEvents.map((event) => (
+                            {upcomingEvents.map((event: any) => (
                                 <EventCard key={event.id} event={event} />
                             ))}
                         </div>
@@ -215,7 +215,7 @@ export default function EventsPage() {
                     <div>
                         <h2 className="text-3xl font-bold text-brewery-dark mb-8">Past Events</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-75">
-                            {pastEvents.map((event) => (
+                            {pastEvents.map((event: any) => (
                                 <EventCard key={event.id} event={event} isPast={true} />
                             ))}
                         </div>

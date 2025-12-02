@@ -425,7 +425,7 @@ export default function AdminEventsPage() {
                                 <p className="text-gray-500">No events yet. Create your first event!</p>
                             </div>
                         ) : (
-                            events.map((event) => (
+                            events.map((event: any) => (
                                 <div key={event.id} className="space-y-4"> {/* Use a new container div for the whole event item + tickets section */}
                                     <div
                                         className="bg-white p-6 border-2 border-black flex flex-col sm:flex-row gap-6"

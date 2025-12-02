@@ -66,7 +66,7 @@ export default function AdminOrdersPage() {
 
                 <div className="space-y-6">
                     {orders
-                        .filter((order) => filterStatus === "all" || order.status === filterStatus)
+                        .filter((order: any) => filterStatus === "all" || order.status === filterStatus)
                         .length === 0 ? (
                         <div className="bg-white p-12 border-2 border-black text-center">
                             <Package className="h-16 w-16 mx-auto mb-4 text-gray-400" />
@@ -74,8 +74,8 @@ export default function AdminOrdersPage() {
                         </div>
                     ) : (
                         orders
-                            .filter((order) => filterStatus === "all" || order.status === filterStatus)
-                            .map((order) => {
+                            .filter((order: any) => filterStatus === "all" || order.status === filterStatus)
+                            .map((order: any) => {
                                 const shippingAddress = order.shippingAddress
                                     ? JSON.parse(order.shippingAddress)
                                     : null;

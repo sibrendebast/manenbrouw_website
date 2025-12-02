@@ -49,7 +49,7 @@ export default function AdminDashboard() {
 
         setUploading(true);
         const formData = new FormData();
-        Array.from(e.target.files).forEach((file) => {
+        Array.from(e.target.files).forEach((file: any) => {
             formData.append("files", file);
         });
 
@@ -317,7 +317,7 @@ export default function AdminDashboard() {
                     {/* Product List */}
                     <div className="lg:col-span-2 space-y-6">
                         <h2 className="text-2xl font-bold mb-6">Current Inventory</h2>
-                        {products.map((product) => (
+                        {products.map((product: any) => (
                             <div
                                 key={product.id}
                                 className="bg-white p-6 border-2 border-black flex flex-col sm:flex-row gap-6 items-center"

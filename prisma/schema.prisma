@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"  // Changed from sqlite for Vercel deployment
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_PRISMA_DATABASE_URL")
+  directUrl = env("DATABASE_POSTGRES_URL")
 }
 
 model Product {

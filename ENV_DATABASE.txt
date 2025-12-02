@@ -1,0 +1,7 @@
+# Add these to your .env file
+
+# Prisma Accelerate URL (for application queries)
+DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19KLTNtTG11cEpTUENpLUNEa0wyaUkiLCJhcGlfa2V5IjoiMDFLQkc3TU1DWEFIVFA4NlhZUFBFUjE0QVQiLCJ0ZW5hbnRfaWQiOiJjOWE1MWZiOWM3ZTA1ZjUzOTU2MGViNjQ0MjI4YTVjNjUyOTZlNzM5NjUzOTdkNzk5ZTA2YTgzOTQ1ZTA0NWUzIiwiaW50ZXJuYWxfc2VjcmV0IjoiODcwZDU5ZjctYzRjMS00OTc3LWJkZGEtNDUzNTBkMzA4YmJlIn0.Grq2hmgkmI2SOrAoPH1KUHB9Dnt8Q66Ga1bykpS6NF0"
+
+# Direct PostgreSQL URL (for migrations)
+DIRECT_DATABASE_URL="postgres://c9a51fb9c7e05f539560eb644228a5c65296e73965397d799e06a83945e045e3:sk_J-3mLmupJSPCi-CDkL2iI@db.prisma.io:5432/postgres?sslmode=require"

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.10.2",
+    "@prisma/extension-accelerate": "^3.0.0",
     "@react-email/components": "^1.0.1",
     "@stripe/stripe-js": "^8.5.3",
     "cloudinary": "^2.8.0",

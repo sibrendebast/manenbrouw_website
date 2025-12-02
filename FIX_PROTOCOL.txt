@@ -1,0 +1,14 @@
+# FIX: Change protocol to prisma://
+
+Open your .env file and change the DATABASE_URL protocol.
+
+FROM:
+DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/..."
+
+TO:
+DATABASE_URL="prisma://accelerate.prisma-data.net/..."
+
+(Keep the rest of the URL exactly the same, just change "prisma+postgres" to "prisma")
+
+Then restart your dev server:
+npm run dev

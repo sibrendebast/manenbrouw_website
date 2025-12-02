@@ -8,7 +8,7 @@ export async function getProducts() {
         const products = await prisma.product.findMany({
             orderBy: { createdAt: 'desc' },
         })
-        return products.map(p => ({
+        return products.map((p: any) => ({
             ...p,
             images: JSON.parse(p.images) as string[],
         }))

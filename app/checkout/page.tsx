@@ -6,6 +6,7 @@ import { placeOrder } from "@/app/actions/checkout";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { useI18n } from "@/lib/i18n-context";
 
 export default function CheckoutPage() {
     const { items, getTotalPrice, clearCart } = useCartStore();
@@ -15,6 +16,7 @@ export default function CheckoutPage() {
     const [error, setError] = useState("");
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
+    const { t } = useI18n();
 
     // Helper function to safely get images array
     const getProductImages = (item: any): string[] => {
@@ -43,13 +45,13 @@ export default function CheckoutPage() {
     if (items.length === 0) {
         return (
             <div className="container mx-auto px-4 py-16 text-center">
-                <h1 className="text-3xl font-bold mb-4">Checkout</h1>
-                <p className="mb-8">Your cart is empty.</p>
+                <h1 className="text-3xl font-bold mb-4">{t("checkout.title")}</h1>
+                <p className="mb-8">{t("cart.emptyMessage")}</p>
                 <Link
                     href="/shop"
                     className="bg-brewery-green text-white px-6 py-3 rounded hover:bg-opacity-90 transition-colors"
                 >
-                    Return to Shop
+                    {t("cart.startShopping")}
                 </Link>
             </div>
         );
@@ -111,14 +113,14 @@ export default function CheckoutPage() {
     return (
         <div className="bg-white min-h-screen py-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 className="text-3xl font-bold text-brewery-dark mb-8">Checkout</h1>
+                <h1 className="text-3xl font-bold text-brewery-dark mb-8">{t("checkout.title")}</h1>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Checkout Form */}
                     <div>
                         <form id="checkout-form" action={handleSubmit} className="space-y-6">
                             <div className="bg-white p-6 border-2 border-black">
-                                <h2 className="text-xl font-semibold mb-4 text-brewery-dark">Shipping Method</h2>
+                                <h2 className="text-xl font-semibold mb-4 text-brewery-dark">{t("checkout.shippingMethod")}</h2>
                                 <div className="space-y-4">
                                     <div className="flex items-center">
                                         <input
@@ -131,7 +133,7 @@ export default function CheckoutPage() {
                                             className="mr-3 h-4 w-4 text-brewery-green focus:ring-brewery-green"
                                         />
                                         <label htmlFor="shipment" className="flex-grow text-brewery-dark">
-                                            Shipment (Belgium only)
+                                            {t("checkout.shipment")}
                                         </label>
                                         <span className="font-semibold text-brewery-dark">€10.00</span>
                                     </div>
@@ -146,19 +148,19 @@ export default function CheckoutPage() {
                                             className="mr-3 h-4 w-4 text-brewery-green focus:ring-brewery-green"
                                         />
                                         <label htmlFor="pickup" className="flex-grow text-brewery-dark">
-                                            Pick up at brewery
+                                            {t("checkout.pickup")}
                                         </label>
-                                        <span className="font-semibold text-brewery-dark">Free</span>
+                                        <span className="font-semibold text-brewery-dark">{t("checkout.free")}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="bg-white p-6 border-2 border-black">
-                                <h2 className="text-xl font-semibold mb-4 text-brewery-dark">Customer Details</h2>
+                                <h2 className="text-xl font-semibold mb-4 text-brewery-dark">{t("checkout.customerDetails")}</h2>
                                 <div className="space-y-4">
                                     <div>
                                         <label htmlFor="customerName" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Full Name
+                                            {t("checkout.fullName")}
                                         </label>
                                         <input
                                             type="text"
@@ -170,7 +172,7 @@ export default function CheckoutPage() {
                                     </div>
                                     <div>
                                         <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Email Address
+                                            {t("checkout.email")}
                                         </label>
                                         <input
                                             type="email"
@@ -182,7 +184,7 @@ export default function CheckoutPage() {
                                     </div>
                                     <div>
                                         <label htmlFor="customerPhone" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Phone Number
+                                            {t("checkout.phone")}
                                         </label>
                                         <input
                                             type="tel"
@@ -197,11 +199,11 @@ export default function CheckoutPage() {
 
                             {shippingMethod === "shipment" && (
                                 <div className="bg-white p-6 border-2 border-black">
-                                    <h2 className="text-xl font-semibold mb-4 text-brewery-dark">Shipping Address</h2>
+                                    <h2 className="text-xl font-semibold mb-4 text-brewery-dark">{t("checkout.shippingAddress")}</h2>
                                     <div className="space-y-4">
                                         <div>
                                             <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
-                                                Street Address
+                                                {t("checkout.street")}
                                             </label>
                                             <input
                                                 type="text"
@@ -214,7 +216,7 @@ export default function CheckoutPage() {
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label htmlFor="zip" className="block text-sm font-medium text-gray-700 mb-1">
-                                                    ZIP Code
+                                                    {t("checkout.zip")}
                                                 </label>
                                                 <input
                                                     type="text"
@@ -226,7 +228,7 @@ export default function CheckoutPage() {
                                             </div>
                                             <div>
                                                 <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                                                    City
+                                                    {t("checkout.city")}
                                                 </label>
                                                 <input
                                                     type="text"
@@ -239,7 +241,7 @@ export default function CheckoutPage() {
                                         </div>
                                         <div>
                                             <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
-                                                Country
+                                                {t("checkout.country")}
                                             </label>
                                             <input
                                                 type="text"
@@ -262,7 +264,7 @@ export default function CheckoutPage() {
                                     className="h-4 w-4 text-brewery-green focus:ring-brewery-green border-gray-300 rounded"
                                 />
                                 <label htmlFor="newsletter" className="ml-2 block text-sm text-brewery-dark">
-                                    Sign up for our newsletter
+                                    {t("checkout.newsletter")}
                                 </label>
                             </div>
 
@@ -277,7 +279,7 @@ export default function CheckoutPage() {
                     {/* Order Summary */}
                     <div>
                         <div className="bg-white p-8 sticky top-24 border-2 border-black">
-                            <h2 className="text-xl font-bold text-brewery-dark mb-6">Order Summary</h2>
+                            <h2 className="text-xl font-bold text-brewery-dark mb-6">{t("cart.orderSummary")}</h2>
                             <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">
                                 {items.map((item: any) => (
                                     <div key={item.id} className="flex justify-between items-center border-b border-gray-200 pb-4 last:border-0 last:pb-0">
@@ -306,7 +308,7 @@ export default function CheckoutPage() {
                                             </div>
                                             <div>
                                                 <h3 className="font-medium text-brewery-dark">{item.itemType === "product" ? item.name : item.title}</h3>
-                                                <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                                                <p className="text-sm text-gray-500">{t("common.quantity")}: {item.quantity}</p>
                                             </div>
                                         </div>
                                         <span className="font-medium text-brewery-dark">€{(item.price * item.quantity).toFixed(2)}</span>
@@ -316,21 +318,21 @@ export default function CheckoutPage() {
 
                             <div className="border-t border-gray-200 pt-4 space-y-2">
                                 <div className="flex justify-between text-brewery-dark">
-                                    <span>Subtotal</span>
+                                    <span>{t("cart.subtotal")}</span>
                                     <span>€{subtotal.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-brewery-dark">
-                                    <span>Shipping</span>
-                                    <span>{shippingCost === 0 ? "Free" : `€${shippingCost.toFixed(2)}`}</span>
+                                    <span>{t("cart.shipping")}</span>
+                                    <span>{shippingCost === 0 ? t("checkout.free") : `€${shippingCost.toFixed(2)}`}</span>
                                 </div>
                                 <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-200 mt-2 text-brewery-dark">
-                                    <span>Total</span>
+                                    <span>{t("cart.total")}</span>
                                     <span>€{total.toFixed(2)}</span>
                                 </div>
                             </div>
 
                             <div className="bg-white p-6 border-2 border-black mt-6">
-                                <h2 className="text-xl font-bold text-brewery-dark mb-4">Payment Method</h2>
+                                <h2 className="text-xl font-bold text-brewery-dark mb-4">{t("checkout.paymentMethod")}</h2>
                                 <div className="space-y-3">
                                     <div className="flex items-center">
                                         <input
@@ -343,7 +345,7 @@ export default function CheckoutPage() {
                                             className="mr-3 h-4 w-4 text-brewery-green focus:ring-brewery-green"
                                         />
                                         <label htmlFor="card" className="flex-grow text-brewery-dark">
-                                            Credit Card
+                                            {t("checkout.creditCard")}
                                         </label>
                                     </div>
                                     <div className="flex items-center">
@@ -383,7 +385,7 @@ export default function CheckoutPage() {
                                 disabled={isSubmitting}
                                 className="w-full bg-brewery-green text-white font-bold py-4 hover:bg-opacity-90 transition-colors disabled:opacity-50 border-2 border-black shadow-lg mt-6"
                             >
-                                {isSubmitting ? "Processing..." : `Place Order - €${total.toFixed(2)}`}
+                                {isSubmitting ? t("checkout.processing") : `${t("checkout.placeOrder")} - €${total.toFixed(2)}`}
                             </button>
                         </div>
                     </div>

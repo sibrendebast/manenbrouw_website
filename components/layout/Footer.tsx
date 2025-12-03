@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { Facebook, Instagram, Mail, Phone } from "lucide-react";
+import { useI18n } from "@/lib/i18n-context";
 
 export default function Footer() {
+    const { t } = useI18n();
+
     return (
         <footer className="bg-brewery-dark text-white pt-10 pb-6">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,26 +32,26 @@ export default function Footer() {
 
                     {/* Quick Links */}
                     <div>
-                        <h3 className="text-xl font-bold mb-4 text-brewery-green">Quick Links</h3>
+                        <h3 className="text-xl font-bold mb-4 text-brewery-green">{t("footer.quickLinks")}</h3>
                         <ul className="space-y-2">
                             <li>
                                 <Link href="/shop" className="hover:text-brewery-green transition-colors">
-                                    Shop
+                                    {t("nav.shop")}
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/about" className="hover:text-brewery-green transition-colors">
-                                    About Us
+                                    {t("nav.about")}
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/events" className="hover:text-brewery-green transition-colors">
-                                    Events
+                                    {t("nav.events")}
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/terms" className="hover:text-brewery-green transition-colors">
-                                    Terms & Conditions
+                                    {t("footer.terms")}
                                 </Link>
                             </li>
                         </ul>
@@ -54,21 +59,21 @@ export default function Footer() {
 
                     {/* Newsletter & Socials */}
                     <div>
-                        <h3 className="text-xl font-bold mb-4 text-brewery-green">Stay Updated</h3>
+                        <h3 className="text-xl font-bold mb-4 text-brewery-green">{t("footer.stayUpdated")}</h3>
                         <p className="mb-4 text-sm text-gray-300">
-                            Subscribe to our newsletter for the latest brews and events.
+                            {t("footer.newsletterText")}
                         </p>
                         <form className="flex flex-col space-y-2 mb-6">
                             <input
                                 type="email"
-                                placeholder="Enter your email"
+                                placeholder={t("footer.emailPlaceholder")}
                                 className="px-4 py-2 bg-white/10 border border-white/20 focus:outline-none focus:border-brewery-green text-white"
                             />
                             <button
                                 type="submit"
                                 className="bg-brewery-green text-white px-4 py-2 font-bold hover:bg-opacity-90 transition-colors border border-white"
                             >
-                                Subscribe
+                                {t("footer.subscribe")}
                             </button>
                         </form>
                         <div className="flex space-x-4">
@@ -92,7 +97,7 @@ export default function Footer() {
                     </div>
                 </div>
                 <div className="mt-8 pt-8 border-t border-white/10 text-center text-sm text-gray-400">
-                    <p>&copy; {new Date().getFullYear()} Man & Brouw. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} Man & Brouw. {t("footer.rights")}</p>
                 </div>
             </div>
         </footer>

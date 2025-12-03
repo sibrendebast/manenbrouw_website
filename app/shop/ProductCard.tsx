@@ -5,14 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Minus, Plus, ShoppingCart } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
-import { Product } from "@/data/products"; // Assuming this type exists, or I can define it locally if needed
-
-// We might need to adjust the import path for Product depending on where it's defined.
-// Based on cartStore.ts, it imports from "@/data/products". Let's assume that's correct for now.
-// If not, I'll define a local interface matching the product structure.
+import { useI18n } from "@/lib/i18n-context";
+import { Product } from "@/data/products";
 
 interface ProductCardProps {
-    product: any; // Using any for now to avoid type issues if Product isn't exactly what I think, but ideally should be Product
+    product: any;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
@@ -20,6 +17,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     const [isAdded, setIsAdded] = useState(false);
     const [imageError, setImageError] = useState(false);
     const addItem = useCartStore((state) => state.addItem);
+    const { t } = useI18n();
 
     const handleIncrement = () => {
         setQuantity((prev) => prev + 1);
@@ -54,7 +52,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {!product.inStock && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                         <span className="bg-red-600 text-white px-4 py-2 font-bold transform -rotate-12 border-2 border-white">
-                            SOLD OUT
+                            {t("shop.outOfStock")}
                         </span>
                     </div>
                 )}
@@ -71,8 +69,6 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <p className="text-sm text-gray-500 font-semibold mb-4">
                     {product.style} • {product.volume} • {product.abv}
                 </p>
-
-                {/* Description removed as per request */}
 
                 <div className="mt-auto space-y-4">
 
@@ -103,10 +99,10 @@ export default function ProductCard({ product }: ProductCardProps) {
                                     }`}
                             >
                                 {isAdded ? (
-                                    <>✓ Added!</>
+                                    <>✓ {t("common.success")}!</>
                                 ) : (
                                     <>
-                                        <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
+                                        <ShoppingCart className="mr-2 h-4 w-4" /> {t("shop.addToCart")}
                                     </>
                                 )}
                             </button>
@@ -122,7 +118,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                             disabled
                             className="w-full bg-gray-300 text-gray-500 font-bold py-2 px-4 border-2 border-gray-400 cursor-not-allowed"
                         >
-                            Out of Stock
+                            {t("shop.outOfStock")}
                         </button>
                     )}
                 </div>

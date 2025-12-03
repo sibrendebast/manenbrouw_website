@@ -5,12 +5,14 @@ import { useSearchParams } from "next/navigation";
 import { CheckCircle } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useEffect, Suspense } from "react";
+import { useI18n } from "@/lib/i18n-context";
 
 function CheckoutSuccessContent() {
     const searchParams = useSearchParams();
     const orderId = searchParams.get("orderId") || searchParams.get("order_id");
     const sessionId = searchParams.get("session_id");
     const clearCart = useCartStore((state) => state.clearCart);
+    const { t } = useI18n();
 
     // Clear the cart when the success page loads
     useEffect(() => {
@@ -23,24 +25,24 @@ function CheckoutSuccessContent() {
                 <CheckCircle className="h-12 w-12 text-green-600" />
             </div>
             <h1 className="text-3xl font-bold text-brewery-dark mb-4">
-                Payment Successful!
+                {t("checkout.success.title")}
             </h1>
             <p className="text-gray-600 mb-4">
-                Thank you for your order. Your payment has been processed successfully.
+                {t("checkout.success.message")}
             </p>
             <p className="text-gray-600 mb-8">
-                We will send you a confirmation email shortly.
+                {t("checkout.success.emailConfirmation")}
             </p>
             {orderId && (
                 <p className="text-sm text-gray-500 mb-8">
-                    Order ID: <span className="font-mono">{orderId}</span>
+                    {t("checkout.success.orderId")}: <span className="font-mono">{orderId}</span>
                 </p>
             )}
             <Link
                 href="/shop"
                 className="bg-brewery-green text-white font-bold py-3 px-8 hover:bg-opacity-90 transition-colors border-2 border-black"
             >
-                Continue Shopping
+                {t("cart.continueShopping")}
             </Link>
         </div>
     );

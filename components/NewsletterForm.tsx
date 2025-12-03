@@ -2,11 +2,13 @@
 
 import { useState, useRef } from 'react';
 import { subscribeToNewsletter } from '@/app/actions/newsletterActions';
+import { useI18n } from '@/lib/i18n-context';
 
 export default function NewsletterForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
+    const { t } = useI18n();
 
     const handleSubmit = async (formData: FormData) => {
         setIsSubmitting(true);
@@ -37,7 +39,7 @@ export default function NewsletterForm() {
             <input
                 type="email"
                 name="email"
-                placeholder="Enter your email address"
+                placeholder={t("footer.emailPlaceholder")}
                 className="flex-grow px-6 py-4 text-gray-900 font-medium focus:outline-none border-2 border-black"
                 required
                 disabled={isSubmitting || isSuccess}
@@ -46,11 +48,11 @@ export default function NewsletterForm() {
                 type="submit"
                 disabled={isSubmitting || isSuccess}
                 className={`font-bold py-4 px-8 transition-all border-2 border-black min-w-[140px] ${isSuccess
-                        ? 'bg-green-500 text-white border-green-600'
-                        : 'bg-white text-brewery-green hover:bg-opacity-90'
+                    ? 'bg-green-500 text-white border-green-600'
+                    : 'bg-white text-brewery-green hover:bg-opacity-90'
                     }`}
             >
-                {isSubmitting ? '...' : isSuccess ? 'Subscribed!' : 'Subscribe'}
+                {isSubmitting ? '...' : isSuccess ? `${t("common.success")}!` : t("footer.subscribe")}
             </button>
         </form>
     );

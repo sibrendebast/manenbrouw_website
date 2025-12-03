@@ -5,11 +5,13 @@ import { getEvents } from "@/app/actions/eventActions";
 import Image from "next/image";
 import { Calendar, MapPin, Users, Euro, Clock, ShoppingCart, Check } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
+import { useI18n } from "@/lib/i18n-context";
 
 export default function EventsPage() {
     const [events, setEvents] = useState<any[]>([]);
     const [mounted, setMounted] = useState(false);
     const addTicket = useCartStore((state) => state.addTicket);
+    const { t } = useI18n();
 
     useEffect(() => {
         setMounted(true);
@@ -64,12 +66,12 @@ export default function EventsPage() {
                         />
                         {isPast && (
                             <div className="absolute top-4 right-4 bg-gray-600 text-white px-4 py-2 font-bold border-2 border-white">
-                                PAST EVENT
+                                {t("events.pastEvent")}
                             </div>
                         )}
                         {!isPast && isSoldOut && (
                             <div className="absolute top-4 right-4 bg-red-600 text-white px-4 py-2 font-bold border-2 border-white">
-                                SOLD OUT
+                                {t("events.soldOut")}
                             </div>
                         )}
                     </div>
@@ -86,7 +88,7 @@ export default function EventsPage() {
                         )}
                         {!event.isPaid && !isPast && (
                             <span className="bg-brewery-green text-white px-3 py-1 text-sm font-bold border-2 border-black whitespace-nowrap ml-4">
-                                FREE
+                                {t("events.free")}
                             </span>
                         )}
                     </div>
@@ -108,7 +110,7 @@ export default function EventsPage() {
                             <div className="flex items-center">
                                 <Users className="h-5 w-5 mr-3 text-brewery-green flex-shrink-0" />
                                 <span>
-                                    {event.ticketsSold} / {event.capacity} {event.isPaid ? 'tickets sold' : 'attendees'}
+                                    {event.ticketsSold} / {event.capacity} {event.isPaid ? t("events.ticketsSold") : t("events.attendees")}
                                 </span>
                             </div>
                         )}
@@ -144,11 +146,11 @@ export default function EventsPage() {
                             >
                                 {isAdded ? (
                                     <>
-                                        <Check className="h-5 w-5 mr-2" /> Added to Cart!
+                                        <Check className="h-5 w-5 mr-2" /> {t("common.success")}!
                                     </>
                                 ) : (
                                     <>
-                                        <ShoppingCart className="h-5 w-5 mr-2" /> Add to Cart
+                                        <ShoppingCart className="h-5 w-5 mr-2" /> {t("shop.addToCart")}
                                     </>
                                 )}
                             </button>
@@ -159,7 +161,7 @@ export default function EventsPage() {
                             className="w-full bg-brewery-green text-white font-bold py-3 px-6 hover:bg-opacity-90 transition-colors border-2 border-black"
                             disabled
                         >
-                            Register (Coming Soon)
+                            {t("events.register")}
                         </button>
                     )}
                     {!isPast && isSoldOut && (
@@ -167,7 +169,7 @@ export default function EventsPage() {
                             className="w-full bg-gray-300 text-gray-500 font-bold py-3 px-6 border-2 border-gray-400 cursor-not-allowed"
                             disabled
                         >
-                            Sold Out
+                            {t("events.soldOut")}
                         </button>
                     )}
                 </div>
@@ -179,16 +181,16 @@ export default function EventsPage() {
         <div className="bg-white min-h-screen py-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
-                    <h1 className="text-4xl font-bold text-brewery-dark mb-4">Events</h1>
+                    <h1 className="text-4xl font-bold text-brewery-dark mb-4">{t("events.title")}</h1>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Join us for tastings, brewery tours, and special events at Man & Brouw
+                        {t("events.subtitle")}
                     </p>
                 </div>
 
                 {/* Upcoming Events */}
                 {upcomingEvents.length > 0 && (
                     <div className="mb-16">
-                        <h2 className="text-3xl font-bold text-brewery-dark mb-8">Upcoming Events</h2>
+                        <h2 className="text-3xl font-bold text-brewery-dark mb-8">{t("events.upcoming")}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {upcomingEvents.map((event: any) => (
                                 <EventCard key={event.id} event={event} />
@@ -202,10 +204,10 @@ export default function EventsPage() {
                     <div className="text-center py-16 bg-gray-50 border-2 border-black mb-16">
                         <Clock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                         <h2 className="text-2xl font-bold text-brewery-dark mb-2">
-                            No Upcoming Events
+                            {t("events.noEvents")}
                         </h2>
                         <p className="text-gray-600 max-w-md mx-auto">
-                            We don't have any events scheduled at the moment. Check back soon or follow us on social media for announcements!
+                            {t("events.noEventsMessage")}
                         </p>
                     </div>
                 )}
@@ -213,7 +215,7 @@ export default function EventsPage() {
                 {/* Past Events */}
                 {pastEvents.length > 0 && (
                     <div>
-                        <h2 className="text-3xl font-bold text-brewery-dark mb-8">Past Events</h2>
+                        <h2 className="text-3xl font-bold text-brewery-dark mb-8">{t("events.past")}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-75">
                             {pastEvents.map((event: any) => (
                                 <EventCard key={event.id} event={event} isPast={true} />

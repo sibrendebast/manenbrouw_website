@@ -52,8 +52,8 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                             <Column>
                                 <Heading style={heading}>Man & Brouw</Heading>
                                 <Text style={paragraph}>
-                                    Mechelsesteenweg 291<br />
-                                    1800 Vilvoorde<br />
+                                    Aarschotsesteenweg 179<br />
+                                    3012 Wilsele<br />
                                     Belgium<br />
                                     <Link href="mailto:info@manenbrouw.be">info@manenbrouw.be</Link>
                                 </Text>

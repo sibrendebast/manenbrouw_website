@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Beer } from "lucide-react";
+import { useI18n } from "@/lib/i18n-context";
 
 export default function AgeVerificationModal() {
     const [isVisible, setIsVisible] = useState(false);
+    const { t } = useI18n();
 
     useEffect(() => {
         const hasVerified = localStorage.getItem("age-verified");
@@ -43,22 +45,22 @@ export default function AgeVerificationModal() {
                                 <Beer className="h-12 w-12 text-white" />
                             </div>
                         </div>
-                        <h2 className="text-3xl font-bold mb-4 text-brewery-dark">Are you 18 or older?</h2>
+                        <h2 className="text-3xl font-bold mb-4 text-brewery-dark">{t("ageVerification.question")}</h2>
                         <p className="text-gray-600 mb-8">
-                            You must be of legal drinking age to visit this site. Please verify your age.
+                            {t("ageVerification.message")}
                         </p>
                         <div className="flex flex-col space-y-3">
                             <button
                                 onClick={handleVerify}
                                 className="w-full bg-brewery-green text-white font-bold py-3 px-4 hover:bg-opacity-90 transition-colors text-lg border-2 border-black"
                             >
-                                Yes, I am 18+
+                                {t("ageVerification.yes")}
                             </button>
                             <button
                                 onClick={handleReject}
                                 className="w-full bg-gray-200 text-gray-700 font-bold py-3 px-4 hover:bg-gray-300 transition-colors border-2 border-black"
                             >
-                                No, I am under 18
+                                {t("ageVerification.no")}
                             </button>
                         </div>
                     </motion.div>

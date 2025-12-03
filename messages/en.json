@@ -1,0 +1,115 @@
+{
+    "nav": {
+        "home": "Home",
+        "about": "About",
+        "shop": "Shop",
+        "events": "Events",
+        "contact": "Contact",
+        "cart": "Cart"
+    },
+    "home": {
+        "hero": {
+            "title": "Craft Beer from Wilsele",
+            "subtitle": "Small-batch brewing with passion and precision",
+            "cta": "Explore Our Beers"
+        },
+        "featured": {
+            "title": "Featured Beers",
+            "viewAll": "View All Beers",
+            "viewDetails": "View Details"
+        },
+        "newsletter": {
+            "title": "Join the Man & Brouw Community",
+            "subtitle": "Sign up for our newsletter to get the latest updates on new releases, events, and exclusive offers."
+        }
+    },
+    "shop": {
+        "title": "Our Beers",
+        "subtitle": "Browse our current selection of small-batch craft beers.",
+        "addToCart": "Add to Cart",
+        "outOfStock": "Out of Stock",
+        "inStock": "In Stock"
+    },
+    "cart": {
+        "title": "Your Cart",
+        "empty": "Your cart is empty",
+        "emptyMessage": "Looks like you haven't added any beers yet.",
+        "startShopping": "Start Shopping",
+        "orderSummary": "Order Summary",
+        "subtotal": "Subtotal",
+        "shipping": "Shipping",
+        "calculatedAtCheckout": "Calculated at checkout",
+        "total": "Total",
+        "proceedToCheckout": "Proceed to Checkout",
+        "continueShopping": "Continue Shopping"
+    },
+    "checkout": {
+        "title": "Checkout",
+        "shippingMethod": "Shipping Method",
+        "shipment": "Shipment (Belgium only)",
+        "pickup": "Pick up at brewery",
+        "free": "Free",
+        "customerDetails": "Customer Details",
+        "fullName": "Full Name",
+        "email": "Email Address",
+        "phone": "Phone Number",
+        "shippingAddress": "Shipping Address",
+        "street": "Street Address",
+        "zip": "ZIP Code",
+        "city": "City",
+        "country": "Country",
+        "newsletter": "Sign up for our newsletter",
+        "paymentMethod": "Payment Method",
+        "creditCard": "Credit Card",
+        "placeOrder": "Place Order",
+        "processing": "Processing..."
+    },
+    "events": {
+        "title": "Events",
+        "subtitle": "Join us for tastings, brewery tours, and special events at Man & Brouw",
+        "upcomingEvents": "Upcoming Events",
+        "pastEvents": "Past Events",
+        "noUpcoming": "No Upcoming Events",
+        "noUpcomingMessage": "We don't have any events scheduled at the moment. Check back soon or follow us on social media for announcements!",
+        "soldOut": "Sold Out",
+        "free": "FREE",
+        "tickets": "Tickets",
+        "addToCart": "Add to Cart",
+        "registerSoon": "Register (Coming Soon)"
+    },
+    "footer": {
+        "about": "About Us",
+        "aboutText": "Man & Brouw is a small-batch craft brewery located in Wilsele, Belgium. We're passionate about creating unique, high-quality beers.",
+        "quickLinks": "Quick Links",
+        "contact": "Contact",
+        "followUs": "Follow Us",
+        "newsletter": "Newsletter",
+        "newsletterText": "Subscribe to our newsletter for updates on new beers and events.",
+        "emailPlaceholder": "Your email",
+        "subscribe": "Subscribe",
+        "allRightsReserved": "All rights reserved."
+    },
+    "ageVerification": {
+        "title": "Age Verification",
+        "message": "You must be 18 or older to enter this site.",
+        "question": "Are you 18 years or older?",
+        "yes": "Yes, I am 18+",
+        "no": "No, I am under 18"
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "close": "Close",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "add": "Add",
+        "remove": "Remove",
+        "quantity": "Quantity",
+        "price": "Price",
+        "total": "Total"
+    }
+}

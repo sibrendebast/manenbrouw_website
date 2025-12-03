@@ -1,0 +1,115 @@
+{
+    "nav": {
+        "home": "Home",
+        "about": "Over Ons",
+        "shop": "Winkel",
+        "events": "Evenementen",
+        "contact": "Contact",
+        "cart": "Winkelwagen"
+    },
+    "home": {
+        "hero": {
+            "title": "Ambachtelijk Bier uit Wilsele",
+            "subtitle": "Kleinschalig brouwen met passie en precisie",
+            "cta": "Ontdek Onze Bieren"
+        },
+        "featured": {
+            "title": "Uitgelichte Bieren",
+            "viewAll": "Bekijk Alle Bieren",
+            "viewDetails": "Bekijk Details"
+        },
+        "newsletter": {
+            "title": "Word lid van de Man & Brouw Community",
+            "subtitle": "Schrijf u in voor onze nieuwsbrief voor de laatste updates over nieuwe releases, evenementen en exclusieve aanbiedingen."
+        }
+    },
+    "shop": {
+        "title": "Onze Bieren",
+        "subtitle": "Bekijk onze huidige selectie van kleinschalige ambachtelijke bieren.",
+        "addToCart": "Toevoegen",
+        "outOfStock": "Niet op Voorraad",
+        "inStock": "Op Voorraad"
+    },
+    "cart": {
+        "title": "Uw Winkelwagen",
+        "empty": "Uw winkelwagen is leeg",
+        "emptyMessage": "Het lijkt erop dat u nog geen bieren heeft toegevoegd.",
+        "startShopping": "Begin met Winkelen",
+        "orderSummary": "Besteloverzicht",
+        "subtotal": "Subtotaal",
+        "shipping": "Verzending",
+        "calculatedAtCheckout": "Berekend bij afrekenen",
+        "total": "Totaal",
+        "proceedToCheckout": "Afrekenen",
+        "continueShopping": "Verder Winkelen"
+    },
+    "checkout": {
+        "title": "Afrekenen",
+        "shippingMethod": "Verzendmethode",
+        "shipment": "Verzending (alleen België)",
+        "pickup": "Ophalen bij brouwerij",
+        "free": "Gratis",
+        "customerDetails": "Klantgegevens",
+        "fullName": "Volledige Naam",
+        "email": "E-mailadres",
+        "phone": "Telefoonnummer",
+        "shippingAddress": "Verzendadres",
+        "street": "Straat en Huisnummer",
+        "zip": "Postcode",
+        "city": "Stad",
+        "country": "Land",
+        "newsletter": "Schrijf u in voor onze nieuwsbrief",
+        "paymentMethod": "Betaalmethode",
+        "creditCard": "Creditcard",
+        "placeOrder": "Bestelling Plaatsen",
+        "processing": "Verwerken..."
+    },
+    "events": {
+        "title": "Evenementen",
+        "subtitle": "Sluit u aan bij ons voor proeverijen, brouwerijrondleidingen en speciale evenementen bij Man & Brouw",
+        "upcomingEvents": "Aankomende Evenementen",
+        "pastEvents": "Afgelopen Evenementen",
+        "noUpcoming": "Geen Aankomende Evenementen",
+        "noUpcomingMessage": "We hebben momenteel geen evenementen gepland. Kom binnenkort terug of volg ons op sociale media voor aankondigingen!",
+        "soldOut": "Uitverkocht",
+        "free": "GRATIS",
+        "tickets": "Tickets",
+        "addToCart": "Toevoegen aan Winkelwagen",
+        "registerSoon": "Registreren (Binnenkort)"
+    },
+    "footer": {
+        "about": "Over Ons",
+        "aboutText": "Man & Brouw is een kleinschalige ambachtelijke brouwerij gevestigd in Wilsele, België. We zijn gepassioneerd over het creëren van unieke, hoogwaardige bieren.",
+        "quickLinks": "Snelle Links",
+        "contact": "Contact",
+        "followUs": "Volg Ons",
+        "newsletter": "Nieuwsbrief",
+        "newsletterText": "Abonneer u op onze nieuwsbrief voor updates over nieuwe bieren en evenementen.",
+        "emailPlaceholder": "Uw e-mailadres",
+        "subscribe": "Abonneren",
+        "allRightsReserved": "Alle rechten voorbehouden."
+    },
+    "ageVerification": {
+        "title": "Leeftijdsverificatie",
+        "message": "U moet 18 jaar of ouder zijn om deze site te bezoeken.",
+        "question": "Bent u 18 jaar of ouder?",
+        "yes": "Ja, ik ben 18+",
+        "no": "Nee, ik ben jonger dan 18"
+    },
+    "common": {
+        "loading": "Laden...",
+        "error": "Fout",
+        "success": "Succes",
+        "close": "Sluiten",
+        "cancel": "Annuleren",
+        "confirm": "Bevestigen",
+        "save": "Opslaan",
+        "delete": "Verwijderen",
+        "edit": "Bewerken",
+        "add": "Toevoegen",
+        "remove": "Verwijderen",
+        "quantity": "Aantal",
+        "price": "Prijs",
+        "total": "Totaal"
+    }
+}

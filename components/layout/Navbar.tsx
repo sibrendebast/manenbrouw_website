@@ -6,17 +6,20 @@ import { useState, useEffect } from "react";
 import { Menu, X, ShoppingCart, Beer } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/store/cartStore";
+import { useI18n } from "@/lib/i18n-context";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const { t } = useI18n();
 
     const toggleMenu = () => setIsOpen(!isOpen);
 
     const navLinks = [
-        { href: "/", label: "Home" },
-        { href: "/shop", label: "Shop" },
-        { href: "/about", label: "About" },
-        { href: "/events", label: "Events" },
+        { href: "/", label: t("nav.home") },
+        { href: "/shop", label: t("nav.shop") },
+        { href: "/about", label: t("nav.about") },
+        { href: "/events", label: t("nav.events") },
     ];
 
     const totalItems = useCartStore((state) => state.getTotalItems());
@@ -75,9 +78,11 @@ export default function Navbar() {
                                     </span>
                                 )}
                             </Link>
+                            <LanguageSwitcher />
                         </div>
                     </div>
-                    <div className="-mr-2 flex md:hidden">
+                    <div className="-mr-2 flex md:hidden items-center gap-2">
+                        <LanguageSwitcher />
                         <button
                             onClick={toggleMenu}
                             type="button"
@@ -118,7 +123,7 @@ export default function Navbar() {
                                 onClick={() => setIsOpen(false)}
                             >
                                 <ShoppingCart className="h-5 w-5 mr-2" />
-                                Cart
+                                {t("nav.cart")}
                                 {mounted && totalItems > 0 && (
                                     <span className="ml-2 bg-red-500 text-white text-xs font-bold h-6 w-6 flex items-center justify-center border-2 border-white">
                                         {totalItems}

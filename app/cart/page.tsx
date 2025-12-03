@@ -5,11 +5,13 @@ import Image from "next/image";
 import { useCartStore } from "@/store/cartStore";
 import { Trash2, Plus, Minus, ArrowLeft, ShoppingBag } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useI18n } from "@/lib/i18n-context";
 
 export default function CartPage() {
     const { items, removeItem, updateQuantity, getTotalPrice, clearCart } =
         useCartStore();
     const [mounted, setMounted] = useState(false);
+    const { t } = useI18n();
 
     // Helper function to safely get images array
     const getProductImages = (item: any): string[] => {
@@ -40,16 +42,16 @@ export default function CartPage() {
                     <ShoppingBag className="h-12 w-12 text-gray-400" />
                 </div>
                 <h1 className="text-3xl font-bold text-brewery-dark mb-4">
-                    Your cart is empty
+                    {t("cart.empty")}
                 </h1>
                 <p className="text-gray-600 mb-8">
-                    Looks like you haven't added any beers yet.
+                    {t("cart.emptyMessage")}
                 </p>
                 <Link
                     href="/shop"
                     className="bg-brewery-green text-white font-bold py-3 px-8 hover:bg-opacity-90 transition-colors border-2 border-black"
                 >
-                    Start Shopping
+                    {t("cart.startShopping")}
                 </Link>
             </div>
         );
@@ -58,7 +60,7 @@ export default function CartPage() {
     return (
         <div className="bg-white min-h-screen py-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 className="text-3xl font-bold text-brewery-dark mb-8">Your Cart</h1>
+                <h1 className="text-3xl font-bold text-brewery-dark mb-8">{t("cart.title")}</h1>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2 space-y-6">
@@ -144,19 +146,19 @@ export default function CartPage() {
                     <div className="lg:col-span-1">
                         <div className="bg-gray-50 p-8 sticky top-24 border-2 border-black">
                             <h2 className="text-xl font-bold text-brewery-dark mb-6">
-                                Order Summary
+                                {t("cart.orderSummary")}
                             </h2>
                             <div className="space-y-4 mb-6">
                                 <div className="flex justify-between text-gray-600">
-                                    <span>Subtotal</span>
+                                    <span>{t("cart.subtotal")}</span>
                                     <span>€{getTotalPrice().toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-600">
-                                    <span>Shipping</span>
-                                    <span>Calculated at checkout</span>
+                                    <span>{t("cart.shipping")}</span>
+                                    <span>{t("cart.calculatedAtCheckout")}</span>
                                 </div>
                                 <div className="border-t border-gray-200 pt-4 flex justify-between font-bold text-lg text-brewery-dark">
-                                    <span>Total</span>
+                                    <span>{t("cart.total")}</span>
                                     <span>€{getTotalPrice().toFixed(2)}</span>
                                 </div>
                             </div>
@@ -164,13 +166,13 @@ export default function CartPage() {
                                 href="/checkout"
                                 className="block w-full bg-brewery-dark text-white font-bold py-4 text-center hover:bg-opacity-90 transition-colors shadow-lg border-2 border-black"
                             >
-                                Proceed to Checkout
+                                {t("cart.proceedToCheckout")}
                             </Link>
                             <Link
                                 href="/shop"
                                 className="block text-center mt-4 text-gray-500 hover:text-brewery-green transition-colors text-sm"
                             >
-                                Continue Shopping
+                                {t("cart.continueShopping")}
                             </Link>
                         </div>
                     </div>

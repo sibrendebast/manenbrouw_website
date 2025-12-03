@@ -23,12 +23,47 @@
             "subtitle": "Sign up for our newsletter to get the latest updates on new releases, events, and exclusive offers."
         }
     },
+    "aboutPage": {
+        "hero": {
+            "title": "About Man & Brouw",
+            "subtitle": "Brewing with passion, experimenting with flavor, and sharing the love for craft beer in Wilsele."
+        },
+        "story": {
+            "title": "Our Story",
+            "imageAlt": "Man & Brouw beer assortment",
+            "paragraphs": [
+                "Man & Brouw started as a passion project between friends who shared a love for unique, flavorful beers. What began as small experiments in a kitchen has grown into a local microbrewery located in a shipping container. The brewery is dedicated to pushing the boundaries of traditional brewing.",
+                "We believe in quality over quantity, using only the finest ingredients and taking the time to perfect each batch. From our signature fruited sours to our innovative spiced saisons, every batch tells a story of creativity and craftsmanship.",
+                "What makes us truly unique is our commitment to brewing each beer only once. This philosophy stems from our love for creative freedom and the true homebrewing spirit we fell in love with. We brew what we want, when we want it. While a beer might return, there will always be a new twist—keeping every batch exciting and unique. We brew one batch per month, so if you don't want to miss our new beers, follow us on social media or subscribe to our mailing list!"
+            ]
+        },
+        "highlights": {
+            "flavors": {
+                "title": "Unique Flavors",
+                "description": "We love experimenting with whole fruits, spices, and herbs. But no matter the twist, the base of our beers is always high-quality craft-malted local grains.",
+                "imageAlt": "Fresh apricots"
+            },
+            "community": {
+                "title": "Community",
+                "description": "We are proud to be part of the Wilsele community and love sharing our passion with locals and visitors alike."
+            },
+            "local": {
+                "title": "Local Roots",
+                "description": "Located at Aarschotsesteenweg 179, 3012 Wilsele. Come visit us and taste the difference!"
+            }
+        }
+    },
     "shop": {
         "title": "Our Beers",
         "subtitle": "Browse our current selection of small-batch craft beers.",
         "addToCart": "Add to Cart",
         "outOfStock": "Out of Stock",
         "inStock": "In Stock"
+    },
+    "productDetails": {
+        "notFoundTitle": "Product not found",
+        "backToShop": "Back to shop",
+        "addedToCart": "Added to cart"
     },
     "cart": {
         "title": "Your Cart",

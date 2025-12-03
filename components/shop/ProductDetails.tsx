@@ -5,9 +5,11 @@ import { useCartStore } from "@/store/cartStore";
 import { ShoppingCart, ArrowLeft, Check, Plus, Minus } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useI18n } from "@/lib/i18n-context";
 
 export default function ProductDetails({ product }: { product: any }) {
     const [mounted, setMounted] = useState(false);
+    const { t } = useI18n();
 
     useEffect(() => {
         setMounted(true);
@@ -28,12 +30,12 @@ export default function ProductDetails({ product }: { product: any }) {
     if (!product) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center">
-                <h1 className="text-4xl font-bold mb-4">Product Not Found</h1>
+                <h1 className="text-4xl font-bold mb-4">{t("productDetails.notFoundTitle")}</h1>
                 <Link
                     href="/shop"
                     className="text-brewery-green hover:underline font-bold"
                 >
-                    Back to Shop
+                    {t("productDetails.backToShop")}
                 </Link>
             </div>
         );
@@ -46,7 +48,7 @@ export default function ProductDetails({ product }: { product: any }) {
                     href="/shop"
                     className="inline-flex items-center text-gray-500 hover:text-brewery-green mb-8 transition-colors"
                 >
-                    <ArrowLeft className="h-4 w-4 mr-2" /> Back to Shop
+                    <ArrowLeft className="h-4 w-4 mr-2" /> {t("productDetails.backToShop")}
                 </Link>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -120,15 +122,15 @@ export default function ProductDetails({ product }: { product: any }) {
                                 {product.inStock ? (
                                     isAdded ? (
                                         <>
-                                            <Check className="h-6 w-6 mr-2" /> Added to Cart
+                                            <Check className="h-6 w-6 mr-2" /> {t("productDetails.addedToCart")}
                                         </>
                                     ) : (
                                         <>
-                                            <ShoppingCart className="h-6 w-6 mr-2" /> Add to Cart
+                                            <ShoppingCart className="h-6 w-6 mr-2" /> {t("shop.addToCart")}
                                         </>
                                     )
                                 ) : (
-                                    "Out of Stock"
+                                    t("shop.outOfStock")
                                 )}
                             </button>
                         </div>

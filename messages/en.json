@@ -62,7 +62,18 @@
         "paymentMethod": "Payment Method",
         "creditCard": "Credit Card",
         "placeOrder": "Place Order",
-        "processing": "Processing..."
+        "processing": "Processing...",
+        "success": {
+            "title": "Payment Successful!",
+            "message": "Thank you for your order! Your payment has been successfully processed.",
+            "emailConfirmation": "You will receive a confirmation email shortly with your order details.",
+            "orderId": "Order ID"
+        },
+        "cancel": {
+            "title": "Payment Cancelled",
+            "message": "Your payment was cancelled. No charges were made to your account.",
+            "tryAgain": "Try Again"
+        }
     },
     "events": {
         "title": "Events",

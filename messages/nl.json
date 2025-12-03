@@ -62,7 +62,18 @@
         "paymentMethod": "Betaalmethode",
         "creditCard": "Creditcard",
         "placeOrder": "Bestelling Plaatsen",
-        "processing": "Verwerken..."
+        "processing": "Verwerken...",
+        "success": {
+            "title": "Betaling Gelukt!",
+            "message": "Bedankt voor uw bestelling! Uw betaling is succesvol verwerkt.",
+            "emailConfirmation": "U ontvangt binnenkort een bevestigingsmail met uw bestelgegevens.",
+            "orderId": "Bestelnummer"
+        },
+        "cancel": {
+            "title": "Betaling Geannuleerd",
+            "message": "Uw betaling is geannuleerd. Er zijn geen kosten in rekening gebracht.",
+            "tryAgain": "Opnieuw Proberen"
+        }
     },
     "events": {
         "title": "Evenementen",

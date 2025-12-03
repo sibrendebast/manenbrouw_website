@@ -4,6 +4,10 @@ import { OrderInvoice } from '@/app/emails/OrderInvoice';
 // Use a fallback key during build time to prevent build failures
 const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder');
 
+// Email configuration
+const FROM_EMAIL = process.env.FROM_EMAIL || 'Man & Brouw <onboarding@resend.dev>';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'info@manenbrouw.be';
+
 // Type definition for order with items included
 type OrderWithItems = {
     id: string;
@@ -33,9 +37,9 @@ export async function sendOrderConfirmationEmail(order: OrderWithItems) {
     try {
         // Send email to customer with BCC to admin
         const { data, error } = await resend.emails.send({
-            from: 'Man & Brouw <onboarding@resend.dev>', // Update this with your verified domain in production
+            from: FROM_EMAIL,
             to: [order.customerEmail],
-            bcc: ['info@manenbrouw.be'], // Send copy to admin
+            bcc: [ADMIN_EMAIL], // Send copy to admin
             subject: `Order Confirmation #${order.id.slice(0, 8)}`,
             react: OrderInvoice({ order }),
         });
@@ -45,7 +49,7 @@ export async function sendOrderConfirmationEmail(order: OrderWithItems) {
             return { success: false, error };
         }
 
-        console.log(`Order confirmation email sent successfully to ${order.customerEmail} with copy to info@manenbrouw.be`);
+        console.log(`Order confirmation email sent successfully to ${order.customerEmail} with copy to ${ADMIN_EMAIL}`);
         return { success: true, data };
     } catch (error) {
         console.error("Failed to send order confirmation email:", error);
@@ -62,8 +66,8 @@ export async function sendAdminOrderNotification(order: OrderWithItems) {
 
     try {
         const { data, error } = await resend.emails.send({
-            from: 'Man & Brouw <onboarding@resend.dev>', // Update this with your verified domain in production
-            to: ['info@manenbrouw.be'],
+            from: FROM_EMAIL,
+            to: [ADMIN_EMAIL],
             subject: `New Order Placed #${order.id.slice(0, 8)} - ${order.customerName}`,
             react: OrderInvoice({ order }),
         });
@@ -73,7 +77,7 @@ export async function sendAdminOrderNotification(order: OrderWithItems) {
             return { success: false, error };
         }
 
-        console.log(`Admin notification email sent successfully to info@manenbrouw.be for order #${order.id.slice(0, 8)}`);
+        console.log(`Admin notification email sent successfully to ${ADMIN_EMAIL} for order #${order.id.slice(0, 8)}`);
         return { success: true, data };
     } catch (error) {
         console.error("Failed to send admin notification email:", error);

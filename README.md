@@ -7,10 +7,13 @@ Before running the application, you need to set up the following environment var
 ### Required for Email Notifications
 
 - `RESEND_API_KEY`: Your Resend API key for sending emails (get it from [resend.com](https://resend.com))
-  - When an order is placed and paid, the system will:
-    - Send an order confirmation email to the customer
-    - Send a copy to `info@manenbrouw.be` via BCC
-    - Send a separate admin notification to `info@manenbrouw.be`
+- `FROM_EMAIL` (optional): Email address to send from (defaults to 'Man & Brouw <onboarding@resend.dev>')
+- `ADMIN_EMAIL` (optional): Admin email address for notifications (defaults to 'info@manenbrouw.be')
+  
+  When an order is placed and paid, the system will:
+  - Send an order confirmation email to the customer
+  - Send a copy to the admin email via BCC
+  - Send a separate admin notification to the admin email
 
 ### Other Required Variables
 

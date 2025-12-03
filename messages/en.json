@@ -115,6 +115,53 @@
         "terms": "Terms & Conditions",
         "rights": "All rights reserved."
     },
+    "terms": {
+        "title": "Terms & Conditions",
+        "lastUpdated": "Last updated: 3 December 2025",
+        "intro": "By ordering via the Man & Brouw webshop you confirm that you are at least 18 years old and accept the conditions below.",
+        "sections": {
+            "orders": {
+                "title": "Orders & Availability",
+                "items": [
+                    "Products, tickets and merchandise are offered in limited batches. Items in your cart are only reserved after payment is completed.",
+                    "We may cancel or refund an order if stock discrepancies, age verification issues or pricing errors occur. You will always be notified first."
+                ]
+            },
+            "shipping": {
+                "title": "Shipping & Pickup",
+                "items": [
+                    "Deliveries are currently available within Belgium only. We'll let you know as soon as your parcel leaves the brewery.",
+                    "Pickup orders are ready at Aarschotsesteenweg 179 in Wilsele. Please bring the confirmation email (no ID required)."
+                ]
+            },
+            "events": {
+                "title": "Events & Tickets",
+                "items": [
+                    "Event tickets are issued digitally and linked to the purchaser's email address.",
+                    "Unless explicitly stated, tickets are non-refundable but can be transferred to another attendee by emailing us at least 48 hours in advance."
+                ]
+            },
+            "returns": {
+                "title": "Returns & Right of Withdrawal",
+                "items": [
+                    "Unopened merchandise can be returned within 14 days of delivery. Contact us first so we can create a return label.",
+                    "Perishable goods (beer, food) and opened bottles cannot be returned unless they arrived damaged. Please send photos within 48 hours."
+                ]
+            },
+            "liability": {
+                "title": "Liability",
+                "items": [
+                    "Man & Brouw is not liable for delays or losses caused by third-party carriers once a parcel has been handed over.",
+                    "Our beers contain alcohol. Enjoy responsibly and ensure they are not consumed by minors."
+                ]
+            }
+        },
+        "contact": {
+            "title": "Questions or concerns?",
+            "text": "Reach out and we'll be happy to help.",
+            "email": "info@manenbrouw.be"
+        }
+    },
     "ageVerification": {
         "title": "Age Verification",
         "message": "You must be 18 or older to enter this site.",

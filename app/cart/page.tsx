@@ -127,7 +127,8 @@ export default function CartPage() {
                                         </span>
                                         <button
                                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                            className="p-2 hover:bg-gray-100 transition-colors border-l-2 border-black"
+                                            className="p-2 hover:bg-gray-100 transition-colors border-l-2 border-black disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={item.itemType === "product" && item.stockCount !== undefined && item.quantity >= item.stockCount}
                                         >
                                             <Plus className="h-4 w-4 text-gray-600" />
                                         </button>

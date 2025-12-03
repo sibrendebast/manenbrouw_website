@@ -20,7 +20,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     const { t } = useI18n();
 
     const handleIncrement = () => {
-        setQuantity((prev) => prev + 1);
+        const stockCount = product.stockCount || 0;
+        if (quantity < stockCount) {
+            setQuantity((prev) => prev + 1);
+        }
     };
 
     const handleDecrement = () => {
@@ -66,9 +69,14 @@ export default function ProductCard({ product }: ProductCardProps) {
                         €{product.price.toFixed(2)}
                     </span>
                 </div>
-                <p className="text-sm text-gray-500 font-semibold mb-4">
+                <p className="text-sm text-gray-500 font-semibold mb-2">
                     {product.style} • {product.volume} • {product.abv}
                 </p>
+                {product.inStock && product.stockCount !== undefined && (
+                    <p className="text-xs text-gray-600 mb-4">
+                        {product.stockCount} {t("shop.inStock")}
+                    </p>
+                )}
 
                 <div className="mt-auto space-y-4">
 
@@ -85,7 +93,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                                 <span className="font-bold text-lg w-8 text-center text-black">{quantity}</span>
                                 <button
                                     onClick={handleIncrement}
-                                    className="p-1 hover:bg-gray-100 transition-colors"
+                                    className="p-1 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={quantity >= (product.stockCount || 0)}
                                 >
                                     <Plus className="h-4 w-4 text-brewery-green" />
                                 </button>

@@ -37,12 +37,16 @@ export async function POST(req: NextRequest) {
         );
     }
 
+    console.log(`Webhook received: ${event.type}`);
+
     // Handle the event
     switch (event.type) {
         case "checkout.session.completed":
             const session = event.data.object;
             const orderId = session.metadata?.orderId;
             const paymentMethod = session.metadata?.paymentMethod;
+
+            console.log(`Processing checkout session for order: ${orderId}`);
 
             if (orderId) {
                 try {
@@ -61,13 +65,33 @@ export async function POST(req: NextRequest) {
                             },
                         },
                     });
-                    console.log(`Order ${orderId} marked as paid`);
+                    console.log(`Order ${orderId} marked as paid. Items count: ${updatedOrder.items.length}`);
+
+                    // Decrease stock for each product in the order
+                    for (const orderItem of updatedOrder.items) {
+                        const product = orderItem.product;
+                        console.log(`Processing item: ${product.name}, Current Stock: ${product.stockCount}, Quantity: ${orderItem.quantity}`);
+
+                        const newStockCount = Math.max(0, product.stockCount - orderItem.quantity);
+
+                        await prisma.product.update({
+                            where: { id: product.id },
+                            data: {
+                                stockCount: newStockCount,
+                                inStock: newStockCount > 0,
+                            },
+                        });
+
+                        console.log(`Updated stock for ${product.name}: ${product.stockCount} -> ${newStockCount}`);
+                    }
 
                     // Send confirmation email
                     await sendOrderConfirmationEmail(updatedOrder);
                 } catch (error) {
                     console.error(`Failed to update order ${orderId}:`, error);
                 }
+            } else {
+                console.error("No orderId found in session metadata");
             }
             break;
 

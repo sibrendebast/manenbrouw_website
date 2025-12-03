@@ -21,6 +21,7 @@ type TermsSection = {
 };
 
 type TermsMessages = {
+    badge?: string;
     title: string;
     lastUpdated: string;
     intro: string;
@@ -44,7 +45,9 @@ export default function TermsPage() {
         <div className="bg-white py-16 px-4">
             <div className="max-w-4xl mx-auto space-y-12">
                 <header className="text-center space-y-4">
-                    <p className="text-sm uppercase tracking-[0.3em] text-brewery-green">{terms.title}</p>
+                    {terms.badge ? (
+                        <p className="text-sm uppercase tracking-[0.3em] text-brewery-green">{terms.badge}</p>
+                    ) : null}
                     <h1 className="text-4xl font-bold text-brewery-dark">{terms.title}</h1>
                     <p className="text-sm text-gray-500">{terms.lastUpdated}</p>
                     <p className="text-gray-600 max-w-3xl mx-auto">{terms.intro}</p>
@@ -57,9 +60,9 @@ export default function TermsPage() {
                         const Icon = sectionIconMap[key as SectionKey];
 
                         return (
-                            <section key={key} className="border border-gray-200 p-6">
+                            <section key={key} className="border-2 border-black p-6 bg-white shadow-sm">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="p-2 bg-brewery-green/10 text-brewery-green">
+                                    <div className="p-2 border-2 border-black bg-white text-brewery-green">
                                         <Icon className="h-5 w-5" />
                                     </div>
                                     <h2 className="text-xl font-semibold text-brewery-dark">{section.title}</h2>
@@ -77,7 +80,7 @@ export default function TermsPage() {
                     })}
                 </div>
 
-                <div className="border border-gray-200 p-6 text-center space-y-2">
+                <div className="border-2 border-black p-6 text-center space-y-4 bg-white">
                     <h3 className="text-xl font-semibold text-brewery-dark flex items-center justify-center gap-2">
                         <Mail className="h-5 w-5" />
                         {terms.contact.title}
@@ -85,7 +88,7 @@ export default function TermsPage() {
                     <p className="text-gray-600">{terms.contact.text}</p>
                     <a
                         href={`mailto:${terms.contact.email}`}
-                        className="inline-flex items-center justify-center font-semibold text-brewery-green border border-brewery-green px-6 py-2"
+                        className="inline-flex items-center justify-center font-semibold text-white bg-brewery-green border-2 border-black px-6 py-2 hover:bg-opacity-90 transition"
                     >
                         {terms.contact.email}
                     </a>

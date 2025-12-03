@@ -6,6 +6,8 @@ import { ArrowRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
 import NewsletterForm from "@/components/NewsletterForm";
 
+import Script from "next/script";
+
 interface HomeContentProps {
     featuredProducts: any[];
 }
@@ -91,15 +93,26 @@ export default function HomeContent({ featuredProducts }: HomeContentProps) {
             </section>
 
             {/* Newsletter Section */}
-            <section className="py-16 bg-gray-100">
+            <section className="py-16 bg-brewery-green text-white border-t-2 border-black">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-3xl font-bold text-brewery-dark mb-4">
+                    <h2 className="text-3xl font-bold mb-4">
                         {t("home.newsletter.title")}
                     </h2>
-                    <p className="text-xl text-gray-600 mb-8">
+                    <p className="text-xl text-white/90 mb-8">
                         {t("home.newsletter.subtitle")}
                     </p>
                     <NewsletterForm />
+                </div>
+            </section>
+
+            {/* Instagram Feed Section */}
+            <section className="py-16 bg-white border-t-2 border-black">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 className="text-3xl font-bold text-center mb-12 text-brewery-dark">
+                        {t("home.instagram.title")}
+                    </h2>
+                    <div className="sk-instagram-feed" data-embed-id="25625827"></div>
+                    <Script src="https://widgets.sociablekit.com/instagram-feed/widget.js" strategy="lazyOnload" />
                 </div>
             </section>
         </div>

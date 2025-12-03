@@ -21,6 +21,9 @@
         "newsletter": {
             "title": "Word lid van de Man & Brouw Community",
             "subtitle": "Schrijf u in voor onze nieuwsbrief voor de laatste updates over nieuwe releases, evenementen en exclusieve aanbiedingen."
+        },
+        "instagram": {
+            "title": "Volg ons op Instagram"
         }
     },
     "aboutPage": {

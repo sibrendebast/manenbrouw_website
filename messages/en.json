@@ -21,6 +21,9 @@
         "newsletter": {
             "title": "Join the Man & Brouw Community",
             "subtitle": "Sign up for our newsletter to get the latest updates on new releases, events, and exclusive offers."
+        },
+        "instagram": {
+            "title": "Follow us on Instagram"
         }
     },
     "aboutPage": {

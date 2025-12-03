@@ -115,6 +115,53 @@
         "terms": "Algemene Voorwaarden",
         "rights": "Alle rechten voorbehouden."
     },
+    "terms": {
+        "title": "Algemene Voorwaarden",
+        "lastUpdated": "Laatst bijgewerkt: 3 december 2025",
+        "intro": "Door te bestellen via de Man & Brouw webshop bevestigt u dat u minstens 18 jaar bent en akkoord gaat met onderstaande voorwaarden.",
+        "sections": {
+            "orders": {
+                "title": "Bestellingen & Beschikbaarheid",
+                "items": [
+                    "Producten, tickets en merchandise worden in beperkte oplage aangeboden. Artikelen in uw winkelmand zijn pas gereserveerd na een voltooide betaling.",
+                    "We kunnen een bestelling annuleren of terugbetalen bij voorraadproblemen, leeftijdscontrole of duidelijke prijsfouten. U wordt altijd eerst verwittigd."
+                ]
+            },
+            "shipping": {
+                "title": "Verzending & Afhaling",
+                "items": [
+                    "Leveringen zijn momenteel enkel mogelijk binnen België. We verwittigen u zodra het pakket de brouwerij verlaat.",
+                    "Afhalingen gebeuren op Aarschotsesteenweg 179 in Wilsele. Breng enkel de bevestigingsmail mee (geen ID nodig)."
+                ]
+            },
+            "events": {
+                "title": "Evenementen & Tickets",
+                "items": [
+                    "Tickets worden digitaal verstuurd en gekoppeld aan het e-mailadres van de koper.",
+                    "Tenzij anders vermeld zijn tickets niet terugbetaalbaar, maar kunnen ze tot 48 uur vooraf kosteloos overgedragen worden na melding via e-mail."
+                ]
+            },
+            "returns": {
+                "title": "Retouren & Herroepingsrecht",
+                "items": [
+                    "Ongeopende merchandise kan binnen 14 dagen na levering worden teruggestuurd. Contacteer ons eerst zodat we een retourlabel kunnen aanmaken.",
+                    "Bederfbare goederen (bier, voeding) en geopende flessen kunnen enkel worden geretourneerd indien ze beschadigd aankwamen. Stuur binnen 48 uur foto's door."
+                ]
+            },
+            "liability": {
+                "title": "Aansprakelijkheid",
+                "items": [
+                    "Man & Brouw is niet aansprakelijk voor vertragingen of verlies veroorzaakt door externe vervoerders nadat het pakket is overgedragen.",
+                    "Onze bieren bevatten alcohol. Geniet met mate en zorg ervoor dat minderjarigen niet meedrinken."
+                ]
+            }
+        },
+        "contact": {
+            "title": "Vragen of opmerkingen?",
+            "text": "Neem gerust contact op, we helpen u graag verder.",
+            "email": "info@manenbrouw.be"
+        }
+    },
     "ageVerification": {
         "title": "Leeftijdsverificatie",
         "message": "U moet 18 jaar of ouder zijn om deze site te bezoeken.",

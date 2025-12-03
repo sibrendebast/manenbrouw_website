@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
 
+import { prisma } from "@/lib/prisma";
+
 export async function POST(req: NextRequest) {
     try {
         // Validate Stripe key at runtime
@@ -28,6 +30,34 @@ export async function POST(req: NextRequest) {
                 { error: "Missing required fields" },
                 { status: 400 }
             );
+        }
+
+        // Validate stock for all products in cart
+        for (const item of cartItems) {
+            if (item.itemType === "product") {
+                const product = await prisma.product.findUnique({
+                    where: { id: item.id },
+                });
+
+                if (!product) {
+                    return NextResponse.json(
+                        { error: `Product ${item.name} no longer exists` },
+                        { status: 400 }
+                    );
+                }
+
+                if (!product.inStock || product.stockCount < item.quantity) {
+                    return NextResponse.json(
+                        {
+                            error: `Insufficient stock for ${item.name}. Only ${product.stockCount} available.`,
+                            code: 'INSUFFICIENT_STOCK',
+                            product: item.name,
+                            available: product.stockCount
+                        },
+                        { status: 400 }
+                    );
+                }
+            }
         }
 
         // Map payment method to Stripe payment method types

@@ -184,10 +184,11 @@ export default function CheckoutPage() {
                     {/* Checkout Form */}
                     <div>
                         <form id="checkout-form" action={handleSubmit} className="space-y-6">
-                            <div className="bg-white p-6 border-2 border-black">
-                                <h2 className="text-xl font-semibold mb-4 text-brewery-dark">{t("checkout.shippingMethod")}</h2>
-                                <div className="space-y-4">
-                                    <div className="flex items-center">
+                            <div className="bg-white p-6 border-2 border-black space-y-4">
+                                <div>
+                                    <h2 className="text-xl font-semibold mb-4 text-brewery-dark">{t("checkout.shippingMethod")}</h2>
+                                    <div className="space-y-4">
+                                        <div className="flex flex-wrap md:flex-nowrap items-start gap-4">
                                         <input
                                             type="radio"
                                             id="shipment"
@@ -197,12 +198,20 @@ export default function CheckoutPage() {
                                             onChange={() => setShippingMethod("shipment")}
                                             className="mr-3 h-4 w-4 text-brewery-green focus:ring-brewery-green"
                                         />
-                                        <label htmlFor="shipment" className="flex-grow text-brewery-dark">
-                                            {t("checkout.shipment")}
-                                        </label>
-                                        <span className="font-semibold text-brewery-dark">€10.00</span>
+                                            <div className="flex-1">
+                                                <label htmlFor="shipment" className="text-brewery-dark font-medium block">
+                                                    {t("checkout.shipment")}
+                                                </label>
+                                                <Link
+                                                    href="/delivery/home"
+                                                    className="text-sm underline text-brewery-green hover:text-brewery-dark"
+                                                >
+                                                    {t("checkout.learnAboutDelivery")}
+                                                </Link>
+                                            </div>
+                                            <span className="font-semibold text-brewery-dark">€10.00</span>
                                     </div>
-                                    <div className="flex items-center">
+                                        <div className="flex flex-wrap md:flex-nowrap items-start gap-4">
                                         <input
                                             type="radio"
                                             id="pickup"
@@ -210,12 +219,21 @@ export default function CheckoutPage() {
                                             value="pickup"
                                             checked={shippingMethod === "pickup"}
                                             onChange={() => setShippingMethod("pickup")}
-                                            className="mr-3 h-4 w-4 text-brewery-green focus:ring-brewery-green"
+                                                className="mr-3 h-4 w-4 text-brewery-green focus:ring-brewery-green mt-1"
                                         />
-                                        <label htmlFor="pickup" className="flex-grow text-brewery-dark">
-                                            {t("checkout.pickup")}
-                                        </label>
-                                        <span className="font-semibold text-brewery-dark">{t("checkout.free")}</span>
+                                            <div className="flex-1">
+                                                <label htmlFor="pickup" className="text-brewery-dark font-medium block">
+                                                    {t("checkout.pickup")}
+                                                </label>
+                                                <Link
+                                                    href="/delivery/pickup"
+                                                    className="text-sm underline text-brewery-green hover:text-brewery-dark"
+                                                >
+                                                    {t("checkout.learnAboutPickup")}
+                                                </Link>
+                                            </div>
+                                            <span className="font-semibold text-brewery-dark">{t("checkout.free")}</span>
+                                    </div>
                                     </div>
                                 </div>
                             </div>

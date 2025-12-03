@@ -59,6 +59,8 @@
         "city": "City",
         "country": "Country",
         "newsletter": "Sign up for our newsletter",
+        "learnAboutDelivery": "Learn about home delivery",
+        "learnAboutPickup": "Learn about pickup lockers",
         "paymentMethod": "Payment Method",
         "creditCard": "Credit Card",
         "placeOrder": "Place Order",
@@ -113,7 +115,96 @@
         "emailPlaceholder": "Your email",
         "subscribe": "Subscribe",
         "terms": "Terms & Conditions",
+        "deliveryHome": "Home Delivery",
+        "breweryPickup": "Pick up at Brewery",
         "rights": "All rights reserved."
+    },
+    "delivery": {
+        "home": {
+            "title": "Home Delivery",
+            "subtitle": "We now ship our beers anywhere in Belgium. Tell us what to pack and we take care of the rest.",
+            "priceTag": "Flat €10 shipping fee",
+            "highlights": [
+                {
+                    "title": "Ship nationwide",
+                    "description": "Every week we dispatch parcels to each Belgian province straight from Wilsele."
+                },
+                {
+                    "title": "Unlimited mixing",
+                    "description": "Combine any number of bottles or specials—there is no minimum order and no fragile surcharge."
+                },
+                {
+                    "title": "Safe packaging",
+                    "description": "Double-walled boxes with custom dividers keep every bottle upright and protected."
+                }
+            ],
+            "guaranteeTitle": "100% breakage guarantee",
+            "guaranteeText": "If something gets damaged in transit we immediately send you a replacement free of charge.",
+            "stepsTitle": "How it works",
+            "steps": [
+                {
+                    "title": "Order your beers",
+                    "description": "Fill your cart with any mix of bottles in the webshop."
+                },
+                {
+                    "title": "Select \"Home delivery\" at checkout",
+                    "description": "A flat €10 shipping fee is added automatically—no surprises."
+                },
+                {
+                    "title": "We pack and ship",
+                    "description": "You receive a dispatch email with tracking details as soon as the parcel leaves the brewery."
+                }
+            ],
+            "videoTitle": "Battle-tested packaging",
+            "videoText": "We literally drop-tested our boxes to make sure your beers survive the ride.",
+            "cta": "Go to the shop"
+        },
+        "pickup": {
+            "title": "Pick up at the brewery",
+            "subtitle": "Collect your order for free via our 24/7 locker system in Wilsele.",
+            "highlights": [
+                {
+                    "title": "Free & flexible",
+                    "description": "Pickup is always free and has no minimum order size."
+                },
+                {
+                    "title": "24/7 lockers",
+                    "description": "Grab your beers whenever it suits you—early morning or late night."
+                },
+                {
+                    "title": "Fresh bottles",
+                    "description": "Leave a note with your timing and we stock the locker just in time."
+                }
+            ],
+            "stepsTitle": "Locker instructions",
+            "steps": [
+                {
+                    "title": "Order online",
+                    "description": "Place an order in the webshop and choose \"Pick up at brewery\"."
+                },
+                {
+                    "title": "Optional timing",
+                    "description": "Share your preferred pick-up window in the order notes so we can plan freshness."
+                },
+                {
+                    "title": "Watch for the locker email",
+                    "description": "We send the locker number and secret code as soon as your bottles are ready."
+                },
+                {
+                    "title": "Collect whenever",
+                    "description": "Go to Aarschotsesteenweg 179, enter the code, turn the knob, grab your beers and close the locker."
+                },
+                {
+                    "title": "Enjoy!",
+                    "description": "Put the beers cold and toast to Man & Brouw."
+                }
+            ],
+            "cta": "Plan your pickup",
+            "addressLabel": "Pickup location",
+            "address": "Aarschotsesteenweg 179, 3012 Wilsele",
+            "tipTitle": "Need help?",
+            "tipText": "Email info@manenbrouw.be if you want to schedule a specific timeslot or pick up a large order."
+        }
     },
     "terms": {
         "title": "Terms & Conditions",

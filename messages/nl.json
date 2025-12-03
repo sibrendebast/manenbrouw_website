@@ -23,12 +23,47 @@
             "subtitle": "Schrijf u in voor onze nieuwsbrief voor de laatste updates over nieuwe releases, evenementen en exclusieve aanbiedingen."
         }
     },
+    "aboutPage": {
+        "hero": {
+            "title": "Over Man & Brouw",
+            "subtitle": "We brouwen met passie, experimenteren met smaak en delen onze liefde voor craftbier in Wilsele."
+        },
+        "story": {
+            "title": "Ons Verhaal",
+            "imageAlt": "Man & Brouw bierselectie",
+            "paragraphs": [
+                "Man & Brouw ontstond uit een passieproject tussen vrienden met een grote liefde voor unieke, smaakvolle bieren. Wat begon als kleine experimenten in een keuken, groeide uit tot een microbrouwerij in een zeecontainer in Wilsele die de grenzen van traditioneel brouwen verlegt.",
+                "We geloven in kwaliteit boven kwantiteit, gebruiken enkel de beste ingrediënten en nemen de tijd om elke batch te verfijnen. Van onze kenmerkende fruited sours tot gedurfde spiced saisons: elk bier vertelt een verhaal van creativiteit en vakmanschap.",
+                "Wat ons echt onderscheidt, is onze keuze om elk bier maar één keer te brouwen. Dat past bij de creatieve vrijheid en de homebrewspirit waar we zo van houden. We brouwen wat we willen, wanneer we er zin in hebben. Zelfs als een bier terugkomt, krijgt het altijd een nieuwe twist. We brouwen één batch per maand, dus volg ons op sociale media of schrijf je in voor de nieuwsbrief als je niets wil missen!"
+            ]
+        },
+        "highlights": {
+            "flavors": {
+                "title": "Unieke Smaken",
+                "description": "We experimenteren graag met hele vruchten, kruiden en specerijen. Maar hoe zot de twist ook is, de basis blijft kwaliteitsmout uit de buurt.",
+                "imageAlt": "Verse abrikozen"
+            },
+            "community": {
+                "title": "Community",
+                "description": "We zijn trots dat we deel uitmaken van de gemeenschap in Wilsele en delen onze passie graag met buren én bezoekers."
+            },
+            "local": {
+                "title": "Lokale Wortels",
+                "description": "Je vindt ons op Aarschotsesteenweg 179, 3012 Wilsele. Spring eens binnen en proef het verschil!"
+            }
+        }
+    },
     "shop": {
         "title": "Onze Bieren",
         "subtitle": "Bekijk onze huidige selectie van kleinschalige ambachtelijke bieren.",
         "addToCart": "Toevoegen",
         "outOfStock": "Niet op Voorraad",
         "inStock": "Op Voorraad"
+    },
+    "productDetails": {
+        "notFoundTitle": "Product niet gevonden",
+        "backToShop": "Terug naar de shop",
+        "addedToCart": "Toegevoegd aan de winkelwagen"
     },
     "cart": {
         "title": "Uw Winkelwagen",

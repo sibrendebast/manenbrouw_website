@@ -1,51 +1,71 @@
+"use client";
+
 import { Beer, Users, MapPin } from "lucide-react";
 import Image from "next/image";
+import { useI18n } from "@/lib/i18n-context";
+
+type AboutMessages = {
+    hero: {
+        title: string;
+        subtitle: string;
+    };
+    story: {
+        title: string;
+        imageAlt: string;
+        paragraphs: string[];
+    };
+    highlights: {
+        flavors: {
+            title: string;
+            description: string;
+            imageAlt: string;
+        };
+        community: {
+            title: string;
+            description: string;
+        };
+        local: {
+            title: string;
+            description: string;
+        };
+    };
+};
 
 export default function AboutPage() {
+    const { messages } = useI18n();
+    const about = messages.aboutPage as AboutMessages | undefined;
+
+    if (!about) {
+        return null;
+    }
+
     return (
         <div className="bg-white min-h-screen py-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
                     <h1 className="text-4xl font-bold text-brewery-dark mb-4">
-                        About Man & Brouw
+                        {about.hero.title}
                     </h1>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Brewing with passion, experimenting with flavor, and sharing the love
-                        for craft beer in Wilsele.
+                        {about.hero.subtitle}
                     </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-20">
                     <div>
                         <h2 className="text-3xl font-bold text-brewery-green mb-6">
-                            Our Story
+                            {about.story.title}
                         </h2>
-                        <p className="text-gray-700 mb-4 leading-relaxed">
-                            Man & Brouw started as a passion project between friends who shared a
-                            love for unique, flavorful beers. What began as small experiments in
-                            a kitchen has grown into a local microbrewery located in a shipping container. The brewery is dedicated to pushing
-                            the boundaries of traditional brewing.
-                        </p>
-                        <p className="text-gray-700 mb-4 leading-relaxed">
-                            We believe in quality over quantity, using only the finest
-                            ingredients and taking the time to perfect each batch. From our
-                            signature Fruited sours to our innovative Spiced Saisons,
-                            every batch tells a story of creativity and craftsmanship.
-                        </p>
-                        <p className="text-gray-700 mb-4 leading-relaxed">
-                            What makes us truly unique is our commitment to brewing each beer
-                            only once. This philosophy stems from our love for creative freedom
-                            and the true homebrewing spirit we fell in love with. We brew what
-                            we want, when we want it. While a beer might return, there will
-                            always be a new twist—keeping every batch exciting and unique.
-                            We brew one batch per month, so if you don't want to miss our new
-                            beers, follow us on social media or subscribe to our mailing list!
-                        </p>
+                        {about.story.paragraphs.map((paragraph) => (
+                            <p key={paragraph} className="text-gray-700 mb-4 leading-relaxed">
+                                {paragraph}
+                            </p>
+                        ))}
                     </div>
                     <div className="relative w-full max-w-sm mx-auto aspect-square border-2 border-black overflow-hidden">
                         <Image
                             src="/about/beer_assortment.jpg"
-                            alt="Man & Brouw Beer Assortment"
+                            alt={about.story.imageAlt}
                             width={3064}
                             height={3064}
                             className="object-cover w-full h-full"
@@ -57,7 +77,7 @@ export default function AboutPage() {
                     <div className="relative p-6 border-2 border-black overflow-hidden group min-h-[300px] flex flex-col justify-center">
                         <Image
                             src="/about/abrikozen.jpg"
-                            alt="Fresh Apricots"
+                            alt={about.highlights.flavors.imageAlt}
                             fill
                             className="object-cover transition-transform duration-500 group-hover:scale-110"
                         />
@@ -66,11 +86,9 @@ export default function AboutPage() {
                             <div className="bg-white w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border-2 border-black">
                                 <Beer className="h-8 w-8 text-brewery-green" />
                             </div>
-                            <h3 className="text-xl font-bold mb-2 text-white">Unique Flavors</h3>
+                            <h3 className="text-xl font-bold mb-2 text-white">{about.highlights.flavors.title}</h3>
                             <p className="text-gray-200">
-                                We love experimenting with whole fruits, spices, and herbs.
-                                But no matter the twist, the base of our beers is always
-                                high-quality craft-malted local grains.
+                                {about.highlights.flavors.description}
                             </p>
                         </div>
                     </div>
@@ -79,20 +97,18 @@ export default function AboutPage() {
                         <div className="bg-white w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border-2 border-black">
                             <Users className="h-8 w-8 text-brewery-green" />
                         </div>
-                        <h3 className="text-xl font-bold mb-2">Community</h3>
+                        <h3 className="text-xl font-bold mb-2">{about.highlights.community.title}</h3>
                         <p className="text-gray-600">
-                            We are proud to be part of the Wilsele community and love sharing
-                            our passion with locals and visitors alike.
+                            {about.highlights.community.description}
                         </p>
                     </div>
                     <div className="p-6 bg-brewery-light border-2 border-black">
                         <div className="bg-white w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border-2 border-black">
                             <MapPin className="h-8 w-8 text-brewery-green" />
                         </div>
-                        <h3 className="text-xl font-bold mb-2">Local Roots</h3>
+                        <h3 className="text-xl font-bold mb-2">{about.highlights.local.title}</h3>
                         <p className="text-gray-600">
-                            Located at Aarschotsesteenweg 179, 3012 Wilsele. Come visit us and
-                            taste the difference!
+                            {about.highlights.local.description}
                         </p>
                     </div>
                 </div>

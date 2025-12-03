@@ -89,15 +89,17 @@
     "events": {
         "title": "Evenementen",
         "subtitle": "Sluit u aan bij ons voor proeverijen, brouwerijrondleidingen en speciale evenementen bij Man & Brouw",
-        "upcomingEvents": "Aankomende Evenementen",
-        "pastEvents": "Afgelopen Evenementen",
-        "noUpcoming": "Geen Aankomende Evenementen",
-        "noUpcomingMessage": "We hebben momenteel geen evenementen gepland. Kom binnenkort terug of volg ons op sociale media voor aankondigingen!",
+        "upcoming": "Aankomende Evenementen",
+        "past": "Afgelopen Evenementen",
+        "pastEvent": "Afgelopen Evenement",
+        "noEvents": "Geen Aankomende Evenementen",
+        "noEventsMessage": "We hebben momenteel geen evenementen gepland. Kom binnenkort terug of volg ons op sociale media voor aankondigingen!",
         "soldOut": "Uitverkocht",
         "free": "GRATIS",
+        "ticketsSold": "tickets verkocht",
+        "attendees": "deelnemers",
         "tickets": "Tickets",
-        "addToCart": "Toevoegen aan Winkelwagen",
-        "registerSoon": "Registreren (Binnenkort)"
+        "register": "Registreren (Binnenkort)"
     },
     "footer": {
         "about": "Over Ons",
@@ -105,11 +107,13 @@
         "quickLinks": "Snelle Links",
         "contact": "Contact",
         "followUs": "Volg Ons",
+        "stayUpdated": "Blijf op de Hoogte",
         "newsletter": "Nieuwsbrief",
         "newsletterText": "Abonneer u op onze nieuwsbrief voor updates over nieuwe bieren en evenementen.",
         "emailPlaceholder": "Uw e-mailadres",
         "subscribe": "Abonneren",
-        "allRightsReserved": "Alle rechten voorbehouden."
+        "terms": "Algemene Voorwaarden",
+        "rights": "Alle rechten voorbehouden."
     },
     "ageVerification": {
         "title": "Leeftijdsverificatie",

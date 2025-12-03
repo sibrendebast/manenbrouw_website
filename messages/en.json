@@ -89,15 +89,17 @@
     "events": {
         "title": "Events",
         "subtitle": "Join us for tastings, brewery tours, and special events at Man & Brouw",
-        "upcomingEvents": "Upcoming Events",
-        "pastEvents": "Past Events",
-        "noUpcoming": "No Upcoming Events",
-        "noUpcomingMessage": "We don't have any events scheduled at the moment. Check back soon or follow us on social media for announcements!",
+        "upcoming": "Upcoming Events",
+        "past": "Past Events",
+        "pastEvent": "Past Event",
+        "noEvents": "No Upcoming Events",
+        "noEventsMessage": "We don't have any events scheduled at the moment. Check back soon or follow us on social media for announcements!",
         "soldOut": "Sold Out",
         "free": "FREE",
+        "ticketsSold": "tickets sold",
+        "attendees": "attendees",
         "tickets": "Tickets",
-        "addToCart": "Add to Cart",
-        "registerSoon": "Register (Coming Soon)"
+        "register": "Register (Coming Soon)"
     },
     "footer": {
         "about": "About Us",
@@ -105,11 +107,13 @@
         "quickLinks": "Quick Links",
         "contact": "Contact",
         "followUs": "Follow Us",
+        "stayUpdated": "Stay Updated",
         "newsletter": "Newsletter",
         "newsletterText": "Subscribe to our newsletter for updates on new beers and events.",
         "emailPlaceholder": "Your email",
         "subscribe": "Subscribe",
-        "allRightsReserved": "All rights reserved."
+        "terms": "Terms & Conditions",
+        "rights": "All rights reserved."
     },
     "ageVerification": {
         "title": "Age Verification",

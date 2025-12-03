@@ -1,21 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ChangeEvent } from "react";
 import { useCartStore } from "@/store/cartStore";
 import { placeOrder } from "@/app/actions/checkout";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n-context";
 
+type CheckoutFormValues = {
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    street: string;
+    zip: string;
+    city: string;
+    newsletter: boolean;
+};
+
+const DEFAULT_FORM_VALUES: CheckoutFormValues = {
+    customerName: "",
+    customerEmail: "",
+    customerPhone: "",
+    street: "",
+    zip: "",
+    city: "",
+    newsletter: false,
+};
+
+const CHECKOUT_FORM_STORAGE_KEY = "checkoutFormData";
+
 export default function CheckoutPage() {
-    const { items, getTotalPrice, clearCart } = useCartStore();
+    const { items, getTotalPrice } = useCartStore();
     const [shippingMethod, setShippingMethod] = useState("shipment");
     const [paymentMethod, setPaymentMethod] = useState("card");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
-    const router = useRouter();
     const [mounted, setMounted] = useState(false);
+    const [formValues, setFormValues] = useState<CheckoutFormValues>(DEFAULT_FORM_VALUES);
     const { t } = useI18n();
 
     // Helper function to safely get images array
@@ -33,8 +54,52 @@ export default function CheckoutPage() {
     };
 
     useEffect(() => {
+        if (typeof window === "undefined") {
+            setMounted(true);
+            return;
+        }
+
+        const stored = localStorage.getItem(CHECKOUT_FORM_STORAGE_KEY);
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored);
+                if (parsed.formValues) {
+                    setFormValues((prev) => ({
+                        ...prev,
+                        ...parsed.formValues,
+                    }));
+                }
+                if (parsed.shippingMethod && typeof parsed.shippingMethod === "string") {
+                    setShippingMethod(parsed.shippingMethod);
+                }
+                if (parsed.paymentMethod && typeof parsed.paymentMethod === "string") {
+                    setPaymentMethod(parsed.paymentMethod);
+                }
+            } catch (storageError) {
+                console.error("Failed to parse saved checkout form", storageError);
+            }
+        }
+
         setMounted(true);
     }, []);
+
+    useEffect(() => {
+        if (!mounted || typeof window === "undefined") return;
+        const payload = JSON.stringify({
+            formValues,
+            shippingMethod,
+            paymentMethod,
+        });
+        localStorage.setItem(CHECKOUT_FORM_STORAGE_KEY, payload);
+    }, [formValues, shippingMethod, paymentMethod, mounted]);
+
+    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const { name, value, type, checked } = event.target;
+        setFormValues((prev) => ({
+            ...prev,
+            [name]: type === "checkbox" ? checked : value,
+        }));
+    };
 
     if (!mounted) return null;
 
@@ -167,6 +232,8 @@ export default function CheckoutPage() {
                                             id="customerName"
                                             name="customerName"
                                             required
+                                            value={formValues.customerName}
+                                            onChange={handleInputChange}
                                             className="w-full px-4 py-2 border-2 border-black focus:ring-brewery-green focus:border-brewery-green"
                                         />
                                     </div>
@@ -179,6 +246,8 @@ export default function CheckoutPage() {
                                             id="customerEmail"
                                             name="customerEmail"
                                             required
+                                            value={formValues.customerEmail}
+                                            onChange={handleInputChange}
                                             className="w-full px-4 py-2 border-2 border-black focus:ring-brewery-green focus:border-brewery-green"
                                         />
                                     </div>
@@ -191,6 +260,8 @@ export default function CheckoutPage() {
                                             id="customerPhone"
                                             name="customerPhone"
                                             required
+                                            value={formValues.customerPhone}
+                                            onChange={handleInputChange}
                                             className="w-full px-4 py-2 border-2 border-black focus:ring-brewery-green focus:border-brewery-green"
                                         />
                                     </div>
@@ -210,6 +281,8 @@ export default function CheckoutPage() {
                                                 id="street"
                                                 name="street"
                                                 required
+                                                value={formValues.street}
+                                                onChange={handleInputChange}
                                                 className="w-full px-4 py-2 border-2 border-black focus:ring-brewery-green focus:border-brewery-green"
                                             />
                                         </div>
@@ -223,6 +296,8 @@ export default function CheckoutPage() {
                                                     id="zip"
                                                     name="zip"
                                                     required
+                                                    value={formValues.zip}
+                                                    onChange={handleInputChange}
                                                     className="w-full px-4 py-2 border-2 border-black focus:ring-brewery-green focus:border-brewery-green"
                                                 />
                                             </div>
@@ -235,6 +310,8 @@ export default function CheckoutPage() {
                                                     id="city"
                                                     name="city"
                                                     required
+                                                    value={formValues.city}
+                                                    onChange={handleInputChange}
                                                     className="w-full px-4 py-2 border-2 border-black focus:ring-brewery-green focus:border-brewery-green"
                                                 />
                                             </div>
@@ -262,6 +339,8 @@ export default function CheckoutPage() {
                                     id="newsletter"
                                     name="newsletter"
                                     className="h-4 w-4 text-brewery-green focus:ring-brewery-green border-gray-300 rounded"
+                                    checked={formValues.newsletter}
+                                    onChange={handleInputChange}
                                 />
                                 <label htmlFor="newsletter" className="ml-2 block text-sm text-brewery-dark">
                                     {t("checkout.newsletter")}

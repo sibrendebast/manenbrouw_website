@@ -62,7 +62,29 @@
         "paymentMethod": "Payment Method",
         "creditCard": "Credit Card",
         "placeOrder": "Place Order",
-        "processing": "Processing..."
+        "processing": "Processing...",
+        "success": {
+            "title": "Payment successful",
+            "message": "Thanks for supporting Man & Brouw. Your order is confirmed and the brewing team is already preparing it.",
+            "emailConfirmation": "You'll receive a confirmation email with all the details shortly.",
+            "orderId": "Order ID",
+            "nextStepsTitle": "What happens next",
+            "nextStepsShipping": "We'll let you know as soon as your parcel is ready for shipment or pickup.",
+            "nextStepsUpdates": "Tracking information or pickup instructions arrive via email once the order leaves the brewery.",
+            "nextStepsQuestions": "Questions or changes? Reply to the confirmation email and we'll help you out.",
+            "supportTitle": "Need an extra hand?",
+            "supportDescription": "Our small team is happy to help with delivery questions or invoice details.",
+            "exploreEvents": "Discover events"
+        },
+        "cancel": {
+            "title": "Payment not completed",
+            "message": "It looks like the payment was canceled or failed. No worries—you can try again below or choose a different method.",
+            "tryAgain": "Try checkout again",
+            "retryTitle": "Ready for another try?",
+            "retryDescription": "Reopen the checkout to finish your purchase. Your cart is still saved for the next attempt.",
+            "helpTitle": "Need help?",
+            "helpDescription": "If the payment was charged but the page didn’t update, send us the order ID and we’ll investigate."
+        }
     },
     "events": {
         "title": "Events",

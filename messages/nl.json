@@ -62,7 +62,29 @@
         "paymentMethod": "Betaalmethode",
         "creditCard": "Creditcard",
         "placeOrder": "Bestelling Plaatsen",
-        "processing": "Verwerken..."
+        "processing": "Verwerken...",
+        "success": {
+            "title": "Betaling geslaagd",
+            "message": "Bedankt voor je bestelling bij Man & Brouw. We gaan meteen voor je aan de slag.",
+            "emailConfirmation": "Je ontvangt zo meteen een bevestigingsmail met alle details.",
+            "orderId": "Bestelnummer",
+            "nextStepsTitle": "Wat gebeurt er nu?",
+            "nextStepsShipping": "We laten weten wanneer je pakket klaarstaat voor verzending of ophaling.",
+            "nextStepsUpdates": "Zodra alles vertrekt, sturen we tracking- of ophaalinformatie via e-mail.",
+            "nextStepsQuestions": "Nog vragen of wijzigingen? Antwoord gerust op de bevestigingsmail.",
+            "supportTitle": "Hulp nodig?",
+            "supportDescription": "Ons team helpt je graag met vragen rond levering of factuur.",
+            "exploreEvents": "Ontdek events"
+        },
+        "cancel": {
+            "title": "Betaling niet afgerond",
+            "message": "Het lijkt erop dat de betaling geannuleerd of mislukt is. Geen probleem—probeer het opnieuw of kies een andere methode.",
+            "tryAgain": "Opnieuw afrekenen",
+            "retryTitle": "Nog een poging wagen?",
+            "retryDescription": "Open de checkout opnieuw om je aankoop af te ronden. Je winkelwagen blijft bewaard.",
+            "helpTitle": "Toch hulp nodig?",
+            "helpDescription": "Is het bedrag wel van je rekening gegaan? Stuur ons het bestelnummer en we zoeken het uit."
+        }
     },
     "events": {
         "title": "Evenementen",

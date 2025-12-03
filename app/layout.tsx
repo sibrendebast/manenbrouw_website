@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AgeVerificationModal from "@/components/ui/AgeVerificationModal";
+import AdminBanner from "@/components/AdminBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <Navbar />
+        <AdminBanner />
         <AgeVerificationModal />
         <main className="flex-grow">{children}</main>
         <Footer />

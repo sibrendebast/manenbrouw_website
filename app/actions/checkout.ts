@@ -68,7 +68,7 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                     productId: product.id,
                     quantity: item.quantity,
                     price: product.price,
-                    btwCategory: product.btwCategory,
+                    btwCategory: product.btwCategory || 21,
                 });
             } else if (item.itemType === "ticket") {
                 const event = await prisma.event.findUnique({

@@ -14,6 +14,7 @@ import {
     Text,
 } from "@react-email/components";
 import * as React from "react";
+import { calculateBtwBreakdown } from "@/lib/btw";
 
 interface OrderInvoiceProps {
     order: {
@@ -42,21 +43,12 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
         ? JSON.parse(order.shippingAddress)
         : null;
     
-    // Calculate BTW breakdown
-    const btwMap = new Map<number, number>();
-    order.items.forEach(item => {
-        const category = item.btwCategory || 21;
-        const itemTotal = item.price * item.quantity;
-        const currentSubtotal = btwMap.get(category) || 0;
-        btwMap.set(category, currentSubtotal + itemTotal);
-    });
-    
-    const btwBreakdown: Array<{ category: number; subtotal: number; btw: number }> = [];
-    btwMap.forEach((subtotal, category) => {
-        const btw = subtotal * (category / 100);
-        btwBreakdown.push({ category, subtotal, btw });
-    });
-    btwBreakdown.sort((a, b) => b.category - a.category);
+    // Calculate BTW breakdown using shared utility
+    const btwBreakdown = calculateBtwBreakdown(order.items.map(item => ({
+        price: item.price,
+        quantity: item.quantity,
+        btwCategory: item.btwCategory
+    })));
 
     return (
         <Html>

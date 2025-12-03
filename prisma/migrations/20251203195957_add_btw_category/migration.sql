@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN "btwCategory" INTEGER NOT NULL DEFAULT 21;

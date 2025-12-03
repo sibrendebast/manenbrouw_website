@@ -32,6 +32,7 @@ interface OrderInvoiceProps {
             };
             quantity: number;
             price: number;
+            btwCategory: number;
         }[];
     };
 }
@@ -40,6 +41,22 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
     const shippingAddress = order.shippingAddress
         ? JSON.parse(order.shippingAddress)
         : null;
+    
+    // Calculate BTW breakdown
+    const btwMap = new Map<number, number>();
+    order.items.forEach(item => {
+        const category = item.btwCategory || 21;
+        const itemTotal = item.price * item.quantity;
+        const currentSubtotal = btwMap.get(category) || 0;
+        btwMap.set(category, currentSubtotal + itemTotal);
+    });
+    
+    const btwBreakdown: Array<{ category: number; subtotal: number; btw: number }> = [];
+    btwMap.forEach((subtotal, category) => {
+        const btw = subtotal * (category / 100);
+        btwBreakdown.push({ category, subtotal, btw });
+    });
+    btwBreakdown.sort((a, b) => b.category - a.category);
 
     return (
         <Html>
@@ -131,6 +148,18 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                                 <Column style={{ width: "20%", textAlign: "right" }}><Text style={tableCell}>€10.00</Text></Column>
                             </Row>
                         )}
+                    </Section>
+
+                    <Hr style={hr} />
+
+                    <Section>
+                        <Text style={subHeading}>BTW Breakdown</Text>
+                        {btwBreakdown.map((btw, index) => (
+                            <Row key={index} style={{ marginBottom: "5px" }}>
+                                <Column style={{ width: "70%" }}><Text style={tableCell}>BTW {btw.category}% over €{btw.subtotal.toFixed(2)}</Text></Column>
+                                <Column style={{ width: "30%", textAlign: "right" }}><Text style={tableCell}>€{btw.btw.toFixed(2)}</Text></Column>
+                            </Row>
+                        ))}
                     </Section>
 
                     <Hr style={hr} />

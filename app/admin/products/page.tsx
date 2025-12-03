@@ -24,6 +24,7 @@ export default function AdminDashboard() {
         description: "",
         images: [] as string[],
         stockCount: 0,
+        btwCategory: 21,
     });
 
     const [uploading, setUploading] = useState(false);
@@ -97,6 +98,7 @@ export default function AdminDashboard() {
             images: newProduct.images,
             inStock: true,
             stockCount: Number(newProduct.stockCount),
+            btwCategory: Number(newProduct.btwCategory),
         });
 
         if (result.success) {
@@ -110,6 +112,7 @@ export default function AdminDashboard() {
                 description: "",
                 images: [],
                 stockCount: 0,
+                btwCategory: 21,
             });
         } else {
             alert("Failed to add product");
@@ -224,19 +227,39 @@ export default function AdminDashboard() {
                                         />
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-bold mb-1 text-black">
-                                        Stock Count
-                                    </label>
-                                    <input
-                                        required
-                                        type="number"
-                                        value={newProduct.stockCount}
-                                        onChange={(e) =>
-                                            setNewProduct({ ...newProduct, stockCount: parseInt(e.target.value) })
-                                        }
-                                        className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
-                                    />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold mb-1 text-black">
+                                            Stock Count
+                                        </label>
+                                        <input
+                                            required
+                                            type="number"
+                                            value={newProduct.stockCount}
+                                            onChange={(e) =>
+                                                setNewProduct({ ...newProduct, stockCount: parseInt(e.target.value) })
+                                            }
+                                            className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold mb-1 text-black">
+                                            BTW Category (%)
+                                        </label>
+                                        <select
+                                            required
+                                            value={newProduct.btwCategory}
+                                            onChange={(e) =>
+                                                setNewProduct({ ...newProduct, btwCategory: parseInt(e.target.value) })
+                                            }
+                                            className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                        >
+                                            <option value={0}>0%</option>
+                                            <option value={6}>6%</option>
+                                            <option value={12}>12%</option>
+                                            <option value={21}>21%</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-bold mb-1 text-black">
@@ -335,7 +358,7 @@ export default function AdminDashboard() {
                                         {product.name}
                                     </h3>
                                     <p className="text-sm text-black font-semibold mb-2">
-                                        {product.style} • {product.abv}
+                                        {product.style} • {product.abv} • BTW: {product.btwCategory || 21}%
                                     </p>
                                     <div className="flex items-center gap-2 mb-4">
                                         <span className="text-brewery-green font-bold text-lg">€</span>

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, type ChangeEvent } from "react";
 import { useCartStore } from "@/store/cartStore";
-import { placeOrder, calculateBtwBreakdown } from "@/app/actions/checkout";
+import { placeOrder } from "@/app/actions/checkout";
+import { calculateBtwBreakdown } from "@/lib/btw";
 import Link from "next/link";
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n-context";

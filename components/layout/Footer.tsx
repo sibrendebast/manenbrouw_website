@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Facebook, Instagram, Mail, Phone } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
+import NewsletterForm from "@/components/NewsletterForm";
 
 export default function Footer() {
     const { t } = useI18n();
@@ -63,19 +64,9 @@ export default function Footer() {
                         <p className="mb-4 text-sm text-gray-300">
                             {t("footer.newsletterText")}
                         </p>
-                        <form className="flex flex-col space-y-2 mb-6">
-                            <input
-                                type="email"
-                                placeholder={t("footer.emailPlaceholder")}
-                                className="px-4 py-2 bg-white/10 border border-white/20 focus:outline-none focus:border-brewery-green text-white"
-                            />
-                            <button
-                                type="submit"
-                                className="bg-brewery-green text-white px-4 py-2 font-bold hover:bg-opacity-90 transition-colors border border-white"
-                            >
-                                {t("footer.subscribe")}
-                            </button>
-                        </form>
+                        <div className="mb-6">
+                            <NewsletterForm variant="footer" />
+                        </div>
                         <div className="flex space-x-4">
                             <a
                                 href="https://www.facebook.com/profile.php?id=61559618724445"

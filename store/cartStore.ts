@@ -39,11 +39,22 @@ export const useCartStore = create<CartState>()(
                 const items = get().items;
                 const existingItem = items.find((item) => item.id === product.id && item.itemType === "product");
 
+                // Check stock availability
+                const stockCount = product.stockCount || 0;
+                const currentQuantityInCart = existingItem ? existingItem.quantity : 0;
+                const newTotalQuantity = currentQuantityInCart + quantity;
+
+                // Don't add if it would exceed stock
+                if (newTotalQuantity > stockCount) {
+                    console.warn(`Cannot add ${quantity} items. Only ${stockCount - currentQuantityInCart} available.`);
+                    return;
+                }
+
                 if (existingItem) {
                     set({
                         items: items.map((item) =>
                             item.id === product.id && item.itemType === "product"
-                                ? { ...item, quantity: item.quantity + quantity }
+                                ? { ...item, quantity: newTotalQuantity }
                                 : item
                         ),
                     });
@@ -85,8 +96,20 @@ export const useCartStore = create<CartState>()(
                 if (quantity <= 0) {
                     get().removeItem(itemId);
                 } else {
+                    const items = get().items;
+                    const item = items.find((i) => i.id === itemId);
+
+                    // For products, check stock limit
+                    if (item && item.itemType === "product" && 'stockCount' in item) {
+                        const stockCount = item.stockCount || 0;
+                        if (quantity > stockCount) {
+                            console.warn(`Cannot update to ${quantity}. Only ${stockCount} available.`);
+                            return;
+                        }
+                    }
+
                     set({
-                        items: get().items.map((item) =>
+                        items: items.map((item) =>
                             item.id === itemId ? { ...item, quantity } : item
                         ),
                     });

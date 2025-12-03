@@ -5,9 +5,11 @@ import { useCartStore } from "@/store/cartStore";
 import { ShoppingCart, ArrowLeft, Check, Plus, Minus } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useI18n } from "@/lib/i18n-context";
 
 export default function ProductDetails({ product }: { product: any }) {
     const [mounted, setMounted] = useState(false);
+    const { t } = useI18n();
 
     useEffect(() => {
         setMounted(true);
@@ -78,9 +80,16 @@ export default function ProductDetails({ product }: { product: any }) {
                             </span>
                         </div>
 
-                        <p className="text-3xl font-bold text-brewery-green mb-8">
-                            €{product.price.toFixed(2)}
-                        </p>
+                        <div className="mb-8">
+                            <p className="text-3xl font-bold text-brewery-green mb-2">
+                                €{product.price.toFixed(2)}
+                            </p>
+                            {product.inStock && product.stockCount !== undefined && (
+                                <p className="text-sm text-gray-600 font-medium">
+                                    {product.stockCount} {t("shop.inStock")}
+                                </p>
+                            )}
+                        </div>
 
                         <div className="prose prose-lg text-gray-600 mb-10">
                             <p>{product.description}</p>
@@ -99,9 +108,14 @@ export default function ProductDetails({ product }: { product: any }) {
                                     {quantity}
                                 </span>
                                 <button
-                                    onClick={() => setQuantity(quantity + 1)}
-                                    className="p-4 hover:bg-gray-100 transition-colors border-l-2 border-black"
-                                    disabled={!product.inStock}
+                                    onClick={() => {
+                                        const stockCount = product.stockCount || 0;
+                                        if (quantity < stockCount) {
+                                            setQuantity(quantity + 1);
+                                        }
+                                    }}
+                                    className="p-4 hover:bg-gray-100 transition-colors border-l-2 border-black disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={!product.inStock || (product.stockCount !== undefined && quantity >= product.stockCount)}
                                 >
                                     <Plus className="h-5 w-5 text-gray-600" />
                                 </button>

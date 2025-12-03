@@ -59,6 +59,8 @@
         "city": "Stad",
         "country": "Land",
         "newsletter": "Schrijf u in voor onze nieuwsbrief",
+        "learnAboutDelivery": "Meer over verzending",
+        "learnAboutPickup": "Meer over lockers",
         "paymentMethod": "Betaalmethode",
         "creditCard": "Creditcard",
         "placeOrder": "Bestelling Plaatsen",
@@ -113,7 +115,96 @@
         "emailPlaceholder": "Uw e-mailadres",
         "subscribe": "Abonneren",
         "terms": "Algemene Voorwaarden",
+        "deliveryHome": "Verzending aan huis",
+        "breweryPickup": "Ophalen aan de brouwerij",
         "rights": "Alle rechten voorbehouden."
+    },
+    "delivery": {
+        "home": {
+            "title": "Verzending aan huis",
+            "subtitle": "We verzenden onze bieren nu overal in België. Jij kiest de flessen, wij regelen de rest.",
+            "priceTag": "Vaste verzendkost van €10",
+            "highlights": [
+                {
+                    "title": "Levering in heel België",
+                    "description": "Elke week vertrekken er pakketten vanuit Wilsele naar alle Vlaamse en Waalse provincies."
+                },
+                {
+                    "title": "Mix naar hartenlust",
+                    "description": "Combineer zoveel flessen en specials als je wil—geen minimum order en geen extra kosten."
+                },
+                {
+                    "title": "Dubbelwandige dozen",
+                    "description": "Onze stevige dozen met vakverdeling houden elke fles recht en veilig."
+                }
+            ],
+            "guaranteeTitle": "100% breukgarantie",
+            "guaranteeText": "Komt er toch een fles beschadigd aan? Dan sturen we gratis een nieuwe op.",
+            "stepsTitle": "Zo werkt het",
+            "steps": [
+                {
+                    "title": "Bestel je bier",
+                    "description": "Vul je winkelwagen met eender welke mix uit de webshop."
+                },
+                {
+                    "title": "Kies \"Verzending aan huis\"",
+                    "description": "Bij het afrekenen rekenen we automatisch €10 verzendkost aan—geen verassingen."
+                },
+                {
+                    "title": "Wij pakken en verzenden",
+                    "description": "Zodra het pakket de brouwerij verlaat ontvang je een verzendmail met tracking."
+                }
+            ],
+            "videoTitle": "Geteste verpakking",
+            "videoText": "We hebben onze dozen letterlijk laten vallen om zeker te zijn dat je bier intact blijft.",
+            "cta": "Naar de shop"
+        },
+        "pickup": {
+            "title": "Ophalen aan de brouwerij",
+            "subtitle": "Haal je bestelling gratis af via onze 24/7 locker in Wilsele.",
+            "highlights": [
+                {
+                    "title": "Gratis & flexibel",
+                    "description": "Ophalen kost niets en er is geen minimum hoeveelheid."
+                },
+                {
+                    "title": "24/7 lockers",
+                    "description": "Kom langs wanneer het jou past—vroeg in de ochtend of laat op de avond."
+                },
+                {
+                    "title": "Altijd vers",
+                    "description": "Laat even weten wanneer je langskomt en we vullen de locker op het juiste moment."
+                }
+            ],
+            "stepsTitle": "Locker instructies",
+            "steps": [
+                {
+                    "title": "Bestel online",
+                    "description": "Plaats een bestelling in de webshop en kies \"Ophalen aan de brouwerij\"."
+                },
+                {
+                    "title": "Optioneel: timing",
+                    "description": "Vermeld in de opmerking wanneer je ongeveer langskomt zodat we alles kunnen plannen."
+                },
+                {
+                    "title": "Wacht op de locker-mail",
+                    "description": "Je ontvangt het lockernummer en de geheime code zodra je bestelling klaarstaat."
+                },
+                {
+                    "title": "Haal je bier op",
+                    "description": "Ga naar Aarschotsesteenweg 179, geef de code in, draai aan de knop, neem je bier en sluit de locker."
+                },
+                {
+                    "title": "Geniet!",
+                    "description": "Zet de flesjes koud en klink op Man & Brouw."
+                }
+            ],
+            "cta": "Plan je ophaling",
+            "addressLabel": "Afhaallocatie",
+            "address": "Aarschotsesteenweg 179, 3012 Wilsele",
+            "tipTitle": "Hulp nodig?",
+            "tipText": "Mail naar info@manenbrouw.be als je een specifiek tijdstip wil afspreken of een grote bestelling ophaalt."
+        }
     },
     "terms": {
         "title": "Algemene Voorwaarden",

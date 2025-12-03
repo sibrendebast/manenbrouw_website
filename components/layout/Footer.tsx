@@ -51,6 +51,16 @@ export default function Footer() {
                                 </Link>
                             </li>
                             <li>
+                                <Link href="/delivery/home" className="hover:text-brewery-green transition-colors">
+                                    {t("footer.deliveryHome")}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/delivery/pickup" className="hover:text-brewery-green transition-colors">
+                                    {t("footer.breweryPickup")}
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/terms" className="hover:text-brewery-green transition-colors">
                                     {t("footer.terms")}
                                 </Link>

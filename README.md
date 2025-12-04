@@ -1,5 +1,33 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Variables
+
+Before running the application, you need to set up the following environment variables:
+
+### Required for Email Notifications
+
+- `RESEND_API_KEY`: Your Resend API key for sending emails (get it from [resend.com](https://resend.com))
+- `FROM_EMAIL` (optional): Email address to send from (defaults to 'Man & Brouw <onboarding@resend.dev>')
+- `ADMIN_EMAIL` (optional): Admin email address for notifications (defaults to 'info@manenbrouw.be')
+  
+  When an order is placed and paid, the system will:
+  - Send an order confirmation email to the customer
+  - Send a copy to the admin email via BCC
+  - Send a separate admin notification to the admin email
+
+### Other Required Variables
+
+- `DATABASE_URL`: PostgreSQL database connection string
+- `STRIPE_SECRET_KEY`: Stripe secret key for payment processing
+- `STRIPE_WEBHOOK_SECRET`: Stripe webhook secret for verifying webhook signatures
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`: Stripe publishable key for client-side
+- `CLOUDINARY_CLOUD_NAME`: Cloudinary cloud name for image hosting
+- `CLOUDINARY_API_KEY`: Cloudinary API key
+- `CLOUDINARY_API_SECRET`: Cloudinary API secret
+- `ADMIN_PASSWORD`: Password for admin access
+
+Create a `.env.local` file in the root directory with these variables.
+
 ## Getting Started
 
 Install dependencies first:

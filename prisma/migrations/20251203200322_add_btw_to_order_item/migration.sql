@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE "OrderItem" ADD COLUMN "btwCategory" INTEGER NOT NULL DEFAULT 21;
+ALTER TABLE "OrderItem" ADD COLUMN "btwCategory" INTEGER DEFAULT 21;

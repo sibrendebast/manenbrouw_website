@@ -13,8 +13,30 @@ async function getFeaturedProducts() {
     return products.map((p: any) => ({
       ...p,
       images: JSON.parse(p.images) as string[],
+      btwCategory: p.btwCategory ?? 21,
     }));
-  } catch (error) {
+  } catch (error: any) {
+    // If btwCategory column doesn't exist, retry with raw query
+    if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
+      console.log('btwCategory column does not exist yet, fetching featured products without it');
+      try {
+        const products = await prisma.$queryRaw`
+          SELECT id, slug, name, style, abv, volume, price, description, images, "inStock", "stockCount", "createdAt", "updatedAt"
+          FROM "Product"
+          WHERE "inStock" = true
+          ORDER BY "createdAt" DESC
+          LIMIT 2
+        ` as any[];
+        return products.map((p: any) => ({
+          ...p,
+          images: JSON.parse(p.images) as string[],
+          btwCategory: 21,
+        }));
+      } catch (rawError) {
+        console.error('Failed to fetch featured products with raw query:', rawError);
+        return [];
+      }
+    }
     console.error('Failed to fetch featured products:', error);
     return [];
   }

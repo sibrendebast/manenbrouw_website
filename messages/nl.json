@@ -75,6 +75,7 @@
         "startShopping": "Begin met Winkelen",
         "orderSummary": "Besteloverzicht",
         "subtotal": "Subtotaal",
+        "vatIncluded": "(waarvan BTW {rate}%)",
         "shipping": "Verzending",
         "calculatedAtCheckout": "Berekend bij afrekenen",
         "total": "Totaal",

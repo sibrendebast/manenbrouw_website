@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "OrderItem" ADD COLUMN IF NOT EXISTS "btwCategory" INTEGER DEFAULT 21;

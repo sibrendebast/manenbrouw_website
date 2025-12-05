@@ -3,6 +3,7 @@
 import { useState, useEffect, type ChangeEvent } from "react";
 import { useCartStore } from "@/store/cartStore";
 import { placeOrder } from "@/app/actions/checkout";
+import { calculateBtwBreakdown } from "@/lib/btw";
 import Link from "next/link";
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n-context";
@@ -105,6 +106,15 @@ export default function CheckoutPage() {
 
     const subtotal = getTotalPrice();
     const shippingCost = shippingMethod === "shipment" ? 10 : 0;
+    
+    // Calculate BTW breakdown for products only
+    const productItems = items.filter((item: any) => item.itemType === "product");
+    const btwBreakdown = calculateBtwBreakdown(productItems.map((item: any) => ({
+        price: item.price,
+        quantity: item.quantity,
+        btwCategory: item.btwCategory || 21
+    })));
+    
     const total = subtotal + shippingCost;
 
     if (items.length === 0) {
@@ -418,6 +428,16 @@ export default function CheckoutPage() {
                                     <span>{t("cart.subtotal")}</span>
                                     <span>€{subtotal.toFixed(2)}</span>
                                 </div>
+                                {btwBreakdown.length > 0 && (
+                                    <div className="pl-4 space-y-1 text-sm">
+                                        {btwBreakdown.map((btw, index) => (
+                                            <div key={index} className="flex justify-between text-gray-600">
+                                                <span>{t("cart.vatIncluded", { rate: btw.category })}</span>
+                                                <span>€{btw.btw.toFixed(2)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-brewery-dark">
                                     <span>{t("cart.shipping")}</span>
                                     <span>{shippingCost === 0 ? t("checkout.free") : `€${shippingCost.toFixed(2)}`}</span>

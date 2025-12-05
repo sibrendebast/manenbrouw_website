@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { Product } from "@/data/products";
+import { safeGetProduct } from "@/lib/product-utils";
 
 export interface CartItem extends Product {
     quantity: number;
@@ -20,27 +21,6 @@ export interface EventTicketItem {
 }
 
 type CartItemUnion = CartItem | EventTicketItem;
-
-// Helper function to safely fetch a product, handling missing btwCategory column
-async function safeGetProduct(id: string) {
-    try {
-        return await prisma.product.findUnique({
-            where: { id },
-        });
-    } catch (error: any) {
-        // If btwCategory column doesn't exist, use raw query
-        if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
-            const products = await prisma.$queryRaw`
-                SELECT id, slug, name, style, abv, volume, price, description, images, "inStock", "stockCount", "createdAt", "updatedAt"
-                FROM "Product"
-                WHERE id = ${id}
-                LIMIT 1
-            ` as any[];
-            return products.length > 0 ? { ...products[0], btwCategory: 21 } : null;
-        }
-        throw error;
-    }
-}
 
 export async function placeOrder(formData: FormData, cartItems: CartItemUnion[]) {
     const customerName = formData.get("customerName") as string;
@@ -145,7 +125,12 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
         } catch (error: any) {
             // If btwCategory column doesn't exist in OrderItem, retry without it
             if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
-                const orderItemsDataWithoutBtw = orderItemsData.map(({ btwCategory, ...item }) => item);
+                // Remove btwCategory from order items data
+                const orderItemsDataWithoutBtw = orderItemsData.map(item => ({
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    price: item.price,
+                }));
                 order = await prisma.order.create({
                     data: {
                         customerName,

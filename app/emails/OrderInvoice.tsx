@@ -145,10 +145,10 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                     <Hr style={hr} />
 
                     <Section>
-                        <Text style={subHeading}>BTW Breakdown</Text>
+                        <Text style={subHeading}>BTW Details (prices include VAT)</Text>
                         {btwBreakdown.map((btw, index) => (
                             <Row key={index} style={{ marginBottom: "5px" }}>
-                                <Column style={{ width: "70%" }}><Text style={tableCell}>BTW {btw.category}% over €{btw.subtotal.toFixed(2)}</Text></Column>
+                                <Column style={{ width: "70%" }}><Text style={tableCell}>Included VAT {btw.category}% on €{btw.subtotal.toFixed(2)}</Text></Column>
                                 <Column style={{ width: "30%", textAlign: "right" }}><Text style={tableCell}>€{btw.btw.toFixed(2)}</Text></Column>
                             </Row>
                         ))}

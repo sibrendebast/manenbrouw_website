@@ -16,7 +16,10 @@ export function calculateBtwBreakdown(items: { price: number; quantity: number; 
     
     const breakdown: BtwBreakdown[] = [];
     btwMap.forEach((subtotal, category) => {
-        const btw = subtotal * (category / 100);
+        // Calculate VAT component from VAT-inclusive price
+        // If price includes VAT: VAT = price - (price / (1 + rate))
+        // Example: €10 incl. 21% VAT -> VAT = €10 - (€10 / 1.21) = €1.74
+        const btw = subtotal - (subtotal / (1 + category / 100));
         breakdown.push({ category, subtotal, btw });
     });
     

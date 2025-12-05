@@ -432,7 +432,7 @@ export default function CheckoutPage() {
                                     <div className="pl-4 space-y-1 text-sm">
                                         {btwBreakdown.map((btw, index) => (
                                             <div key={index} className="flex justify-between text-gray-600">
-                                                <span>(waarvan BTW {btw.category}%)</span>
+                                                <span>{t("cart.vatIncluded", { rate: btw.category })}</span>
                                                 <span>€{btw.btw.toFixed(2)}</span>
                                             </div>
                                         ))}

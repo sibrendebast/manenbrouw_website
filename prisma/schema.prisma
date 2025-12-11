@@ -20,6 +20,7 @@ model Product {
   images      String   // Stored as JSON string
   inStock     Boolean  @default(true)
   stockCount  Int      @default(0)
+  btwCategory Int?     @default(21) // BTW/VAT percentage: 0, 6, 12, or 21
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   OrderItem   OrderItem[]
@@ -43,13 +44,14 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(uuid())
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  quantity  Int
-  price     Float
+  id          String  @id @default(uuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id])
+  productId   String
+  product     Product @relation(fields: [productId], references: [id])
+  quantity    Int
+  price       Float
+  btwCategory Int?    @default(21) // BTW/VAT percentage at time of purchase
 }
 
 model NewsletterSubscriber {

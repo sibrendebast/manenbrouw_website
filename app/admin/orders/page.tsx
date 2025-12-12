@@ -88,7 +88,7 @@ export default function AdminOrdersPage() {
                                         <div className="flex justify-between items-start mb-4">
                                             <div>
                                                 <h3 className="text-lg font-bold text-brewery-dark">
-                                                    Order #{order.id.slice(0, 8)}
+                                                    Order #{order.orderNumber || order.id.slice(0, 8)}
                                                 </h3>
                                                 <p className="text-sm text-gray-500">
                                                     {new Date(order.createdAt).toLocaleDateString()} at{" "}

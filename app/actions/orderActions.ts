@@ -5,7 +5,21 @@ import { prisma } from "@/lib/prisma";
 export async function getOrders() {
     try {
         const orders = await prisma.order.findMany({
-            include: {
+            select: {
+                id: true,
+                orderNumber: true,
+                customerName: true,
+                customerEmail: true,
+                customerPhone: true,
+                shippingAddress: true,
+                shippingMethod: true,
+                totalAmount: true,
+                status: true,
+                stripeSessionId: true,
+                paymentMethod: true,
+                invoiceUrl: true,
+                createdAt: true,
+                updatedAt: true,
                 items: {
                     include: {
                         product: true,

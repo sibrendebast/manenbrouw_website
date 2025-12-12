@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { Product } from "@/data/products";
 import { safeGetProduct } from "@/lib/product-utils";
+import { generateOrderNumber } from "@/lib/orderNumber";
 
 export interface CartItem extends Product {
     quantity: number;
@@ -105,8 +106,12 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
         // Try to create order with btwCategory, fall back if column doesn't exist
         let order;
         try {
+            // Generate order number
+            const orderNumber = await generateOrderNumber();
+
             order = await prisma.order.create({
                 data: {
+                    orderNumber,
                     customerName,
                     customerEmail,
                     customerPhone,
@@ -131,8 +136,13 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                     quantity: item.quantity,
                     price: item.price,
                 }));
+
+                // Generate order number for fallback
+                const orderNumber = await generateOrderNumber();
+
                 order = await prisma.order.create({
                     data: {
+                        orderNumber,
                         customerName,
                         customerEmail,
                         customerPhone,

@@ -30,7 +30,7 @@ async function listOrders() {
 
         if (ordersWithoutInvoice.length > 0) {
             console.log(`\n⚠️  ${ordersWithoutInvoice.length} paid order(s) without invoice:\n`);
-            ordersWithoutInvoice.forEach(order => {
+            ordersWithoutInvoice.forEach((order: Order) => {
                 console.log(`   npx tsx scripts/generate-invoice-for-order.ts ${order.id}`);
             });
         } else {

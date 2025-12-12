@@ -28,6 +28,7 @@ model Product {
 
 model Order {
   id              String      @id @default(uuid())
+  orderNumber     String?     @unique // Format: YYYY/####
   customerName    String
   customerEmail   String
   customerPhone   String

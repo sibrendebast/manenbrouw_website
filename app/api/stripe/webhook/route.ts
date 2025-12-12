@@ -72,8 +72,10 @@ export async function POST(req: NextRequest) {
                     // Generate invoice
                     const invoicePdf = await generateInvoice(order);
 
-                    // Upload to Cloudinary
-                    const uploadResult = await uploadToCloudinary(invoicePdf, "invoices", "raw");
+                    // Upload to Cloudinary as image
+                    const orderNumberSafe = order.orderNumber ? order.orderNumber.replace(/\//g, "-") : orderId;
+                    const invoicePublicId = `invoice-${orderNumberSafe}`;
+                    const uploadResult = await uploadToCloudinary(invoicePdf, "invoices", "image", invoicePublicId);
                     const invoiceUrl = uploadResult.secure_url;
 
                     // Update order with payment status and invoice URL

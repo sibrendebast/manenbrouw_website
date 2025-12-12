@@ -10,14 +10,24 @@ cloudinary.config({
 export async function uploadToCloudinary(
     buffer: Buffer,
     folder: string,
-    resource_type: "image" | "raw" = "image"
+    resource_type: "image" | "raw" = "image",
+    filename?: string
 ): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
+        const uploadOptions: any = {
+            folder,
+            resource_type,
+            access_mode: 'public', // Force public access
+            type: 'upload', // Explicitly public
+        };
+
+        // If filename is provided, use it as public_id
+        if (filename) {
+            uploadOptions.public_id = filename;
+        }
+
         const uploadStream = cloudinary.uploader.upload_stream(
-            {
-                folder,
-                resource_type,
-            },
+            uploadOptions,
             (error, result) => {
                 if (error) {
                     return reject(error);

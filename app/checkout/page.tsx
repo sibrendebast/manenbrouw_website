@@ -106,7 +106,7 @@ export default function CheckoutPage() {
 
     const subtotal = getTotalPrice();
     const shippingCost = shippingMethod === "shipment" ? 10 : 0;
-    
+
     // Calculate BTW breakdown for products only
     const productItems = items.filter((item: any) => item.itemType === "product");
     const btwBreakdown = calculateBtwBreakdown(productItems.map((item: any) => ({
@@ -114,7 +114,7 @@ export default function CheckoutPage() {
         quantity: item.quantity,
         btwCategory: item.btwCategory || 21
     })));
-    
+
     const total = subtotal + shippingCost;
 
     if (items.length === 0) {
@@ -199,15 +199,15 @@ export default function CheckoutPage() {
                                     <h2 className="text-xl font-semibold mb-4 text-brewery-dark">{t("checkout.shippingMethod")}</h2>
                                     <div className="space-y-4">
                                         <div className="flex flex-wrap md:flex-nowrap items-start gap-4">
-                                        <input
-                                            type="radio"
-                                            id="shipment"
-                                            name="shippingMethod"
-                                            value="shipment"
-                                            checked={shippingMethod === "shipment"}
-                                            onChange={() => setShippingMethod("shipment")}
-                                            className="mr-3 h-4 w-4 text-brewery-green focus:ring-brewery-green"
-                                        />
+                                            <input
+                                                type="radio"
+                                                id="shipment"
+                                                name="shippingMethod"
+                                                value="shipment"
+                                                checked={shippingMethod === "shipment"}
+                                                onChange={() => setShippingMethod("shipment")}
+                                                className="mr-3 h-4 w-4 text-brewery-green focus:ring-brewery-green"
+                                            />
                                             <div className="flex-1">
                                                 <label htmlFor="shipment" className="text-brewery-dark font-medium block">
                                                     {t("checkout.shipment")}
@@ -220,17 +220,17 @@ export default function CheckoutPage() {
                                                 </Link>
                                             </div>
                                             <span className="font-semibold text-brewery-dark">€10.00</span>
-                                    </div>
+                                        </div>
                                         <div className="flex flex-wrap md:flex-nowrap items-start gap-4">
-                                        <input
-                                            type="radio"
-                                            id="pickup"
-                                            name="shippingMethod"
-                                            value="pickup"
-                                            checked={shippingMethod === "pickup"}
-                                            onChange={() => setShippingMethod("pickup")}
+                                            <input
+                                                type="radio"
+                                                id="pickup"
+                                                name="shippingMethod"
+                                                value="pickup"
+                                                checked={shippingMethod === "pickup"}
+                                                onChange={() => setShippingMethod("pickup")}
                                                 className="mr-3 h-4 w-4 text-brewery-green focus:ring-brewery-green mt-1"
-                                        />
+                                            />
                                             <div className="flex-1">
                                                 <label htmlFor="pickup" className="text-brewery-dark font-medium block">
                                                     {t("checkout.pickup")}
@@ -243,7 +243,7 @@ export default function CheckoutPage() {
                                                 </Link>
                                             </div>
                                             <span className="font-semibold text-brewery-dark">{t("checkout.free")}</span>
-                                    </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -361,18 +361,30 @@ export default function CheckoutPage() {
                                 </div>
                             )}
 
-                            <div className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    id="newsletter"
-                                    name="newsletter"
-                                    className="h-4 w-4 text-brewery-green focus:ring-brewery-green border-gray-300 rounded"
-                                    checked={formValues.newsletter}
-                                    onChange={handleInputChange}
-                                />
-                                <label htmlFor="newsletter" className="ml-2 block text-sm text-brewery-dark">
-                                    {t("checkout.newsletter")}
-                                </label>
+                            {/* Newsletter Subscription Box */}
+                            <div className=" p-6 border-2 border-black shadow-lg">
+                                <div className="flex items-start gap-4">
+                                    <div className="flex-1">
+                                        <div className="flex items-start gap-3">
+                                            <input
+                                                type="checkbox"
+                                                id="newsletter"
+                                                name="newsletter"
+                                                className="h-5 w-5 mt-1 text-white bg-brewery-green border-3 border-black  focus:ring-2 focus:ring-white cursor-pointer"
+                                                checked={formValues.newsletter}
+                                                onChange={handleInputChange}
+                                            />
+                                            <div className="flex-1">
+                                                <label htmlFor="newsletter" className="block font-bold text-brewery-dark text-lg cursor-pointer">
+                                                    {t("checkout.newsletter")}
+                                                </label>
+                                                <p className="text-brewery-dark/90 text-sm mt-1">
+                                                    {t("home.newsletter.subtitle")}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             {error && (

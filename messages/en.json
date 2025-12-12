@@ -75,6 +75,7 @@
         "startShopping": "Start Shopping",
         "orderSummary": "Order Summary",
         "subtotal": "Subtotal",
+        "vatIncluded": "(incl. {rate}% VAT)",
         "shipping": "Shipping",
         "calculatedAtCheckout": "Calculated at checkout",
         "total": "Total",

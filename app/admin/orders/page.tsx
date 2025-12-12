@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
 import { getOrders, updateOrderStatus } from "@/app/actions/orderActions";
-import { Package, ArrowLeft } from "lucide-react";
+import { Package, ArrowLeft, FileText } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminOrdersPage() {
@@ -88,7 +88,7 @@ export default function AdminOrdersPage() {
                                         <div className="flex justify-between items-start mb-4">
                                             <div>
                                                 <h3 className="text-lg font-bold text-brewery-dark">
-                                                    Order #{order.id.slice(0, 8)}
+                                                    Order #{order.orderNumber || order.id.slice(0, 8)}
                                                 </h3>
                                                 <p className="text-sm text-gray-500">
                                                     {new Date(order.createdAt).toLocaleDateString()} at{" "}
@@ -117,6 +117,17 @@ export default function AdminOrdersPage() {
                                                     <option value="completed">Completed</option>
                                                     <option value="cancelled">Cancelled</option>
                                                 </select>
+                                                {order.invoiceUrl && (
+                                                    <a
+                                                        href={order.invoiceUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center px-4 py-2 border-2 border-black bg-white hover:bg-gray-100"
+                                                    >
+                                                        <FileText className="h-5 w-5 mr-2" />
+                                                        Invoice
+                                                    </a>
+                                                )}
                                             </div>
                                         </div>
 

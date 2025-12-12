@@ -3,6 +3,8 @@ import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { sendOrderConfirmationEmail, sendAdminOrderNotification } from "@/lib/email";
+import { generateInvoice } from "@/lib/invoice";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export async function POST(req: NextRequest) {
     const body = await req.text();
@@ -50,12 +52,40 @@ export async function POST(req: NextRequest) {
 
             if (orderId) {
                 try {
+                    // First, find the order and include all necessary relations
+                    const order = await prisma.order.findUnique({
+                        where: { id: orderId },
+                        include: {
+                            items: {
+                                include: {
+                                    product: true,
+                                },
+                            },
+                            tickets: true,
+                        },
+                    });
+
+                    if (!order) {
+                        throw new Error(`Order with ID ${orderId} not found.`);
+                    }
+
+                    // Generate invoice
+                    const invoicePdf = await generateInvoice(order);
+
+                    // Upload to Cloudinary as image
+                    const orderNumberSafe = order.orderNumber ? order.orderNumber.replace(/\//g, "-") : orderId;
+                    const invoicePublicId = `invoice-${orderNumberSafe}`;
+                    const uploadResult = await uploadToCloudinary(invoicePdf, "invoices", "image", invoicePublicId);
+                    const invoiceUrl = uploadResult.secure_url;
+
+                    // Update order with payment status and invoice URL
                     const updatedOrder = await prisma.order.update({
                         where: { id: orderId },
                         data: {
                             status: "paid",
                             stripeSessionId: session.id,
                             paymentMethod: paymentMethod,
+                            invoiceUrl: invoiceUrl,
                         },
                         include: {
                             items: {

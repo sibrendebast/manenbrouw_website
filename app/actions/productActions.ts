@@ -11,8 +11,29 @@ export async function getProducts() {
         return products.map((p: any) => ({
             ...p,
             images: JSON.parse(p.images) as string[],
+            btwCategory: p.btwCategory ?? 21, // Default to 21 if not set
         }))
-    } catch (error) {
+    } catch (error: any) {
+        // If btwCategory column doesn't exist, retry with raw query or handle gracefully
+        if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
+            console.log('btwCategory column does not exist yet, fetching products without it')
+            try {
+                // Use raw query to select only existing columns
+                const products = await prisma.$queryRaw`
+                    SELECT id, slug, name, style, abv, volume, price, description, images, "inStock", "stockCount", "createdAt", "updatedAt"
+                    FROM "Product"
+                    ORDER BY "createdAt" DESC
+                ` as any[]
+                return products.map((p: any) => ({
+                    ...p,
+                    images: JSON.parse(p.images) as string[],
+                    btwCategory: 21, // Default to 21 when column doesn't exist
+                }))
+            } catch (rawError) {
+                console.error('Failed to fetch products with raw query:', rawError)
+                return []
+            }
+        }
         console.error('Failed to fetch products:', error)
         return []
     }
@@ -27,8 +48,31 @@ export async function getProduct(slug: string) {
         return {
             ...product,
             images: JSON.parse(product.images) as string[],
+            btwCategory: (product as any).btwCategory ?? 21,
         }
-    } catch (error) {
+    } catch (error: any) {
+        // If btwCategory column doesn't exist, retry with raw query
+        if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
+            console.log('btwCategory column does not exist yet, fetching product without it')
+            try {
+                const products = await prisma.$queryRaw`
+                    SELECT id, slug, name, style, abv, volume, price, description, images, "inStock", "stockCount", "createdAt", "updatedAt"
+                    FROM "Product"
+                    WHERE slug = ${slug}
+                    LIMIT 1
+                ` as any[]
+                if (products.length === 0) return null
+                const product = products[0]
+                return {
+                    ...product,
+                    images: JSON.parse(product.images) as string[],
+                    btwCategory: 21,
+                }
+            } catch (rawError) {
+                console.error('Failed to fetch product with raw query:', rawError)
+                return null
+            }
+        }
         console.error('Failed to fetch product:', error)
         return null
     }
@@ -36,13 +80,32 @@ export async function getProduct(slug: string) {
 
 export async function createProduct(data: any) {
     try {
-        const { images, ...rest } = data
-        await prisma.product.create({
-            data: {
-                ...rest,
-                images: JSON.stringify(images),
-            },
-        })
+        const { images, btwCategory, ...rest } = data
+        
+        // Try to create with btwCategory first
+        try {
+            await prisma.product.create({
+                data: {
+                    ...rest,
+                    images: JSON.stringify(images),
+                    ...(btwCategory !== undefined && { btwCategory }),
+                },
+            })
+        } catch (error: any) {
+            // If column doesn't exist (P2022), retry without btwCategory
+            if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
+                console.log('btwCategory column does not exist yet, creating product without it')
+                await prisma.product.create({
+                    data: {
+                        ...rest,
+                        images: JSON.stringify(images),
+                    },
+                })
+            } else {
+                throw error
+            }
+        }
+        
         revalidatePath('/shop')
         revalidatePath('/admin/dashboard')
         return { success: true }

@@ -20,6 +20,7 @@ model Product {
   images      String   // Stored as JSON string
   inStock     Boolean  @default(true)
   stockCount  Int      @default(0)
+  btwCategory Int?     @default(21) // BTW/VAT percentage: 0, 6, 12, or 21
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   OrderItem   OrderItem[]
@@ -27,6 +28,7 @@ model Product {
 
 model Order {
   id              String      @id @default(uuid())
+  orderNumber     String?     @unique // Format: YYYY/####
   customerName    String
   customerEmail   String
   customerPhone   String
@@ -36,6 +38,7 @@ model Order {
   status          String      @default("pending") // "pending", "pending_payment", "paid", "shipped", "completed", "cancelled"
   stripeSessionId String?
   paymentMethod   String? // "bancontact", "card", "payconiq"
+  invoiceUrl      String?
   items           OrderItem[]
   tickets         EventTicket[]
   createdAt       DateTime    @default(now())
@@ -43,13 +46,14 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(uuid())
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  quantity  Int
-  price     Float
+  id          String  @id @default(uuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id])
+  productId   String
+  product     Product @relation(fields: [productId], references: [id])
+  quantity    Int
+  price       Float
+  btwCategory Int?    @default(21) // BTW/VAT percentage at time of purchase
 }
 
 model NewsletterSubscriber {

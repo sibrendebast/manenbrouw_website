@@ -3,6 +3,7 @@ import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
 
 import { prisma } from "@/lib/prisma";
+import { safeGetProduct } from "@/lib/product-utils";
 
 export async function POST(req: NextRequest) {
     try {
@@ -35,9 +36,7 @@ export async function POST(req: NextRequest) {
         // Validate stock for all products in cart
         for (const item of cartItems) {
             if (item.itemType === "product") {
-                const product = await prisma.product.findUnique({
-                    where: { id: item.id },
-                });
+                const product = await safeGetProduct(item.id);
 
                 if (!product) {
                     return NextResponse.json(
@@ -71,17 +70,23 @@ export async function POST(req: NextRequest) {
 
         // Create line items for Stripe
         const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = cartItems.map(
-            (item: any) => ({
-                price_data: {
-                    currency: "eur",
-                    product_data: {
-                        name: item.itemType === "product" ? item.name : item.title,
-                        description: item.itemType === "product" ? item.style : `Event at ${item.location}`,
+            (item: any) => {
+                const btwCategory = item.itemType === "product" ? (item.btwCategory || 21) : 21;
+                return {
+                    price_data: {
+                        currency: "eur",
+                        product_data: {
+                            name: item.itemType === "product" ? item.name : item.title,
+                            description: item.itemType === "product" 
+                                ? `${item.style} (BTW ${btwCategory}%)`
+                                : `Event at ${item.location}`,
+                        },
+                        unit_amount: Math.round(item.price * 100), // Convert to cents
+                        tax_behavior: "inclusive", // Price includes tax
                     },
-                    unit_amount: Math.round(item.price * 100), // Convert to cents
-                },
-                quantity: item.quantity,
-            })
+                    quantity: item.quantity,
+                };
+            }
         );
 
         // Add shipping as a line item if applicable

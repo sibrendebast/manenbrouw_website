@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { Product } from "@/data/products";
+import { safeGetProduct } from "@/lib/product-utils";
+import { generateOrderNumber } from "@/lib/orderNumber";
 
 export interface CartItem extends Product {
     quantity: number;
@@ -55,9 +57,7 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
 
         for (const item of cartItems) {
             if (item.itemType === "product") {
-                const product = await prisma.product.findUnique({
-                    where: { id: item.id },
-                });
+                const product = await safeGetProduct(item.id);
 
                 if (!product) {
                     throw new Error(`Product not found: ${item.id}`);
@@ -68,6 +68,7 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                     productId: product.id,
                     quantity: item.quantity,
                     price: product.price,
+                    btwCategory: (product as any).btwCategory || 21,
                 });
             } else if (item.itemType === "ticket") {
                 const event = await prisma.event.findUnique({
@@ -102,23 +103,65 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                 ? JSON.stringify({ street, city, zip, country })
                 : "";
 
-        const order = await prisma.order.create({
-            data: {
-                customerName,
-                customerEmail,
-                customerPhone,
-                shippingAddress,
-                shippingMethod: hasProducts ? shippingMethod : "pickup",
-                totalAmount,
-                status: "pending_payment",
-                items: orderItemsData.length > 0 ? {
-                    create: orderItemsData,
-                } : undefined,
-                tickets: ticketData.length > 0 ? {
-                    create: ticketData,
-                } : undefined,
-            },
-        });
+        // Try to create order with btwCategory, fall back if column doesn't exist
+        let order;
+        try {
+            // Generate order number
+            const orderNumber = await generateOrderNumber();
+
+            order = await prisma.order.create({
+                data: {
+                    orderNumber,
+                    customerName,
+                    customerEmail,
+                    customerPhone,
+                    shippingAddress,
+                    shippingMethod: hasProducts ? shippingMethod : "pickup",
+                    totalAmount,
+                    status: "pending_payment",
+                    items: orderItemsData.length > 0 ? {
+                        create: orderItemsData,
+                    } : undefined,
+                    tickets: ticketData.length > 0 ? {
+                        create: ticketData,
+                    } : undefined,
+                },
+            });
+        } catch (error: any) {
+            // If btwCategory column doesn't exist in OrderItem, retry without it
+            if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
+                // Remove btwCategory from order items data
+                const orderItemsDataWithoutBtw = orderItemsData.map(item => ({
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    price: item.price,
+                }));
+
+                // Generate order number for fallback
+                const orderNumber = await generateOrderNumber();
+
+                order = await prisma.order.create({
+                    data: {
+                        orderNumber,
+                        customerName,
+                        customerEmail,
+                        customerPhone,
+                        shippingAddress,
+                        shippingMethod: hasProducts ? shippingMethod : "pickup",
+                        totalAmount,
+                        status: "pending_payment",
+                        items: orderItemsDataWithoutBtw.length > 0 ? {
+                            create: orderItemsDataWithoutBtw,
+                        } : undefined,
+                        tickets: ticketData.length > 0 ? {
+                            create: ticketData,
+                        } : undefined,
+                    },
+                });
+            } else {
+                throw error;
+            }
+        }
 
         // Update tickets sold count for each event
         for (const ticket of ticketData) {

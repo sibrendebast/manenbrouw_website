@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
-import { sendOrderConfirmationEmail } from "@/lib/email";
+import { sendOrderConfirmationEmail, sendAdminOrderNotification } from "@/lib/email";
 import { generateInvoice } from "@/lib/invoice";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
@@ -115,8 +115,17 @@ export async function POST(req: NextRequest) {
                         console.log(`Updated stock for ${product.name}: ${product.stockCount} -> ${newStockCount}`);
                     }
 
-                    // Send confirmation email
-                    await sendOrderConfirmationEmail(updatedOrder);
+                    // Send confirmation email to customer (with BCC to admin)
+                    const customerEmailResult = await sendOrderConfirmationEmail(updatedOrder);
+                    if (!customerEmailResult?.success) {
+                        console.error("Failed to send customer confirmation email, but order was processed successfully");
+                    }
+
+                    // Send separate admin notification as backup
+                    const adminEmailResult = await sendAdminOrderNotification(updatedOrder);
+                    if (!adminEmailResult?.success) {
+                        console.error("Failed to send admin notification email, but order was processed successfully");
+                    }
                 } catch (error) {
                     console.error(`Failed to update order ${orderId}:`, error);
                 }

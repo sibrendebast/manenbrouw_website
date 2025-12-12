@@ -25,6 +25,7 @@ type OrderWithItems = {
         };
         quantity: number;
         price: number;
+        btwCategory: number;
     }[];
 };
 

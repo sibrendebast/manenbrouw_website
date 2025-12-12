@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma";
+import { Order } from "@prisma/client";
 
 async function listOrders() {
     try {
@@ -25,7 +26,7 @@ async function listOrders() {
             console.log("─".repeat(100));
         }
 
-        const ordersWithoutInvoice = orders.filter(o => !o.invoiceUrl && o.status === "paid");
+        const ordersWithoutInvoice = orders.filter((o: Order) => !o.invoiceUrl && o.status === "paid");
 
         if (ordersWithoutInvoice.length > 0) {
             console.log(`\n⚠️  ${ordersWithoutInvoice.length} paid order(s) without invoice:\n`);

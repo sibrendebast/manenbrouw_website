@@ -95,7 +95,7 @@ export default function AdminOrdersPage() {
                                                     {new Date(order.createdAt).toLocaleTimeString()}
                                                 </p>
                                             </div>
-                                            <div className="flex items-center gap-4">
+                                            <div className="flex flex-col items-end gap-2">
                                                 <select
                                                     value={order.status}
                                                     onChange={async (e) => {
@@ -159,24 +159,38 @@ export default function AdminOrdersPage() {
 
                                         <div className="border-t-2 border-gray-200 pt-4">
                                             <h4 className="font-bold text-sm mb-3">Order Items</h4>
+
+                                            {/* Column Headers */}
+                                            <div className="grid grid-cols-12 gap-2 text-xs font-bold text-gray-500 mb-2 uppercase border-b border-gray-100 pb-2">
+                                                <div className="col-span-7">Item</div>
+                                                <div className="col-span-2 text-center">Qty</div>
+                                                <div className="col-span-3 text-right">Total</div>
+                                            </div>
+
                                             <div className="space-y-2">
                                                 {order.items.map((item: any) => (
                                                     <div
                                                         key={item.id}
-                                                        className="flex justify-between items-center text-sm"
+                                                        className="grid grid-cols-12 gap-2 items-center text-sm"
                                                     >
-                                                        <span>
-                                                            {item.product.name} x {item.quantity}
-                                                        </span>
-                                                        <span className="font-semibold">
+                                                        <div className="col-span-7">
+                                                            {item.product.name}
+                                                        </div>
+                                                        <div className="col-span-2 text-center">
+                                                            <span className="inline-block bg-gray-100 font-bold px-2 py-0.5 rounded text-gray-800">
+                                                                {item.quantity}
+                                                            </span>
+                                                        </div>
+                                                        <div className="col-span-3 text-right font-semibold">
                                                             €{(item.price * item.quantity).toFixed(2)}
-                                                        </span>
+                                                        </div>
                                                     </div>
                                                 ))}
                                                 {order.shippingMethod === "shipment" && (
-                                                    <div className="flex justify-between items-center text-sm">
-                                                        <span>Shipping</span>
-                                                        <span className="font-semibold">€10.00</span>
+                                                    <div className="grid grid-cols-12 gap-2 items-center text-sm text-gray-600">
+                                                        <div className="col-span-7">Shipping</div>
+                                                        <div className="col-span-2 text-center">1</div>
+                                                        <div className="col-span-3 text-right font-semibold">€10.00</div>
                                                     </div>
                                                 )}
                                             </div>

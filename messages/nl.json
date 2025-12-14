@@ -9,8 +9,8 @@
     },
     "home": {
         "hero": {
-            "title": "Ambachtelijk Bier uit Wilsele",
-            "subtitle": "Kleinschalig brouwen met passie en precisie",
+            "title": "Nanobrouwerij in Leuven",
+            "subtitle": "Kleinschalig brouwen met passie, creativiteit en precisie",
             "cta": "Ontdek Onze Bieren"
         },
         "featured": {
@@ -19,8 +19,8 @@
             "viewDetails": "Bekijk Details"
         },
         "newsletter": {
-            "title": "Word lid van de Man & Brouw Community",
-            "subtitle": "Schrijf u in voor onze nieuwsbrief voor de laatste updates over nieuwe releases, evenementen en exclusieve aanbiedingen."
+            "title": "Blijf op de hoogte!",
+            "subtitle": "We brouwen elk bier slechts één keer, dus mis niets en schrijf je in voor onze nieuwsbrief!"
         },
         "instagram": {
             "title": "Volg ons op Instagram"
@@ -29,7 +29,7 @@
     "aboutPage": {
         "hero": {
             "title": "Over Man & Brouw",
-            "subtitle": "We brouwen met passie, experimenteren met smaak en delen onze liefde voor craftbier in Wilsele."
+            "subtitle": "We brouwen met passie, experimenteren met smaak en delen onze liefde voor craftbier in Leuven."
         },
         "story": {
             "title": "Ons Verhaal",
@@ -46,13 +46,13 @@
                 "description": "We experimenteren graag met hele vruchten, kruiden en specerijen. Maar hoe zot de twist ook is, de basis blijft kwaliteitsmout uit de buurt.",
                 "imageAlt": "Verse abrikozen"
             },
-            "community": {
-                "title": "Community",
-                "description": "We zijn trots dat we deel uitmaken van de gemeenschap in Wilsele en delen onze passie graag met buren én bezoekers."
+            "makerMentality": {
+                "title": "Maker Mentality",
+                "description": "We bouwen veel van onze brouwapparatuur zelf. Zo hebben we volledige controle over het brouwproces en kunnen we blijven innoveren."
             },
-            "local": {
-                "title": "Lokale Wortels",
-                "description": "Je vindt ons op Aarschotsesteenweg 179, 3012 Wilsele. Spring eens binnen en proef het verschil!"
+            "temporal": {
+                "title": "Tijdelijke Natuur",
+                "description": "We brouwen elk bier slechts één keer, vaak met verse seizoensgebonden ingrediënten. Op is op!"
             }
         }
     },
@@ -150,8 +150,10 @@
         "followUs": "Volg Ons",
         "stayUpdated": "Blijf op de Hoogte",
         "newsletter": "Nieuwsbrief",
-        "newsletterText": "Abonneer u op onze nieuwsbrief voor updates over nieuwe bieren en evenementen.",
-        "emailPlaceholder": "Uw e-mailadres",
+        "newsletterText": "Schrijf je in voor onze nieuwsbrief voor updates over nieuwe bieren en evenementen.",
+        "firstName": "Voornaam",
+        "lastName": "Achternaam",
+        "emailPlaceholder": "Jouw email",
         "subscribe": "Abonneren",
         "terms": "Algemene Voorwaarden",
         "deliveryHome": "Verzending aan huis",

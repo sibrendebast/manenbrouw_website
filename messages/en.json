@@ -9,8 +9,8 @@
     },
     "home": {
         "hero": {
-            "title": "Craft Beer from Wilsele",
-            "subtitle": "Small-batch brewing with passion and precision",
+            "title": "Nanobrewery in Leuven",
+            "subtitle": "Small-batch brewing with passion, creativity and precision",
             "cta": "Explore Our Beers"
         },
         "featured": {
@@ -20,7 +20,7 @@
         },
         "newsletter": {
             "title": "Join the Man & Brouw Community",
-            "subtitle": "Sign up for our newsletter to get the latest updates on new releases, events, and exclusive offers."
+            "subtitle": "We brew every beer only once, so if you don't want to miss out, subscribe to our newsletter!"
         },
         "instagram": {
             "title": "Follow us on Instagram"
@@ -46,13 +46,13 @@
                 "description": "We love experimenting with whole fruits, spices, and herbs. But no matter the twist, the base of our beers is always high-quality craft-malted local grains.",
                 "imageAlt": "Fresh apricots"
             },
-            "community": {
-                "title": "Community",
-                "description": "We are proud to be part of the Wilsele community and love sharing our passion with locals and visitors alike."
+            "makerMentality": {
+                "title": "Maker Mentality",
+                "description": "We build much of our brewing equipment ourselves. This gives us full control over the brewing process and allows us to keep innovating."
             },
-            "local": {
-                "title": "Local Roots",
-                "description": "Located at Aarschotsesteenweg 179, 3012 Wilsele. Come visit us and taste the difference!"
+            "temporal": {
+                "title": "Ephemeral Nature",
+                "description": "Every beer is brewed only once, often featuring fresh seasonal ingredients. When it's gone, it's gone!"
             }
         }
     },
@@ -151,6 +151,8 @@
         "stayUpdated": "Stay Updated",
         "newsletter": "Newsletter",
         "newsletterText": "Subscribe to our newsletter for updates on new beers and events.",
+        "firstName": "First Name",
+        "lastName": "Last Name",
         "emailPlaceholder": "Your email",
         "subscribe": "Subscribe",
         "terms": "Terms & Conditions",

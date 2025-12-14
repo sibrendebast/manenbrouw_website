@@ -55,6 +55,9 @@ export default async function AdminNewsletterPage() {
                                 <thead className="bg-gray-50">
                                     <tr>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Name
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                             Email Address
                                         </th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
@@ -66,9 +69,14 @@ export default async function AdminNewsletterPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {subscribers.map((subscriber: { id: string; email: string; createdAt: Date }) => (
+                                    {subscribers.map((subscriber: { id: string; email: string; firstName: string | null; lastName: string | null; createdAt: Date }) => (
                                         <tr key={subscriber.id} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                {subscriber.firstName || subscriber.lastName
+                                                    ? `${subscriber.firstName || ''} ${subscriber.lastName || ''}`.trim()
+                                                    : <span className="text-gray-400 italic">No name provided</span>}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {subscriber.email}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

@@ -177,10 +177,21 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
 
         if (newsletter) {
             try {
+                const nameParts = customerName.trim().split(" ");
+                const firstName = nameParts[0];
+                const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : undefined;
+
                 await prisma.newsletterSubscriber.upsert({
                     where: { email: customerEmail },
-                    update: {},
-                    create: { email: customerEmail },
+                    update: {
+                        firstName: firstName || undefined,
+                        lastName: lastName || undefined
+                    },
+                    create: {
+                        email: customerEmail,
+                        firstName: firstName || undefined,
+                        lastName: lastName || undefined
+                    },
                 });
             } catch (error) {
                 console.error("Failed to subscribe to newsletter:", error);

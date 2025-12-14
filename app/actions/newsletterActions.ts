@@ -18,6 +18,8 @@ export async function deleteSubscriber(id: string) {
 
 export async function subscribeToNewsletter(formData: FormData) {
     const email = formData.get('email') as string;
+    const firstName = formData.get('firstName') as string | null;
+    const lastName = formData.get('lastName') as string | null;
 
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
         return { success: false, error: 'Invalid email address' };
@@ -25,7 +27,11 @@ export async function subscribeToNewsletter(formData: FormData) {
 
     try {
         await prisma.newsletterSubscriber.create({
-            data: { email }
+            data: {
+                email,
+                firstName: firstName || undefined,
+                lastName: lastName || undefined
+            }
         });
         revalidatePath('/admin/newsletter');
         return { success: true };

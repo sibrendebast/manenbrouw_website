@@ -1,6 +1,6 @@
 "use client";
 
-import { Beer, Users, MapPin } from "lucide-react";
+import { Beer, Wrench, Hourglass } from "lucide-react";
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n-context";
 
@@ -20,11 +20,11 @@ type AboutMessages = {
             description: string;
             imageAlt: string;
         };
-        community: {
+        makerMentality: {
             title: string;
             description: string;
         };
-        local: {
+        temporal: {
             title: string;
             description: string;
         };
@@ -93,23 +93,41 @@ export default function AboutPage() {
                         </div>
                     </div>
 
-                    <div className="p-6 bg-brewery-light border-2 border-black">
-                        <div className="bg-white w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border-2 border-black">
-                            <Users className="h-8 w-8 text-brewery-green" />
+                    <div className="relative p-6 border-2 border-black overflow-hidden group min-h-[300px] flex flex-col justify-center">
+                        <Image
+                            src="/about/brewery.jpg"
+                            alt={about.highlights.makerMentality.title}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-black/60"></div>
+                        <div className="relative z-10">
+                            <div className="bg-white w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border-2 border-black">
+                                <Wrench className="h-8 w-8 text-brewery-green" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2 text-white">{about.highlights.makerMentality.title}</h3>
+                            <p className="text-gray-200">
+                                {about.highlights.makerMentality.description}
+                            </p>
                         </div>
-                        <h3 className="text-xl font-bold mb-2">{about.highlights.community.title}</h3>
-                        <p className="text-gray-600">
-                            {about.highlights.community.description}
-                        </p>
                     </div>
-                    <div className="p-6 bg-brewery-light border-2 border-black">
-                        <div className="bg-white w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border-2 border-black">
-                            <MapPin className="h-8 w-8 text-brewery-green" />
+                    <div className="relative p-6 border-2 border-black overflow-hidden group min-h-[300px] flex flex-col justify-center">
+                        <Image
+                            src="/about/rabarber.jpg"
+                            alt={about.highlights.temporal.title}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-black/60"></div>
+                        <div className="relative z-10">
+                            <div className="bg-white w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border-2 border-black">
+                                <Hourglass className="h-8 w-8 text-brewery-green" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2 text-white">{about.highlights.temporal.title}</h3>
+                            <p className="text-gray-200">
+                                {about.highlights.temporal.description}
+                            </p>
                         </div>
-                        <h3 className="text-xl font-bold mb-2">{about.highlights.local.title}</h3>
-                        <p className="text-gray-600">
-                            {about.highlights.local.description}
-                        </p>
                     </div>
                 </div>
             </div>

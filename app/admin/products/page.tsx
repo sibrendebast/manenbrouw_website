@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
 import { getProducts, createProduct, deleteProduct, updateStock, updateStockCount, updatePrice } from "@/app/actions/productActions";
-import { Plus, Trash2, LogOut, Upload, X, RefreshCw, ArrowLeft } from "lucide-react";
+import { Plus, Trash2, LogOut, Upload, X, RefreshCw, ArrowLeft, Pencil } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -416,6 +416,13 @@ export default function AdminDashboard() {
                                         </div>
                                     </div>
                                 </div>
+                                <Link
+                                    href={`/admin/products/${product.id}`}
+                                    className="p-3 text-blue-600 hover:bg-blue-50 border-2 border-transparent hover:border-blue-600 transition-all rounded-none"
+                                    title="Edit Product"
+                                >
+                                    <Pencil className="h-6 w-6" />
+                                </Link>
                                 <button
                                     onClick={async () => {
                                         if (confirm('Are you sure?')) {

@@ -78,10 +78,47 @@ export async function getProduct(slug: string) {
     }
 }
 
+export async function getProductById(id: string) {
+    try {
+        const product = await prisma.product.findUnique({
+            where: { id },
+        })
+        if (!product) return null
+        return {
+            ...product,
+            images: JSON.parse(product.images) as string[],
+            btwCategory: (product as any).btwCategory ?? 21,
+        }
+    } catch (error: any) {
+        if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
+            try {
+                const products = await prisma.$queryRaw`
+                    SELECT id, slug, name, style, abv, volume, price, description, images, "inStock", "stockCount", "createdAt", "updatedAt"
+                    FROM "Product"
+                    WHERE id = ${id}
+                    LIMIT 1
+                ` as any[]
+                if (products.length === 0) return null
+                const product = products[0]
+                return {
+                    ...product,
+                    images: JSON.parse(product.images) as string[],
+                    btwCategory: 21,
+                }
+            } catch (rawError) {
+                console.error('Failed to fetch product by id with raw query:', rawError)
+                return null
+            }
+        }
+        console.error('Failed to fetch product by id:', error)
+        return null
+    }
+}
+
 export async function createProduct(data: any) {
     try {
         const { images, btwCategory, ...rest } = data
-        
+
         // Try to create with btwCategory first
         try {
             await prisma.product.create({
@@ -105,7 +142,7 @@ export async function createProduct(data: any) {
                 throw error
             }
         }
-        
+
         revalidatePath('/shop')
         revalidatePath('/admin/dashboard')
         return { success: true }

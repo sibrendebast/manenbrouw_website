@@ -45,6 +45,7 @@ export default function EventsPage() {
         const isSoldOut = event.capacity && event.ticketsSold >= event.capacity;
         const [ticketQuantity, setTicketQuantity] = useState(1);
         const [isAdded, setIsAdded] = useState(false);
+        const ticketsAvailable = event.capacity ? Math.max(0, event.capacity - event.ticketsSold) : Infinity;
 
         const handleAddTickets = () => {
             addTicket(event, ticketQuantity);
@@ -132,8 +133,9 @@ export default function EventsPage() {
                                         </button>
                                         <span className="px-4 font-bold">{ticketQuantity}</span>
                                         <button
-                                            onClick={() => setTicketQuantity(ticketQuantity + 1)}
-                                            className="px-3 py-1 hover:bg-gray-100 transition-colors"
+                                            onClick={() => setTicketQuantity(Math.min(ticketsAvailable, ticketQuantity + 1))}
+                                            className="px-3 py-1 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={ticketQuantity >= ticketsAvailable}
                                         >
                                             +
                                         </button>

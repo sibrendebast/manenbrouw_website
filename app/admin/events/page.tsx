@@ -15,7 +15,7 @@ export default function AdminEventsPage() {
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
     const [uploading, setUploading] = useState(false);
-    const [editingId, setEditingId] = useState<string | null>(null);
+    // const [editingId, setEditingId] = useState<string | null>(null); // Removed
     const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
     const [eventTickets, setEventTickets] = useState<Record<string, any[]>>({});
 
@@ -114,71 +114,7 @@ export default function AdminEventsPage() {
         }
     };
 
-    const handleEditEvent = (event: any) => {
-        setEditingId(event.id);
-        const eventDate = new Date(event.date);
-        const localDate = new Date(eventDate.getTime() - eventDate.getTimezoneOffset() * 60000)
-            .toISOString()
-            .slice(0, 16);
 
-        setNewEvent({
-            title: event.title,
-            description: event.description,
-            date: localDate,
-            location: event.location,
-            isPaid: event.isPaid,
-            ticketPrice: event.ticketPrice?.toString() || "",
-            capacity: event.capacity?.toString() || "",
-            image: event.image || "",
-        });
-    };
-
-    const handleUpdateEvent = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!editingId) return;
-
-        const result = await updateEvent(editingId, {
-            title: newEvent.title,
-            description: newEvent.description,
-            date: new Date(newEvent.date),
-            location: newEvent.location,
-            isPaid: newEvent.isPaid,
-            ticketPrice: newEvent.isPaid ? parseFloat(newEvent.ticketPrice) : undefined,
-            capacity: newEvent.capacity ? parseInt(newEvent.capacity) : undefined,
-            image: newEvent.image || undefined,
-        });
-
-        if (result.success) {
-            loadEvents();
-            setEditingId(null);
-            setNewEvent({
-                title: "",
-                description: "",
-                date: "",
-                location: "",
-                isPaid: false,
-                ticketPrice: "",
-                capacity: "",
-                image: "",
-            });
-        } else {
-            alert("Failed to update event");
-        }
-    };
-
-    const handleCancelEdit = () => {
-        setEditingId(null);
-        setNewEvent({
-            title: "",
-            description: "",
-            date: "",
-            location: "",
-            isPaid: false,
-            ticketPrice: "",
-            capacity: "",
-            image: "",
-        });
-    };
 
     const handleToggleTickets = async (eventId: string) => {
         if (expandedEventId === eventId) {
@@ -231,21 +167,13 @@ export default function AdminEventsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Add/Edit Event Form */}
+                    {/* Add Event Form */}
                     <div className="lg:col-span-1">
                         <div className="bg-white p-6 border-2 border-black shadow-lg sticky top-24">
                             <h2 className="text-2xl font-bold mb-6 flex items-center">
-                                {editingId ? (
-                                    <>
-                                        <Edit className="h-6 w-6 mr-2" /> Edit Event
-                                    </>
-                                ) : (
-                                    <>
-                                        <Plus className="h-6 w-6 mr-2" /> Add New Event
-                                    </>
-                                )}
+                                <Plus className="h-6 w-6 mr-2" /> Add New Event
                             </h2>
-                            <form onSubmit={editingId ? handleUpdateEvent : handleAddEvent} className="space-y-4">
+                            <form onSubmit={handleAddEvent} className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-bold mb-1 text-black">Title</label>
                                     <input
@@ -401,17 +329,8 @@ export default function AdminEventsPage() {
                                         className="w-full bg-brewery-dark text-white font-bold py-3 px-4 hover:bg-opacity-90 transition-colors border-2 border-black"
                                         disabled={uploading}
                                     >
-                                        {uploading ? "Uploading..." : editingId ? "Update Event" : "Add Event"}
+                                        {uploading ? "Uploading..." : "Add Event"}
                                     </button>
-                                    {editingId && (
-                                        <button
-                                            type="button"
-                                            onClick={handleCancelEdit}
-                                            className="w-full bg-gray-300 text-gray-700 font-bold py-3 px-4 hover:bg-gray-400 transition-colors border-2 border-black"
-                                        >
-                                            Cancel
-                                        </button>
-                                    )}
                                 </div>
                             </form>
                         </div>
@@ -478,13 +397,13 @@ export default function AdminEventsPage() {
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
-                                            <button
-                                                onClick={() => handleEditEvent(event)}
-                                                className="p-3 text-brewery-green hover:bg-green-50 border-2 border-transparent hover:border-brewery-green transition-all rounded-none"
+                                            <Link
+                                                href={`/admin/events/${event.id}`}
+                                                className="p-3 text-brewery-green hover:bg-green-50 border-2 border-transparent hover:border-brewery-green transition-all rounded-none block"
                                                 title="Edit Event"
                                             >
                                                 <Edit className="h-6 w-6" />
-                                            </button>
+                                            </Link>
                                             <button
                                                 onClick={async () => {
                                                     if (confirm("Are you sure you want to delete this event?")) {
@@ -556,7 +475,6 @@ export default function AdminEventsPage() {
                     </div>
                 </div>
             </div>
-            );
         </div>
     );
 }

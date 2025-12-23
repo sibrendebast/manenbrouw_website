@@ -5,7 +5,17 @@ import { OrderInvoice } from '@/app/emails/OrderInvoice';
 const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder');
 
 // Email configuration
-const FROM_EMAIL = process.env.FROM_EMAIL || 'Man & Brouw <onboarding@resend.dev>';
+// Email configuration
+// Helper to strip quotes if they somehow get into the env var (common issue with some env parsers)
+const cleanEnvVar = (val: string | undefined) => {
+    if (!val) return undefined;
+    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+        return val.slice(1, -1);
+    }
+    return val;
+};
+
+const FROM_EMAIL = cleanEnvVar(process.env.FROM_EMAIL) || 'Man & Brouw <onboarding@resend.dev>';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'info@manenbrouw.be';
 
 // Type definition for order with items included

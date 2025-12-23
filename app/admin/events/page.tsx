@@ -347,7 +347,7 @@ export default function AdminEventsPage() {
                             events.map((event: any) => (
                                 <div key={event.id} className="space-y-4"> {/* Use a new container div for the whole event item + tickets section */}
                                     <div
-                                        className="bg-white p-6 border-2 border-black flex flex-col sm:flex-row gap-6"
+                                        className="bg-white p-6 border-2 border-black flex flex-col sm:flex-row gap-6 items-start"
                                     >
                                         {/* Event Details Content (Image, Text, Buttons) */}
                                         {event.image && (
@@ -399,7 +399,7 @@ export default function AdminEventsPage() {
                                         <div className="flex gap-2">
                                             <Link
                                                 href={`/admin/events/${event.id}`}
-                                                className="p-3 text-brewery-green hover:bg-green-50 border-2 border-transparent hover:border-brewery-green transition-all rounded-none block"
+                                                className="p-3 text-brewery-green hover:bg-green-50 border-2 border-transparent hover:border-brewery-green transition-all rounded-none flex items-center justify-center"
                                                 title="Edit Event"
                                             >
                                                 <Edit className="h-6 w-6" />
@@ -411,7 +411,7 @@ export default function AdminEventsPage() {
                                                         loadEvents();
                                                     }
                                                 }}
-                                                className="p-3 text-red-600 hover:bg-red-50 border-2 border-transparent hover:border-red-600 transition-all rounded-none"
+                                                className="p-3 text-red-600 hover:bg-red-50 border-2 border-transparent hover:border-red-600 transition-all rounded-none flex items-center justify-center"
                                                 title="Remove Event"
                                             >
                                                 <Trash2 className="h-6 w-6" />

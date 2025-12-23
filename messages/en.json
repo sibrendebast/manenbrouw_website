@@ -140,6 +140,7 @@
         "ticketsSold": "tickets sold",
         "attendees": "attendees",
         "tickets": "Tickets",
+        "ticketsAvailable": "tickets available",
         "register": "Register (Coming Soon)"
     },
     "footer": {

@@ -55,9 +55,9 @@ export default function EventsPage() {
         };
 
         return (
-            <div className="bg-white border-2 border-black overflow-hidden hover:shadow-xl transition-shadow">
+            <div className="bg-white border-2 border-black overflow-hidden hover:shadow-xl transition-shadow flex flex-col md:flex-row">
                 {event.image && (
-                    <div className="relative aspect-video w-full bg-gray-100">
+                    <div className="relative h-64 md:h-auto md:w-1/3 w-full bg-gray-100 flex-shrink-0">
                         <Image
                             src={event.image}
                             alt={event.title}
@@ -76,102 +76,106 @@ export default function EventsPage() {
                         )}
                     </div>
                 )}
-                <div className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                        <h3 className="text-2xl font-bold text-brewery-dark">
-                            {event.title}
-                        </h3>
-                        {event.isPaid && !isPast && (
-                            <span className="text-2xl font-bold text-brewery-green whitespace-nowrap ml-4">
-                                €{event.ticketPrice?.toFixed(2)}
-                            </span>
-                        )}
-                        {!event.isPaid && !isPast && (
-                            <span className="bg-brewery-green text-white px-3 py-1 text-sm font-bold border-2 border-black whitespace-nowrap ml-4">
-                                {t("events.free")}
-                            </span>
-                        )}
-                    </div>
-
-                    <p className="text-gray-700 mb-6 leading-relaxed">
-                        {event.description}
-                    </p>
-
-                    <div className="space-y-3 text-sm text-gray-800 mb-6">
-                        <div className="flex items-center">
-                            <Calendar className="h-5 w-5 mr-3 text-brewery-green flex-shrink-0" />
-                            <span className="font-semibold">{formatDate(event.date)}</span>
-                        </div>
-                        <div className="flex items-center">
-                            <MapPin className="h-5 w-5 mr-3 text-brewery-green flex-shrink-0" />
-                            <span>{event.location}</span>
-                        </div>
-                        {event.capacity && (
-                            <div className="flex items-center">
-                                <Users className="h-5 w-5 mr-3 text-brewery-green flex-shrink-0" />
-                                <span>
-                                    {event.ticketsSold} / {event.capacity} {event.isPaid ? t("events.ticketsSold") : t("events.attendees")}
+                <div className={`p-6 flex flex-col justify-between flex-grow ${!event.image ? 'w-full' : ''}`}>
+                    <div>
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-2xl font-bold text-brewery-dark">
+                                {event.title}
+                            </h3>
+                            {event.isPaid && !isPast && (
+                                <span className="text-2xl font-bold text-brewery-green whitespace-nowrap ml-4">
+                                    €{event.ticketPrice?.toFixed(2)}
                                 </span>
+                            )}
+                            {!event.isPaid && !isPast && (
+                                <span className="bg-brewery-green text-white px-3 py-1 text-sm font-bold border-2 border-black whitespace-nowrap ml-4">
+                                    {t("events.free")}
+                                </span>
+                            )}
+                        </div>
+
+                        <p className="text-gray-700 mb-6 leading-relaxed">
+                            {event.description}
+                        </p>
+
+                        <div className="space-y-3 text-sm text-gray-800 mb-6">
+                            <div className="flex items-center">
+                                <Calendar className="h-5 w-5 mr-3 text-brewery-green flex-shrink-0" />
+                                <span className="font-semibold">{formatDate(event.date)}</span>
                             </div>
-                        )}
+                            <div className="flex items-center">
+                                <MapPin className="h-5 w-5 mr-3 text-brewery-green flex-shrink-0" />
+                                <span>{event.location}</span>
+                            </div>
+                            {event.capacity && (
+                                <div className="flex items-center">
+                                    <Users className="h-5 w-5 mr-3 text-brewery-green flex-shrink-0" />
+                                    <span>
+                                        {Math.max(0, event.capacity - event.ticketsSold)} {event.isPaid ? t("events.ticketsAvailable") : t("events.attendees")}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    {!isPast && event.isPaid && !isSoldOut && (
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                                <label className="text-sm font-bold text-black">Tickets:</label>
-                                <div className="flex items-center border-2 border-black">
-                                    <button
-                                        onClick={() => setTicketQuantity(Math.max(1, ticketQuantity - 1))}
-                                        className="px-3 py-1 hover:bg-gray-100 transition-colors"
-                                    >
-                                        -
-                                    </button>
-                                    <span className="px-4 font-bold">{ticketQuantity}</span>
-                                    <button
-                                        onClick={() => setTicketQuantity(ticketQuantity + 1)}
-                                        className="px-3 py-1 hover:bg-gray-100 transition-colors"
-                                    >
-                                        +
-                                    </button>
+                    <div className="md:self-start w-full md:w-auto mt-4 md:mt-0">
+                        {!isPast && event.isPaid && !isSoldOut && (
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <label className="text-sm font-bold text-black">Tickets:</label>
+                                    <div className="flex items-center border-2 border-black">
+                                        <button
+                                            onClick={() => setTicketQuantity(Math.max(1, ticketQuantity - 1))}
+                                            className="px-3 py-1 hover:bg-gray-100 transition-colors"
+                                        >
+                                            -
+                                        </button>
+                                        <span className="px-4 font-bold">{ticketQuantity}</span>
+                                        <button
+                                            onClick={() => setTicketQuantity(ticketQuantity + 1)}
+                                            className="px-3 py-1 hover:bg-gray-100 transition-colors"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
                                 </div>
+                                <button
+                                    onClick={handleAddTickets}
+                                    disabled={isAdded}
+                                    className={`w-full flex items-center justify-center font-bold py-3 px-6 transition-colors border-2 border-black ${isAdded
+                                        ? 'bg-green-500 text-white'
+                                        : 'bg-brewery-dark text-white hover:bg-opacity-90'
+                                        }`}
+                                >
+                                    {isAdded ? (
+                                        <>
+                                            <Check className="h-5 w-5 mr-2" /> {t("common.success")}!
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ShoppingCart className="h-5 w-5 mr-2" /> {t("shop.addToCart")}
+                                        </>
+                                    )}
+                                </button>
                             </div>
+                        )}
+                        {!isPast && !event.isPaid && !isSoldOut && (
                             <button
-                                onClick={handleAddTickets}
-                                disabled={isAdded}
-                                className={`w-full flex items-center justify-center font-bold py-3 px-6 transition-colors border-2 border-black ${isAdded
-                                    ? 'bg-green-500 text-white'
-                                    : 'bg-brewery-dark text-white hover:bg-opacity-90'
-                                    }`}
+                                className="w-full bg-brewery-green text-white font-bold py-3 px-6 hover:bg-opacity-90 transition-colors border-2 border-black"
+                                disabled
                             >
-                                {isAdded ? (
-                                    <>
-                                        <Check className="h-5 w-5 mr-2" /> {t("common.success")}!
-                                    </>
-                                ) : (
-                                    <>
-                                        <ShoppingCart className="h-5 w-5 mr-2" /> {t("shop.addToCart")}
-                                    </>
-                                )}
+                                {t("events.register")}
                             </button>
-                        </div>
-                    )}
-                    {!isPast && !event.isPaid && !isSoldOut && (
-                        <button
-                            className="w-full bg-brewery-green text-white font-bold py-3 px-6 hover:bg-opacity-90 transition-colors border-2 border-black"
-                            disabled
-                        >
-                            {t("events.register")}
-                        </button>
-                    )}
-                    {!isPast && isSoldOut && (
-                        <button
-                            className="w-full bg-gray-300 text-gray-500 font-bold py-3 px-6 border-2 border-gray-400 cursor-not-allowed"
-                            disabled
-                        >
-                            {t("events.soldOut")}
-                        </button>
-                    )}
+                        )}
+                        {!isPast && isSoldOut && (
+                            <button
+                                className="w-full bg-gray-300 text-gray-500 font-bold py-3 px-6 border-2 border-gray-400 cursor-not-allowed"
+                                disabled
+                            >
+                                {t("events.soldOut")}
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         );
@@ -191,7 +195,7 @@ export default function EventsPage() {
                 {upcomingEvents.length > 0 && (
                     <div className="mb-16">
                         <h2 className="text-3xl font-bold text-brewery-dark mb-8">{t("events.upcoming")}</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="flex flex-col gap-8">
                             {upcomingEvents.map((event: any) => (
                                 <EventCard key={event.id} event={event} />
                             ))}

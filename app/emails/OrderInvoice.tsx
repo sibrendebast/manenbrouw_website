@@ -19,6 +19,7 @@ import { calculateBtwBreakdown } from "@/lib/btw";
 interface OrderInvoiceProps {
     order: {
         id: string;
+        orderNumber?: string | null;
         createdAt: Date;
         customerName: string;
         customerEmail: string;
@@ -42,7 +43,7 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
     const shippingAddress = order.shippingAddress
         ? JSON.parse(order.shippingAddress)
         : null;
-    
+
     // Calculate BTW breakdown using shared utility
     const btwBreakdown = calculateBtwBreakdown(order.items.map(item => ({
         price: item.price,
@@ -53,7 +54,7 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
     return (
         <Html>
             <Head />
-            <Preview>Order Invoice #{order.id.slice(0, 8)} - Man & Brouw</Preview>
+            <Preview>Order Invoice #{order.orderNumber || order.id.slice(0, 8)} - Man & Brouw</Preview>
             <Body style={main}>
                 <Container style={container}>
                     <Section>
@@ -68,9 +69,9 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                                 </Text>
                             </Column>
                             <Column align="right">
-                                <Text style={heading}>INVOICE</Text>
+                                <Text style={accentHeading}>INVOICE</Text>
                                 <Text style={paragraph}>
-                                    Order #{order.id.slice(0, 8)}<br />
+                                    Order #{order.orderNumber || order.id.slice(0, 8)}<br />
                                     {new Date(order.createdAt).toLocaleDateString()}
                                 </Text>
                             </Column>
@@ -187,55 +188,72 @@ const main = {
 
 const container = {
     margin: "0 auto",
-    padding: "20px 0 48px",
-    width: "580px",
+    padding: "40px 20px",
+    width: "100%",
+    maxWidth: "600px",
+    border: "2px solid #000000",
+    backgroundColor: "#ffffff",
 };
 
 const heading = {
     fontSize: "24px",
     fontWeight: "bold",
     margin: "0",
+    color: "#000000",
+};
+
+const accentHeading = {
+    ...heading,
+    color: "#56c99b",
 };
 
 const subHeading = {
-    fontSize: "16px",
+    fontSize: "18px",
     fontWeight: "bold",
-    margin: "0 0 8px",
-    color: "#484848",
+    margin: "0 0 12px",
+    color: "#56c99b",
+    textTransform: "uppercase" as const,
 };
 
 const paragraph = {
     fontSize: "16px",
-    lineHeight: "24px",
+    lineHeight: "26px",
     margin: "0 0 16px",
-    color: "#484848",
+    color: "#000000",
 };
 
 const hr = {
-    borderColor: "#cccccc",
-    margin: "20px 0",
+    borderColor: "#000000",
+    borderWidth: "2px",
+    margin: "24px 0",
 };
 
 const tableHeader = {
     fontSize: "14px",
     fontWeight: "bold",
-    color: "#484848",
+    color: "#000000",
+    textTransform: "uppercase" as const,
+    borderBottom: "2px solid #000000",
+    paddingBottom: "8px",
 };
 
 const tableCell = {
-    fontSize: "14px",
-    color: "#484848",
+    fontSize: "15px",
+    color: "#000000",
+    paddingTop: "8px",
+    paddingBottom: "8px",
 };
 
 const totalText = {
     fontSize: "20px",
     fontWeight: "bold",
     margin: "0",
+    color: "#56c99b",
 };
 
 const footer = {
-    color: "#9ca299",
+    color: "#666666",
     fontSize: "14px",
-    marginBottom: "10px",
+    marginTop: "20px",
     textAlign: "center" as const,
 };

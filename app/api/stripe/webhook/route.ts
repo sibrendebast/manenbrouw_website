@@ -116,7 +116,9 @@ export async function POST(req: NextRequest) {
                     }
 
                     // Send confirmation email to customer (with BCC to admin)
-                    const customerEmailResult = await sendOrderConfirmationEmail(updatedOrder);
+                    // Note: invoicePdf is generated effectively from the order state before it was marked paid in DB,
+                    // but usually invoice generation primarily cares about items and totals.
+                    const customerEmailResult = await sendOrderConfirmationEmail(updatedOrder, invoicePdf);
                     if (!customerEmailResult?.success) {
                         console.error("Failed to send customer confirmation email, but order was processed successfully");
                     }

@@ -21,6 +21,7 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'info@manenbrouw.be';
 // Type definition for order with items included
 type OrderWithItems = {
     id: string;
+    orderNumber?: string | null;
     customerName: string;
     customerEmail: string;
     customerPhone: string;
@@ -39,20 +40,26 @@ type OrderWithItems = {
     }[];
 };
 
-export async function sendOrderConfirmationEmail(order: OrderWithItems) {
+export async function sendOrderConfirmationEmail(order: OrderWithItems, invoicePdf?: Buffer | string) {
     if (!process.env.RESEND_API_KEY) {
         console.error("RESEND_API_KEY is missing - emails will not be sent");
         return { success: false, error: "RESEND_API_KEY is missing" };
     }
 
     try {
+        const attachments = invoicePdf ? [{
+            filename: `invoice-${order.orderNumber?.replace(/\//g, '-') || order.id.slice(0, 8)}.pdf`,
+            content: invoicePdf,
+        }] : [];
+
         // Send email to customer with BCC to admin
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
             to: [order.customerEmail],
-            bcc: [ADMIN_EMAIL], // Send copy to admin
-            subject: `Order Confirmation #${order.id.slice(0, 8)}`,
+            // bcc: [ADMIN_EMAIL], // Removed BCC to avoid cluttering admin with customer emails, admin gets separate notif
+            subject: `Order Confirmation #${order.orderNumber || order.id.slice(0, 8)}`,
             react: OrderInvoice({ order }),
+            attachments,
         });
 
         if (error) {
@@ -79,7 +86,7 @@ export async function sendAdminOrderNotification(order: OrderWithItems) {
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
             to: [ADMIN_EMAIL],
-            subject: `New Order Placed #${order.id.slice(0, 8)} - ${order.customerName}`,
+            subject: `New Order Placed #${order.orderNumber || order.id.slice(0, 8)} - ${order.customerName}`,
             react: OrderInvoice({ order }),
         });
 

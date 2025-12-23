@@ -22,6 +22,7 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'info@manenbrouw.be';
 type OrderWithItems = {
     id: string;
     orderNumber?: string | null;
+    locale?: string;
     customerName: string;
     customerEmail: string;
     customerPhone: string;
@@ -52,12 +53,17 @@ export async function sendOrderConfirmationEmail(order: OrderWithItems, invoiceP
             content: invoicePdf,
         }] : [];
 
+        // Localize subject
+        const subject = order.locale === 'nl'
+            ? `Bestelling Bevestigd #${order.orderNumber || order.id.slice(0, 8)}`
+            : `Order Confirmation #${order.orderNumber || order.id.slice(0, 8)}`;
+
         // Send email to customer with BCC to admin
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
             to: [order.customerEmail],
             // bcc: [ADMIN_EMAIL], // Removed BCC to avoid cluttering admin with customer emails, admin gets separate notif
-            subject: `Order Confirmation #${order.orderNumber || order.id.slice(0, 8)}`,
+            subject,
             react: OrderInvoice({ order }),
             attachments,
         });

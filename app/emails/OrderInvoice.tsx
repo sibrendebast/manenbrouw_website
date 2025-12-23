@@ -20,6 +20,7 @@ interface OrderInvoiceProps {
     order: {
         id: string;
         orderNumber?: string | null;
+        locale?: string;
         createdAt: Date;
         customerName: string;
         customerEmail: string;
@@ -39,17 +40,72 @@ interface OrderInvoiceProps {
     };
 }
 
+// Simple translation dictionary for email
+const translations = {
+    en: {
+        invoiceTitle: "INVOICE",
+        orderDate: "Order Date",
+        billTo: "Bill To",
+        shipTo: "Ship To",
+        pickup: "Pickup at Brewery",
+        shipping: "Shipping",
+        paymentMethod: "Payment Method",
+        item: "Item",
+        qty: "Qty",
+        price: "Price",
+        total: "Total",
+        vatDetails: "VAT Details (prices include VAT)",
+        includedVat: "Included VAT {rate}% on €{amount}",
+        totalLabel: "Total",
+        footer: "Thank you for your business!<br />If you have any questions, please contact us at info@manenbrouw.be",
+        orderNumber: "Order #",
+        nA: "N/A"
+    },
+    nl: {
+        invoiceTitle: "FACTUUR",
+        orderDate: "Datum",
+        billTo: "Factuuradres",
+        shipTo: "Leveradres",
+        pickup: "Ophalen bij brouwerij",
+        shipping: "Verzending",
+        paymentMethod: "Betaalmethode",
+        item: "Item",
+        qty: "Aantal",
+        price: "Prijs",
+        total: "Totaal",
+        vatDetails: "BTW Details (prijzen inclusief BTW)",
+        includedVat: "Inclusief BTW {rate}% op €{amount}",
+        totalLabel: "Totaal",
+        footer: "Bedankt voor je bestelling!<br />Vragen? Mail naar info@manenbrouw.be",
+        orderNumber: "Bestelling #",
+        nA: "N/A"
+    }
+};
+
 export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
+    const locale = (order.locale as 'en' | 'nl') || 'nl';
+    const t = translations[locale] || translations.nl;
+
     const shippingAddress = order.shippingAddress
         ? JSON.parse(order.shippingAddress)
         : null;
 
     // Calculate BTW breakdown using shared utility
-    const btwBreakdown = calculateBtwBreakdown(order.items.map(item => ({
+    const itemsForBtw = order.items.map(item => ({
         price: item.price,
         quantity: item.quantity,
         btwCategory: item.btwCategory
-    })));
+    }));
+
+    if (order.shippingMethod === "shipment") {
+        itemsForBtw.push({
+            price: 10.00,
+            quantity: 1,
+            btwCategory: 21 // Shipping is standard 21% VAT
+        });
+    }
+
+    const btwBreakdown = calculateBtwBreakdown(itemsForBtw);
 
     return (
         <Html>
@@ -69,10 +125,10 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                                 </Text>
                             </Column>
                             <Column align="right">
-                                <Text style={accentHeading}>INVOICE</Text>
+                                <Text style={accentHeading}>{t.invoiceTitle}</Text>
                                 <Text style={paragraph}>
-                                    Order #{order.orderNumber || order.id.slice(0, 8)}<br />
-                                    {new Date(order.createdAt).toLocaleDateString()}
+                                    {t.orderNumber}{order.orderNumber || order.id.slice(0, 8)}<br />
+                                    {new Date(order.createdAt).toLocaleDateString(locale === 'nl' ? 'nl-BE' : 'en-GB')}
                                 </Text>
                             </Column>
                         </Row>
@@ -83,7 +139,7 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                     <Section>
                         <Row>
                             <Column>
-                                <Text style={subHeading}>Bill To:</Text>
+                                <Text style={subHeading}>{t.billTo}:</Text>
                                 <Text style={paragraph}>
                                     {order.customerName}<br />
                                     {order.customerEmail}<br />
@@ -91,10 +147,10 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                                 </Text>
                             </Column>
                             <Column>
-                                <Text style={subHeading}>Ship To:</Text>
+                                <Text style={subHeading}>{t.shipTo}:</Text>
                                 <Text style={paragraph}>
                                     {order.shippingMethod === "pickup" ? (
-                                        "Pickup at Brewery"
+                                        t.pickup
                                     ) : shippingAddress ? (
                                         <>
                                             {shippingAddress.street}<br />
@@ -102,7 +158,7 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                                             {shippingAddress.country}
                                         </>
                                     ) : (
-                                        "N/A"
+                                        t.nA
                                     )}
                                 </Text>
                             </Column>
@@ -110,9 +166,9 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                     </Section>
 
                     <Section>
-                        <Text style={subHeading}>Payment Method</Text>
+                        <Text style={subHeading}>{t.paymentMethod}</Text>
                         <Text style={{ ...paragraph, textTransform: "capitalize" }}>
-                            {order.paymentMethod || "N/A"}
+                            {order.paymentMethod || t.nA}
                         </Text>
                     </Section>
 
@@ -120,10 +176,10 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
 
                     <Section>
                         <Row style={{ marginBottom: "10px" }}>
-                            <Column style={{ width: "50%" }}><Text style={tableHeader}>Item</Text></Column>
-                            <Column style={{ width: "15%", textAlign: "center" }}><Text style={tableHeader}>Qty</Text></Column>
-                            <Column style={{ width: "15%", textAlign: "right" }}><Text style={tableHeader}>Price</Text></Column>
-                            <Column style={{ width: "20%", textAlign: "right" }}><Text style={tableHeader}>Total</Text></Column>
+                            <Column style={{ width: "50%" }}><Text style={tableHeader}>{t.item}</Text></Column>
+                            <Column style={{ width: "15%", textAlign: "center" }}><Text style={tableHeader}>{t.qty}</Text></Column>
+                            <Column style={{ width: "15%", textAlign: "right" }}><Text style={tableHeader}>{t.price}</Text></Column>
+                            <Column style={{ width: "20%", textAlign: "right" }}><Text style={tableHeader}>{t.total}</Text></Column>
                         </Row>
                         {order.items.map((item, index) => (
                             <Row key={index} style={{ marginBottom: "10px" }}>
@@ -135,7 +191,7 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                         ))}
                         {order.shippingMethod === "shipment" && (
                             <Row style={{ marginBottom: "10px" }}>
-                                <Column style={{ width: "50%" }}><Text style={tableCell}>Shipping</Text></Column>
+                                <Column style={{ width: "50%" }}><Text style={tableCell}>{t.shipping}</Text></Column>
                                 <Column style={{ width: "15%", textAlign: "center" }}><Text style={tableCell}>1</Text></Column>
                                 <Column style={{ width: "15%", textAlign: "right" }}><Text style={tableCell}>€10.00</Text></Column>
                                 <Column style={{ width: "20%", textAlign: "right" }}><Text style={tableCell}>€10.00</Text></Column>
@@ -146,10 +202,10 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                     <Hr style={hr} />
 
                     <Section>
-                        <Text style={subHeading}>BTW Details (prices include VAT)</Text>
+                        <Text style={subHeading}>{t.vatDetails}</Text>
                         {btwBreakdown.map((btw, index) => (
                             <Row key={index} style={{ marginBottom: "5px" }}>
-                                <Column style={{ width: "70%" }}><Text style={tableCell}>Included VAT {btw.category}% on €{btw.subtotal.toFixed(2)}</Text></Column>
+                                <Column style={{ width: "70%" }}><Text style={tableCell}>{t.includedVat.replace('{rate}', btw.category.toString()).replace('{amount}', btw.subtotal.toFixed(2))}</Text></Column>
                                 <Column style={{ width: "30%", textAlign: "right" }}><Text style={tableCell}>€{btw.btw.toFixed(2)}</Text></Column>
                             </Row>
                         ))}
@@ -160,7 +216,7 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                     <Section>
                         <Row>
                             <Column align="right">
-                                <Text style={totalText}>Total: €{order.totalAmount.toFixed(2)}</Text>
+                                <Text style={totalText}>{t.totalLabel}: €{order.totalAmount.toFixed(2)}</Text>
                             </Column>
                         </Row>
                     </Section>
@@ -168,10 +224,7 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                     <Hr style={hr} />
 
                     <Section>
-                        <Text style={footer}>
-                            Thank you for your business!<br />
-                            If you have any questions, please contact us at info@manenbrouw.be
-                        </Text>
+                        <Text style={footer} dangerouslySetInnerHTML={{ __html: t.footer }} />
                     </Section>
                 </Container>
             </Body>

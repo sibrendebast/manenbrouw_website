@@ -33,6 +33,7 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
     const zip = formData.get("zip") as string;
     const country = formData.get("country") as string;
     const newsletter = formData.get("newsletter") === "on";
+    const locale = (formData.get("locale") as string) || "nl";
 
     if (!customerName || !customerEmail || !customerPhone || !shippingMethod) {
         return { success: false, error: "Missing required fields" };
@@ -112,6 +113,7 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
             order = await prisma.order.create({
                 data: {
                     orderNumber,
+                    locale,
                     customerName,
                     customerEmail,
                     customerPhone,
@@ -143,6 +145,7 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                 order = await prisma.order.create({
                     data: {
                         orderNumber,
+                        locale,
                         customerName,
                         customerEmail,
                         customerPhone,

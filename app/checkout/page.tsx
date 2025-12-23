@@ -38,7 +38,7 @@ export default function CheckoutPage() {
     const [error, setError] = useState("");
     const [mounted, setMounted] = useState(false);
     const [formValues, setFormValues] = useState<CheckoutFormValues>(DEFAULT_FORM_VALUES);
-    const { t } = useI18n();
+    const { t, locale } = useI18n();
 
     // Helper function to safely get images array
     const getProductImages = (item: any): string[] => {
@@ -139,6 +139,7 @@ export default function CheckoutPage() {
         try {
             // Add shipping method to formData
             formData.append("shippingMethod", shippingMethod);
+            formData.append("locale", locale);
 
             // First create the order in pending_payment status
             const result = await placeOrder(formData, items);

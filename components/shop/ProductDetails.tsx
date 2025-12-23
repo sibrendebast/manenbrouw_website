@@ -1,8 +1,10 @@
 "use client";
 
+import { motion, AnimatePresence } from "framer-motion";
+
 import Image from "next/image";
 import { useCartStore } from "@/store/cartStore";
-import { ShoppingCart, ArrowLeft, Check, Plus, Minus } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Check, Plus, Minus, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n-context";
@@ -18,11 +20,65 @@ export default function ProductDetails({ product }: { product: any }) {
     const addItem = useCartStore((state) => state.addItem);
     const [isAdded, setIsAdded] = useState(false);
     const [quantity, setQuantity] = useState(1);
+    const [selectedImage, setSelectedImage] = useState<string>('');
+    const [direction, setDirection] = useState(0);
+
+    const variants = {
+        enter: (direction: number) => ({
+            x: direction > 0 ? '100%' : '-100%',
+            opacity: 1,
+            zIndex: 1
+        }),
+        center: {
+            zIndex: 1,
+            x: 0,
+            opacity: 1
+        },
+        exit: (direction: number) => ({
+            zIndex: 0,
+            x: 0,
+            opacity: 1,
+            scale: 0.95
+        })
+    };
+
+    useEffect(() => {
+        if (product && product.images && product.images.length > 0) {
+            // Set the first image as selected, or fallback if empty
+            const firstImage = (!product.images || product.images.length === 0 || product.images[0].includes("placehold.co")) ? "/logo.png" : product.images[0];
+            setSelectedImage(firstImage);
+        } else {
+            setSelectedImage("/logo.png");
+        }
+    }, [product]);
 
     const handleAddToCart = () => {
         addItem(product, quantity);
         setIsAdded(true);
         setTimeout(() => setIsAdded(false), 2000);
+    };
+
+    const handlePrevImage = () => {
+        if (!product.images || product.images.length <= 1) return;
+        setDirection(-1);
+        const currentIndex = product.images.indexOf(selectedImage);
+        const newIndex = currentIndex > 0 ? currentIndex - 1 : product.images.length - 1;
+        setSelectedImage(product.images[newIndex]);
+    };
+
+    const handleNextImage = () => {
+        if (!product.images || product.images.length <= 1) return;
+        setDirection(1);
+        const currentIndex = product.images.indexOf(selectedImage);
+        const newIndex = currentIndex < product.images.length - 1 ? currentIndex + 1 : 0;
+        setSelectedImage(product.images[newIndex]);
+    };
+
+    const handleThumbnailClick = (img: string) => {
+        const currentIndex = product.images.indexOf(selectedImage);
+        const newIndex = product.images.indexOf(img);
+        setDirection(newIndex > currentIndex ? 1 : -1);
+        setSelectedImage(img);
     };
 
     if (!mounted) return null;
@@ -52,18 +108,78 @@ export default function ProductDetails({ product }: { product: any }) {
                 </Link>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <div className="relative aspect-square overflow-hidden bg-gray-100 border-2 border-black">
-                        <Image
-                            src={(!product.images || product.images.length === 0 || product.images[0].includes("placehold.co")) ? "/logo.png" : product.images[0]}
-                            alt={product.name}
-                            fill
-                            className="object-cover"
-                            onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.srcset = "/logo.png";
-                                target.src = "/logo.png";
-                            }}
-                        />
+                    <div className="flex flex-col gap-4">
+                        <div className="relative aspect-square overflow-hidden bg-gray-100 border-2 border-black group">
+                            <AnimatePresence initial={false} custom={direction} mode="popLayout">
+                                {selectedImage && (
+                                    <motion.div
+                                        key={selectedImage}
+                                        custom={direction}
+                                        variants={variants}
+                                        initial="enter"
+                                        animate="center"
+                                        exit="exit"
+                                        transition={{
+                                            x: { type: "tween", ease: "easeInOut", duration: 0.3 },
+                                            opacity: { duration: 0.2 },
+                                            scale: { duration: 0.3 }
+                                        }}
+                                        className="absolute inset-0 w-full h-full"
+                                    >
+                                        <Image
+                                            src={selectedImage}
+                                            alt={product.name}
+                                            fill
+                                            className="object-cover"
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement;
+                                                target.srcset = "/logo.png";
+                                                target.src = "/logo.png";
+                                            }}
+                                        />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Navigation Arrows */}
+                            {product.images && product.images.length > 1 && (
+                                <>
+                                    <button
+                                        onClick={handlePrevImage}
+                                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-100 border-2 border-black p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                        aria-label="Previous image"
+                                    >
+                                        <ChevronLeft className="h-6 w-6 text-black" />
+                                    </button>
+                                    <button
+                                        onClick={handleNextImage}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-100 border-2 border-black p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                        aria-label="Next image"
+                                    >
+                                        <ChevronRight className="h-6 w-6 text-black" />
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                        {/* Thumbnail Gallery */}
+                        {product.images && product.images.length > 1 && (
+                            <div className="grid grid-cols-5 gap-2">
+                                {product.images.map((img: string, index: number) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => handleThumbnailClick(img)}
+                                        className={`relative aspect-square border-2 ${selectedImage === img ? 'border-brewery-green' : 'border-transparent hover:border-gray-300'} transition-all`}
+                                    >
+                                        <Image
+                                            src={img}
+                                            alt={`${product.name} thumbnail ${index + 1}`}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex flex-col justify-center">

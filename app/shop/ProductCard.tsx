@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Minus, Plus, ShoppingCart } from "lucide-react";
+import { ArrowRight, Minus, Plus, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/store/cartStore";
 import { useI18n } from "@/lib/i18n-context";
 import { Product } from "@/data/products";
@@ -38,28 +39,123 @@ export default function ProductCard({ product }: ProductCardProps) {
         }, 2000);
     };
 
+
+
+    // ... inside component ...
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [direction, setDirection] = useState(0);
+
+    const variants = {
+        enter: (direction: number) => ({
+            x: direction > 0 ? '100%' : '-100%',
+            opacity: 1,
+            zIndex: 1,
+            scale: 1
+        }),
+        center: {
+            zIndex: 1,
+            x: 0,
+            opacity: 1,
+            scale: 1
+        },
+        exit: (direction: number) => ({
+            zIndex: 0,
+            x: 0,
+            opacity: 1,
+            scale: 0.95
+        })
+    };
+
+    // ...
+
+    const handlePrevImage = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (product.images && product.images.length > 0) {
+            setDirection(-1);
+            setCurrentImageIndex((prev) => (prev === 0 ? product.images.length - 1 : prev - 1));
+        }
+    };
+
+    const handleNextImage = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (product.images && product.images.length > 0) {
+            setDirection(1);
+            setCurrentImageIndex((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
+        }
+    };
+
     const imageSrc = (imageError || !product.images || product.images.length === 0 || product.images[0].includes("placehold.co"))
         ? "/logo.png"
-        : product.images[0];
+        : product.images[currentImageIndex];
 
     return (
-        <div className="bg-white border-2 border-black overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full">
-            <Link href={`/shop/${product.slug}`} className="relative aspect-square w-full bg-gray-100">
-                <Image
-                    src={imageSrc}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                    onError={() => setImageError(true)}
-                />
+        <div className="bg-white border-2 border-black overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full group">
+            <div className="relative aspect-square w-full bg-gray-100">
+
+                <Link href={`/shop/${product.slug}`} className="block w-full h-full relative z-0">
+                    <AnimatePresence initial={false} custom={direction} mode="popLayout">
+                        <motion.div
+                            key={currentImageIndex}
+                            custom={direction}
+                            variants={variants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{
+                                x: { type: "tween", ease: "easeInOut", duration: 0.3 },
+                                opacity: { duration: 0.2 },
+                                scale: { duration: 0.3 }
+                            }}
+                            className="absolute inset-0 w-full h-full"
+                        >
+                            <Image
+                                src={imageSrc}
+                                alt={product.name}
+                                fill
+                                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                onError={() => setImageError(true)}
+                            />
+                        </motion.div>
+                    </AnimatePresence>
+                </Link>
+
+                {product.images && product.images.length > 1 && (
+                    <>
+                        <button
+                            onClick={handlePrevImage}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-1 rounded-full border-2 border-black opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                            aria-label="Previous image"
+                        >
+                            <ChevronLeft className="h-5 w-5 text-black" />
+                        </button>
+                        <button
+                            onClick={handleNextImage}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-1 rounded-full border-2 border-black opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                            aria-label="Next image"
+                        >
+                            <ChevronRight className="h-5 w-5 text-black" />
+                        </button>
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20">
+                            {product.images.map((_: any, idx: number) => (
+                                <div
+                                    key={idx}
+                                    className={`h-2 w-2 rounded-full border border-black ${idx === currentImageIndex ? 'bg-brewery-green' : 'bg-white'}`}
+                                />
+                            ))}
+                        </div>
+                    </>
+                )}
+
                 {!product.inStock && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
                         <span className="bg-red-600 text-white px-4 py-2 font-bold transform -rotate-12 border-2 border-white">
                             {t("shop.outOfStock")}
                         </span>
                     </div>
                 )}
-            </Link>
+            </div>
             <div className="p-6 flex-grow flex flex-col">
                 <div className="flex justify-between items-start mb-2">
                     <h3 className="text-xl font-bold text-brewery-dark">

@@ -16,6 +16,8 @@ export interface EventTicketItem {
     quantity: number;
     itemType: "ticket";
     eventId: string;
+    capacity?: number;
+    ticketsSold?: number;
 }
 
 type CartItemUnion = CartItem | EventTicketItem;
@@ -67,11 +69,19 @@ export const useCartStore = create<CartState>()(
                 const ticketId = `ticket-${event.id}`;
                 const existingTicket = items.find((item) => item.id === ticketId && item.itemType === "ticket");
 
+                const ticketsAvailable = event.capacity ? Math.max(0, event.capacity - (event.ticketsSold || 0)) : Infinity;
+                const currentQuantity = existingTicket ? existingTicket.quantity : 0;
+
+                if (currentQuantity + quantity > ticketsAvailable) {
+                    console.warn(`Cannot add ${quantity} tickets. Only ${ticketsAvailable - currentQuantity} available.`);
+                    return;
+                }
+
                 if (existingTicket) {
                     set({
                         items: items.map((item) =>
                             item.id === ticketId && item.itemType === "ticket"
-                                ? { ...item, quantity: item.quantity + quantity }
+                                ? { ...item, quantity: item.quantity + quantity, capacity: event.capacity, ticketsSold: event.ticketsSold }
                                 : item
                         ),
                     });
@@ -85,6 +95,8 @@ export const useCartStore = create<CartState>()(
                         quantity,
                         itemType: "ticket" as const,
                         eventId: event.id,
+                        capacity: event.capacity,
+                        ticketsSold: event.ticketsSold
                     };
                     set({ items: [...items, ticketItem] });
                 }
@@ -104,6 +116,15 @@ export const useCartStore = create<CartState>()(
                         const stockCount = item.stockCount || 0;
                         if (quantity > stockCount) {
                             console.warn(`Cannot update to ${quantity}. Only ${stockCount} available.`);
+                            return;
+                        }
+                    }
+
+                    // For tickets, check capacity limit
+                    if (item && item.itemType === "ticket" && 'capacity' in item && item.capacity) {
+                        const ticketsAvailable = (item.capacity || 0) - (item.ticketsSold || 0);
+                        if (quantity > ticketsAvailable) {
+                            console.warn(`Cannot update to ${quantity}. Only ${ticketsAvailable} available.`);
                             return;
                         }
                     }

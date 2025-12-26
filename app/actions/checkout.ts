@@ -64,6 +64,10 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                     throw new Error(`Product not found: ${item.id}`);
                 }
 
+                if (product.stockCount !== null && item.quantity > product.stockCount) {
+                    throw new Error(`Not enough stock for ${product.name}. Only ${product.stockCount} left.`);
+                }
+
                 totalAmount += product.price * item.quantity;
                 orderItemsData.push({
                     productId: product.id,
@@ -82,6 +86,10 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
 
                 if (!event.isPaid || !event.ticketPrice) {
                     throw new Error(`Event is not a paid event: ${item.eventId}`);
+                }
+
+                if (event.capacity && (event.ticketsSold + item.quantity > event.capacity)) {
+                    throw new Error(`Not enough tickets available for ${event.title}. Only ${Math.max(0, event.capacity - event.ticketsSold)} left.`);
                 }
 
                 totalAmount += event.ticketPrice * item.quantity;

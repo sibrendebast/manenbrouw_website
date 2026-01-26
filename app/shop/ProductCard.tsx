@@ -60,7 +60,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         },
         exit: (direction: number) => ({
             zIndex: 0,
-            x: 0,
+            x: direction < 0 ? '100%' : '-100%',
             opacity: 1,
             scale: 0.95
         })
@@ -68,22 +68,31 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     // ...
 
-    const handlePrevImage = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
+    const handlePrevImage = (e?: React.MouseEvent | any) => {
+        if (e && e.preventDefault) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
         if (product.images && product.images.length > 0) {
             setDirection(-1);
             setCurrentImageIndex((prev) => (prev === 0 ? product.images.length - 1 : prev - 1));
         }
     };
 
-    const handleNextImage = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
+    const handleNextImage = (e?: React.MouseEvent | any) => {
+        if (e && e.preventDefault) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
         if (product.images && product.images.length > 0) {
             setDirection(1);
             setCurrentImageIndex((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
         }
+    };
+
+    const swipeConfidenceThreshold = 10000;
+    const swipePower = (offset: number, velocity: number) => {
+        return Math.abs(offset) * velocity;
     };
 
     const imageSrc = (imageError || !product.images || product.images.length === 0 || product.images[0].includes("placehold.co"))
@@ -92,7 +101,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     return (
         <div className="bg-white border-2 border-black overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full group">
-            <div className="relative aspect-square w-full bg-gray-100">
+            <div className="relative aspect-square w-full bg-gray-100 touch-pan-y">
 
                 <Link href={`/shop/${product.slug}`} className="block w-full h-full relative z-0">
                     <AnimatePresence initial={false} custom={direction} mode="popLayout">
@@ -108,13 +117,25 @@ export default function ProductCard({ product }: ProductCardProps) {
                                 opacity: { duration: 0.2 },
                                 scale: { duration: 0.3 }
                             }}
+                            drag="x"
+                            dragConstraints={{ left: 0, right: 0 }}
+                            dragElastic={1}
+                            onDragEnd={(e, { offset, velocity }) => {
+                                const swipe = swipePower(offset.x, velocity.x);
+
+                                if (swipe < -swipeConfidenceThreshold) {
+                                    handleNextImage();
+                                } else if (swipe > swipeConfidenceThreshold) {
+                                    handlePrevImage();
+                                }
+                            }}
                             className="absolute inset-0 w-full h-full"
                         >
                             <Image
                                 src={imageSrc}
                                 alt={product.name}
                                 fill
-                                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                className="object-cover transition-transform duration-300 group-hover:scale-105 pointer-events-none"
                                 onError={() => setImageError(true)}
                             />
                         </motion.div>
@@ -125,14 +146,14 @@ export default function ProductCard({ product }: ProductCardProps) {
                     <>
                         <button
                             onClick={handlePrevImage}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-1 rounded-full border-2 border-black opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-1 rounded-full border-2 border-black transition-opacity z-20"
                             aria-label="Previous image"
                         >
                             <ChevronLeft className="h-5 w-5 text-black" />
                         </button>
                         <button
                             onClick={handleNextImage}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-1 rounded-full border-2 border-black opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-1 rounded-full border-2 border-black transition-opacity z-20"
                             aria-label="Next image"
                         >
                             <ChevronRight className="h-5 w-5 text-black" />

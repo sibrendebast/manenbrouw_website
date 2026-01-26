@@ -16,6 +16,7 @@ export async function getOrders() {
                 shippingMethod: true,
                 totalAmount: true,
                 status: true,
+                comment: true,
                 stripeSessionId: true,
                 paymentMethod: true,
                 invoiceUrl: true,

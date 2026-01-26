@@ -19,6 +19,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
     const [product, setProduct] = useState({
         name: "",
+        category: "BEER",
         style: "",
         abv: "",
         volume: "33cl",
@@ -43,9 +44,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 if (data) {
                     setProduct({
                         name: data.name,
-                        style: data.style,
-                        abv: data.abv,
-                        volume: data.volume,
+                        category: data.category || "BEER",
+                        style: data.style || "",
+                        abv: data.abv || "",
+                        volume: data.volume || "",
                         price: data.price.toString(),
                         description: data.description,
                         images: data.images,
@@ -68,6 +70,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         loadProduct();
     }, [isAuthenticated, router, id]);
 
+    // ... (keep file handling functions)
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.length) return;
 
@@ -88,7 +91,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     ...prev,
                     images: [...prev.images, ...data.urls],
                 }));
-                // alert("Images uploaded");
             } else {
                 alert("Upload failed");
             }
@@ -128,6 +130,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         try {
             const result = await updateProduct(id, {
                 name: product.name,
+                category: product.category,
                 style: product.style,
                 abv: product.abv,
                 volume: product.volume,
@@ -140,7 +143,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             });
 
             if (result.success) {
-                // Return to products page without alert
                 router.push("/admin/products");
                 router.refresh();
             } else {
@@ -153,6 +155,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             setSaving(false);
         }
     };
+
+    // ... (keep handleLogout, checks, and loading)
 
     const handleLogout = () => {
         logout();
@@ -172,6 +176,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     return (
         <div className="min-h-screen bg-gray-50 py-12 text-black">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* ... (keep header) */}
                 <div className="flex justify-between items-center mb-12">
                     <div>
                         <Link
@@ -195,6 +200,22 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 <div className="bg-white p-8 border-2 border-black shadow-lg">
                     <form onSubmit={handleUpdateProduct} className="space-y-6">
                         <div>
+                            <label className="block text-sm font-bold mb-1 text-black">Category</label>
+                            <select
+                                required
+                                value={product.category}
+                                onChange={(e) =>
+                                    setProduct({ ...product, category: e.target.value })
+                                }
+                                className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                            >
+                                <option value="BEER">Beer</option>
+                                <option value="GIFTBOX">Giftbox</option>
+                                <option value="GLASS">Glassware</option>
+                                <option value="MERCH">Merchandise</option>
+                            </select>
+                        </div>
+                        <div>
                             <label className="block text-sm font-bold mb-1 text-black">Name</label>
                             <input
                                 required
@@ -206,51 +227,56 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                 className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
                             />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-bold mb-1 text-black">
-                                    Style
-                                </label>
-                                <input
-                                    required
-                                    type="text"
-                                    value={product.style}
-                                    onChange={(e) =>
-                                        setProduct({ ...product, style: e.target.value })
-                                    }
-                                    className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
-                                />
+
+                        {product.category === 'BEER' && (
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-bold mb-1 text-black">
+                                        Style
+                                    </label>
+                                    <input
+                                        required
+                                        type="text"
+                                        value={product.style}
+                                        onChange={(e) =>
+                                            setProduct({ ...product, style: e.target.value })
+                                        }
+                                        className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-1 text-black">ABV</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        value={product.abv}
+                                        onChange={(e) =>
+                                            setProduct({ ...product, abv: e.target.value })
+                                        }
+                                        className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                    />
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-bold mb-1 text-black">ABV</label>
-                                <input
-                                    required
-                                    type="text"
-                                    value={product.abv}
-                                    onChange={(e) =>
-                                        setProduct({ ...product, abv: e.target.value })
-                                    }
-                                    className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
-                                />
-                            </div>
-                        </div>
+                        )}
 
                         <div className="grid grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-bold mb-1 text-black">
-                                    Volume
-                                </label>
-                                <input
-                                    required
-                                    type="text"
-                                    value={product.volume}
-                                    onChange={(e) =>
-                                        setProduct({ ...product, volume: e.target.value })
-                                    }
-                                    className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
-                                />
-                            </div>
-                            <div>
+                            {['BEER', 'GLASS', 'GIFTBOX'].includes(product.category) && (
+                                <div>
+                                    <label className="block text-sm font-bold mb-1 text-black">
+                                        Volume
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={product.volume}
+                                        onChange={(e) =>
+                                            setProduct({ ...product, volume: e.target.value })
+                                        }
+                                        placeholder="e.g. 33cl"
+                                        className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                    />
+                                </div>
+                            )}
+                            <div className={['BEER', 'GLASS', 'GIFTBOX'].includes(product.category) ? "" : "col-span-2"}>
                                 <label className="block text-sm font-bold mb-1 text-black">
                                     Price (€)
                                 </label>

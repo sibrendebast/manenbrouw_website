@@ -101,6 +101,8 @@
         "learnAboutDelivery": "Meer over verzending",
         "learnAboutPickup": "Meer over lockers",
         "paymentMethod": "Betaalmethode",
+        "comments": "Opmerkingen",
+        "commentsPlaceholderText": "Voeg een notitie toe aan uw bestelling (bv. leveringsinstructies, boodschap voor cadeau)...",
         "creditCard": "Creditcard",
         "placeOrder": "Bestelling Plaatsen",
         "processing": "Verwerken...",

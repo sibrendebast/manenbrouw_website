@@ -16,6 +16,7 @@ type CheckoutFormValues = {
     zip: string;
     city: string;
     newsletter: boolean;
+    comment: string;
 };
 
 const DEFAULT_FORM_VALUES: CheckoutFormValues = {
@@ -26,6 +27,7 @@ const DEFAULT_FORM_VALUES: CheckoutFormValues = {
     zip: "",
     city: "",
     newsletter: false,
+    comment: "",
 };
 
 const CHECKOUT_FORM_STORAGE_KEY = "checkoutFormData";
@@ -94,8 +96,11 @@ export default function CheckoutPage() {
         localStorage.setItem(CHECKOUT_FORM_STORAGE_KEY, payload);
     }, [formValues, shippingMethod, paymentMethod, mounted]);
 
-    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const { name, value, type, checked } = event.target;
+    const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value, type } = event.target;
+        // Check if it's a checkbox input
+        const checked = (event.target as HTMLInputElement).checked;
+
         setFormValues((prev) => ({
             ...prev,
             [name]: type === "checkbox" ? checked : value,
@@ -388,6 +393,8 @@ export default function CheckoutPage() {
                                 </div>
                             </div>
 
+
+
                             {error && (
                                 <div className="bg-red-100 border-2 border-red-400 text-red-700 px-4 py-3" role="alert">
                                     <span className="block sm:inline">{error}</span>
@@ -399,6 +406,23 @@ export default function CheckoutPage() {
                     {/* Order Summary */}
                     <div>
                         <div className="bg-white p-8 sticky top-24 border-2 border-black">
+                            {/* Comment Field - Moved to Right Column */}
+                            <div className="mb-8">
+                                <h2 className="text-xl font-bold text-brewery-dark mb-4">{t("checkout.comments")}</h2>
+                                <div>
+                                    <textarea
+                                        id="comment"
+                                        name="comment"
+                                        form="checkout-form"
+                                        rows={3}
+                                        value={formValues.comment}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-2 border-2 border-black focus:ring-brewery-green focus:border-brewery-green"
+                                        placeholder={t("checkout.commentsPlaceholderText") || "Add a note to your order..."}
+                                    />
+                                </div>
+                            </div>
+
                             <h2 className="text-xl font-bold text-brewery-dark mb-6">{t("cart.orderSummary")}</h2>
                             <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">
                                 {items.map((item: any) => (

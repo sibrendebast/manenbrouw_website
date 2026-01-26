@@ -20,7 +20,7 @@ export async function getProducts() {
             try {
                 // Use raw query to select only existing columns
                 const products = await prisma.$queryRaw`
-                    SELECT id, slug, name, style, abv, volume, price, description, images, "inStock", "stockCount", "isHidden", "createdAt", "updatedAt"
+                    SELECT id, slug, name, category, style, abv, volume, price, description, images, "inStock", "stockCount", "isHidden", "createdAt", "updatedAt"
                     FROM "Product"
                     ORDER BY "createdAt" DESC
                 ` as any[]
@@ -56,7 +56,7 @@ export async function getProduct(slug: string) {
             console.log('btwCategory column does not exist yet, fetching product without it')
             try {
                 const products = await prisma.$queryRaw`
-                    SELECT id, slug, name, style, abv, volume, price, description, images, "inStock", "stockCount", "isHidden", "createdAt", "updatedAt"
+                    SELECT id, slug, name, category, style, abv, volume, price, description, images, "inStock", "stockCount", "isHidden", "createdAt", "updatedAt"
                     FROM "Product"
                     WHERE slug = ${slug}
                     LIMIT 1
@@ -93,7 +93,7 @@ export async function getProductById(id: string) {
         if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
             try {
                 const products = await prisma.$queryRaw`
-                    SELECT id, slug, name, style, abv, volume, price, description, images, "inStock", "stockCount", "isHidden", "createdAt", "updatedAt"
+                    SELECT id, slug, name, category, style, abv, volume, price, description, images, "inStock", "stockCount", "isHidden", "createdAt", "updatedAt"
                     FROM "Product"
                     WHERE id = ${id}
                     LIMIT 1

@@ -8,22 +8,30 @@ datasource db {
   directUrl = env("DATABASE_URL")
 }
 
+enum ProductType {
+  BEER
+  GIFTBOX
+  GLASS
+  MERCH
+}
+
 model Product {
-  id          String   @id @default(uuid())
-  slug        String   @unique
+  id          String      @id @default(uuid())
+  slug        String      @unique
   name        String
-  style       String
-  abv         String
-  volume      String
+  category    ProductType @default(BEER)
+  style       String?
+  abv         String?
+  volume      String?
   price       Float
   description String
-  images      String   // Stored as JSON string
-  inStock     Boolean  @default(true)
-  stockCount  Int      @default(0)
-  isHidden    Boolean  @default(false)
-  btwCategory Int?     @default(21) // BTW/VAT percentage: 0, 6, 12, or 21
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  images      String // Stored as JSON string
+  inStock     Boolean     @default(true)
+  stockCount  Int         @default(0)
+  isHidden    Boolean     @default(false)
+  btwCategory Int?        @default(21) // BTW/VAT percentage: 0, 6, 12, or 21
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   OrderItem   OrderItem[]
 }
 
@@ -43,6 +51,7 @@ model Order {
   items           OrderItem[]
   tickets         EventTicket[]
   locale          String      @default("nl") // "nl" | "en"
+  comment         String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 }

@@ -101,6 +101,8 @@
         "learnAboutDelivery": "Learn about home delivery",
         "learnAboutPickup": "Learn about pickup lockers",
         "paymentMethod": "Payment Method",
+        "comments": "Order Comments",
+        "commentsPlaceholderText": "Add a note to your order (e.g. delivery instructions, gift message)...",
         "creditCard": "Credit Card",
         "placeOrder": "Place Order",
         "processing": "Processing...",

@@ -1,10 +1,24 @@
 "use client";
 
+import { useState } from "react";
 import { useI18n } from "@/lib/i18n-context";
 import ProductCard from "./ProductCard";
 
 export default function ShopContent({ products }: { products: any[] }) {
     const { t } = useI18n();
+    const [activeCategory, setActiveCategory] = useState("ALL");
+
+    const filteredProducts = products.filter(product =>
+        activeCategory === "ALL" ? true : product.category === activeCategory
+    );
+
+    const categories = [
+        { id: "ALL", label: t("shop.all") || "All" },
+        { id: "BEER", label: "Beers" },
+        { id: "GIFTBOX", label: "Giftboxes" },
+        { id: "GLASS", label: "Glassware" },
+        { id: "MERCH", label: "Merch" },
+    ];
 
     return (
         <div className="bg-white min-h-screen py-16">
@@ -16,11 +30,32 @@ export default function ShopContent({ products }: { products: any[] }) {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {products.map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                <div className="flex justify-center mb-12 flex-wrap gap-4">
+                    {categories.map((category) => (
+                        <button
+                            key={category.id}
+                            onClick={() => setActiveCategory(category.id)}
+                            className={`px-6 py-2 rounded-full font-bold border-2 border-black transition-all ${activeCategory === category.id
+                                ? "bg-brewery-dark text-white"
+                                : "bg-white text-black hover:bg-gray-100"
+                                }`}
+                        >
+                            {category.label}
+                        </button>
                     ))}
                 </div>
+
+                {filteredProducts.length === 0 ? (
+                    <div className="text-center py-12">
+                        <p className="text-xl text-gray-500">No products found in this category.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {filteredProducts.map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

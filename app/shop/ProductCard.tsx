@@ -187,7 +187,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </span>
                 </div>
                 <p className="text-sm text-gray-500 font-semibold mb-2">
-                    {product.style} • {product.volume} • {product.abv}
+                    {[product.style, product.volume, product.abv].filter(Boolean).join(" • ")}
                 </p>
                 {product.inStock && product.stockCount !== undefined && (
                     <p className="text-xs text-gray-600 mb-4">

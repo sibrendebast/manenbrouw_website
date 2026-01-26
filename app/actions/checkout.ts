@@ -29,6 +29,7 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
     const customerEmail = formData.get("customerEmail") as string;
     const customerPhone = formData.get("customerPhone") as string;
     const shippingMethod = formData.get("shippingMethod") as string;
+    const comment = formData.get("comment") as string;
     const street = formData.get("street") as string;
     const city = formData.get("city") as string;
     const zip = formData.get("zip") as string;
@@ -115,6 +116,7 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                 data: {
                     orderNumber,
                     locale,
+                    comment,
                     customerName,
                     customerEmail,
                     customerPhone,
@@ -147,6 +149,7 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                     data: {
                         orderNumber,
                         locale,
+                        comment,
                         customerName,
                         customerEmail,
                         customerPhone,

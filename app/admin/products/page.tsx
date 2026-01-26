@@ -17,6 +17,7 @@ export default function AdminDashboard() {
     // Form State
     const [newProduct, setNewProduct] = useState({
         name: "",
+        category: "BEER",
         style: "",
         abv: "",
         volume: "33cl",
@@ -30,6 +31,7 @@ export default function AdminDashboard() {
     const [uploading, setUploading] = useState(false);
 
     const loadProducts = async () => {
+        // ... (keep existing)
         const data = await getProducts();
         // Sort: 1. In Stock & Not Hidden, 2. Out of Stock & Not Hidden, 3. Hidden
         const sorted = data.sort((a: any, b: any) => {
@@ -47,6 +49,7 @@ export default function AdminDashboard() {
         setProducts(sorted);
     };
 
+    // ... (keep useEffect)
     useEffect(() => {
         setMounted(true);
         if (!isAuthenticated) {
@@ -58,6 +61,7 @@ export default function AdminDashboard() {
 
     if (!mounted || !isAuthenticated) return null;
 
+    // ... (keep handleFileUpload and removeImage)
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.length) return;
 
@@ -103,6 +107,7 @@ export default function AdminDashboard() {
         const result = await createProduct({
             slug,
             name: newProduct.name,
+            category: newProduct.category,
             style: newProduct.style,
             abv: newProduct.abv,
             volume: newProduct.volume,
@@ -118,6 +123,7 @@ export default function AdminDashboard() {
             loadProducts();
             setNewProduct({
                 name: "",
+                category: "BEER",
                 style: "",
                 abv: "",
                 volume: "33cl",
@@ -132,6 +138,7 @@ export default function AdminDashboard() {
         }
     };
 
+    // ... (keep handleLogout)
     const handleLogout = () => {
         logout();
         router.push("/admin/login");
@@ -140,6 +147,7 @@ export default function AdminDashboard() {
     return (
         <div className="min-h-screen bg-gray-50 py-12 text-black">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* ... (keep header) */}
                 <div className="flex justify-between items-center mb-12">
                     <div>
                         <Link
@@ -165,9 +173,25 @@ export default function AdminDashboard() {
                     <div className="lg:col-span-1">
                         <div className="bg-white p-6 border-2 border-black shadow-lg sticky top-24">
                             <h2 className="text-2xl font-bold mb-6 flex items-center">
-                                <Plus className="h-6 w-6 mr-2" /> Add New Beer
+                                <Plus className="h-6 w-6 mr-2" /> Add New Item
                             </h2>
                             <form onSubmit={handleAddProduct} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-bold mb-1 text-black">Category</label>
+                                    <select
+                                        required
+                                        value={newProduct.category}
+                                        onChange={(e) =>
+                                            setNewProduct({ ...newProduct, category: e.target.value })
+                                        }
+                                        className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                    >
+                                        <option value="BEER">Beer</option>
+                                        <option value="GIFTBOX">Giftbox</option>
+                                        <option value="GLASS">Glassware</option>
+                                        <option value="MERCH">Merchandise</option>
+                                    </select>
+                                </div>
                                 <div>
                                     <label className="block text-sm font-bold mb-1 text-black">Name</label>
                                     <input
@@ -180,51 +204,56 @@ export default function AdminDashboard() {
                                         className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
                                     />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-bold mb-1 text-black">
-                                            Style
-                                        </label>
-                                        <input
-                                            required
-                                            type="text"
-                                            value={newProduct.style}
-                                            onChange={(e) =>
-                                                setNewProduct({ ...newProduct, style: e.target.value })
-                                            }
-                                            className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
-                                        />
+
+                                {newProduct.category === 'BEER' && (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-bold mb-1 text-black">
+                                                Style
+                                            </label>
+                                            <input
+                                                required
+                                                type="text"
+                                                value={newProduct.style}
+                                                onChange={(e) =>
+                                                    setNewProduct({ ...newProduct, style: e.target.value })
+                                                }
+                                                className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold mb-1 text-black">ABV</label>
+                                            <input
+                                                required
+                                                type="text"
+                                                value={newProduct.abv}
+                                                onChange={(e) =>
+                                                    setNewProduct({ ...newProduct, abv: e.target.value })
+                                                }
+                                                className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                            />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-bold mb-1 text-black">ABV</label>
-                                        <input
-                                            required
-                                            type="text"
-                                            value={newProduct.abv}
-                                            onChange={(e) =>
-                                                setNewProduct({ ...newProduct, abv: e.target.value })
-                                            }
-                                            className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
-                                        />
-                                    </div>
-                                </div>
+                                )}
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-bold mb-1 text-black">
-                                            Volume
-                                        </label>
-                                        <input
-                                            required
-                                            type="text"
-                                            value={newProduct.volume}
-                                            onChange={(e) =>
-                                                setNewProduct({ ...newProduct, volume: e.target.value })
-                                            }
-                                            className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
-                                        />
-                                    </div>
-                                    <div>
+                                    {['BEER', 'GLASS', 'GIFTBOX'].includes(newProduct.category) && (
+                                        <div>
+                                            <label className="block text-sm font-bold mb-1 text-black">
+                                                Volume
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={newProduct.volume}
+                                                onChange={(e) =>
+                                                    setNewProduct({ ...newProduct, volume: e.target.value })
+                                                }
+                                                placeholder="e.g. 33cl"
+                                                className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                            />
+                                        </div>
+                                    )}
+                                    <div className={['BEER', 'GLASS', 'GIFTBOX'].includes(newProduct.category) ? "" : "col-span-2"}>
                                         <label className="block text-sm font-bold mb-1 text-black">
                                             Price (€)
                                         </label>
@@ -389,19 +418,16 @@ export default function AdminDashboard() {
                                             </td>
                                             <td className="px-4 py-2 border-r-2 border-black">
                                                 <div className="text-sm font-bold text-brewery-dark">{product.name}</div>
+                                                <div className="text-xs text-gray-500 font-bold capitalize">
+                                                    {product.category ? product.category.toLowerCase() : 'beer'}
+                                                </div>
                                             </td>
                                             <td className="px-4 py-2 whitespace-nowrap text-center border-r-2 border-black">
                                                 <div className="text-sm font-bold text-black">€ {product.price.toFixed(2)}</div>
                                             </td>
-                                            <td className="px-4 py-2 whitespace-nowrap text-center border-r-2 border-black">
-                                                <div className="flex flex-col items-center">
-                                                    <span className={`px-2 inline-flex text-xs leading-5 font-bold rounded-full border border-black mb-1 ${product.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                                                        }`}>
-                                                        {product.inStock ? "In" : "Out"}
-                                                    </span>
-                                                    <span className="text-xs font-bold text-gray-500">
-                                                        {product.stockCount}
-                                                    </span>
+                                            <td className={`px-4 py-2 whitespace-nowrap text-center border-r-2 border-black ${product.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                                                <div className="text-sm font-bold">
+                                                    {product.stockCount}
                                                 </div>
                                             </td>
                                             <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium">

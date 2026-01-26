@@ -16,6 +16,7 @@
     "theme_color": "#ffffff",
     "background_color": "#ffffff",
     "start_url": "/admin/dashboard",
+    "scope": "/",
     "display": "standalone",
     "orientation": "portrait"
 }

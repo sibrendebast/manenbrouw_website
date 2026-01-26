@@ -45,6 +45,13 @@ export default function AdminDashboard() {
     const handleSubscribe = async () => {
         setLoading(true);
         try {
+            const permission = await Notification.requestPermission();
+            if (permission !== "granted") {
+                alert("Permission denied. Please enable notifications in your browser settings.");
+                setLoading(false);
+                return;
+            }
+
             const registration = await navigator.serviceWorker.ready;
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
@@ -89,8 +96,8 @@ export default function AdminDashboard() {
                             onClick={handleSubscribe}
                             disabled={isSubscribed || loading}
                             className={`flex items-center font-bold px-4 py-2 rounded-md transition-colors ${isSubscribed
-                                    ? "bg-green-100 text-green-700 cursor-default"
-                                    : "bg-brewery-dark text-white hover:opacity-90"
+                                ? "bg-green-100 text-green-700 cursor-default"
+                                : "bg-brewery-dark text-white hover:opacity-90"
                                 }`}
                         >
                             {isSubscribed ? <Bell className="h-5 w-5 mr-2" /> : <BellOff className="h-5 w-5 mr-2" />}

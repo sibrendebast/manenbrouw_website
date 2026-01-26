@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
-import { getProducts, createProduct, deleteProduct, updateStock, updateStockCount, updatePrice, toggleHidden } from "@/app/actions/productActions";
+import { getProducts, createProduct, deleteProduct, toggleHidden } from "@/app/actions/productActions";
 import { Plus, Trash2, LogOut, Upload, X, RefreshCw, ArrowLeft, Pencil, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -353,117 +353,98 @@ export default function AdminDashboard() {
                     {/* Product List */}
                     <div className="lg:col-span-2 space-y-6">
                         <h2 className="text-2xl font-bold mb-6">Current Inventory</h2>
-                        {products.map((product: any) => (
-                            <div
-                                key={product.id}
-                                className="bg-white p-6 border-2 border-black flex flex-col sm:flex-row gap-6 items-center"
-                            >
-                                <div className="relative h-32 w-32 flex-shrink-0 border-2 border-black">
-                                    <Image
-                                        src={(!product.images || product.images.length === 0 || product.images[0].includes("placehold.co")) ? "/logo.png" : product.images[0]}
-                                        alt={product.name}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
-                                <div className="flex-grow text-center sm:text-left">
-                                    <h3 className="text-xl font-bold text-brewery-dark">
-                                        {product.name}
-                                    </h3>
-                                    <p className="text-sm text-black font-semibold mb-2">
-                                        {product.style} • {product.abv} • BTW: {product.btwCategory || 21}%
-                                    </p>
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <span className="text-brewery-green font-bold text-lg">€</span>
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            className="w-24 px-2 py-1 border-2 border-black font-bold text-lg text-brewery-green"
-                                            defaultValue={product.price}
-                                            onBlur={async (e) => {
-                                                const newPrice = parseFloat(e.target.value);
-                                                if (newPrice !== product.price) {
-                                                    await updatePrice(product.id, newPrice);
-                                                    loadProducts();
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="flex items-center justify-center sm:justify-start gap-4">
-                                        <label className="flex items-center cursor-pointer">
-                                            <div className="relative">
-                                                <input
-                                                    type="checkbox"
-                                                    className="sr-only"
-                                                    checked={product.inStock}
-                                                    onChange={async (e) => {
-                                                        await updateStock(product.id, e.target.checked);
-                                                        loadProducts();
-                                                    }}
-                                                />
-                                                <div
-                                                    className={`block w-14 h-8 rounded-full border-2 border-black transition-colors ${product.inStock ? "bg-green-500" : "bg-gray-300"
-                                                        }`}
-                                                ></div>
-                                                <div
-                                                    className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full border-2 border-black transition-transform ${product.inStock ? "transform translate-x-6" : ""
-                                                        }`}
-                                                ></div>
-                                            </div>
-                                            <span className="ml-3 font-bold text-sm text-black">
-                                                {product.inStock ? "In Stock" : "Out of Stock"}
-                                            </span>
-                                        </label>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-bold text-sm text-black">Stock:</span>
-                                            <input
-                                                type="number"
-                                                className="w-20 px-2 py-1 border-2 border-black"
-                                                value={product.stockCount}
-                                                onChange={async (e) => {
-                                                    // Optimistic update could be done here, but for now just trigger action
-                                                    await updateStockCount(product.id, parseInt(e.target.value));
-                                                    loadProducts();
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                <Link
-                                    href={`/admin/products/${product.id}`}
-                                    className="p-3 text-blue-600 hover:bg-blue-50 border-2 border-transparent hover:border-blue-600 transition-all rounded-none"
-                                    title="Edit Product"
-                                >
-                                    <Pencil className="h-6 w-6" />
-                                </Link>
-                                <button
-                                    onClick={async () => {
-                                        await toggleHidden(product.id, !product.isHidden);
-                                        loadProducts();
-                                    }}
-                                    className={`p-3 border-2 border-transparent transition-all rounded-none ${product.isHidden
-                                        ? "text-gray-400 hover:text-gray-600 hover:bg-gray-50 hover:border-gray-400"
-                                        : "text-indigo-600 hover:bg-indigo-50 hover:border-indigo-600"
-                                        }`}
-                                    title={product.isHidden ? "Show Product" : "Hide Product"}
-                                >
-                                    {product.isHidden ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        if (confirm('Are you sure?')) {
-                                            await deleteProduct(product.id);
-                                            loadProducts();
-                                        }
-                                    }}
-                                    className="p-3 text-red-600 hover:bg-red-50 border-2 border-transparent hover:border-red-600 transition-all rounded-none"
-                                    title="Remove Product"
-                                >
-                                    <Trash2 className="h-6 w-6" />
-                                </button>
-                            </div>
-
-                        ))}
+                        <div className="bg-white border-2 border-black overflow-x-auto">
+                            <table className="min-w-full divide-y-2 divide-black">
+                                <thead className="bg-gray-100">
+                                    <tr>
+                                        <th scope="col" className="px-4 py-2 text-left text-xs font-bold text-black uppercase tracking-wider border-r-2 border-black">
+                                            Image
+                                        </th>
+                                        <th scope="col" className="px-4 py-2 text-left text-xs font-bold text-black uppercase tracking-wider border-r-2 border-black">
+                                            Product
+                                        </th>
+                                        <th scope="col" className="px-4 py-2 text-center text-xs font-bold text-black uppercase tracking-wider border-r-2 border-black">
+                                            Price
+                                        </th>
+                                        <th scope="col" className="px-4 py-2 text-center text-xs font-bold text-black uppercase tracking-wider border-r-2 border-black">
+                                            Stock
+                                        </th>
+                                        <th scope="col" className="px-4 py-2 text-center text-xs font-bold text-black uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y-2 divide-black bg-white">
+                                    {products.map((product: any) => (
+                                        <tr key={product.id} className="hover:bg-gray-50">
+                                            <td className="px-4 py-2 whitespace-nowrap border-r-2 border-black w-14">
+                                                <div className="relative h-10 w-10 border border-black">
+                                                    <Image
+                                                        src={(!product.images || product.images.length === 0 || product.images[0].includes("placehold.co")) ? "/logo.png" : product.images[0]}
+                                                        alt={product.name}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-2 border-r-2 border-black">
+                                                <div className="text-sm font-bold text-brewery-dark">{product.name}</div>
+                                            </td>
+                                            <td className="px-4 py-2 whitespace-nowrap text-center border-r-2 border-black">
+                                                <div className="text-sm font-bold text-black">€ {product.price.toFixed(2)}</div>
+                                            </td>
+                                            <td className="px-4 py-2 whitespace-nowrap text-center border-r-2 border-black">
+                                                <div className="flex flex-col items-center">
+                                                    <span className={`px-2 inline-flex text-xs leading-5 font-bold rounded-full border border-black mb-1 ${product.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                                        }`}>
+                                                        {product.inStock ? "In" : "Out"}
+                                                    </span>
+                                                    <span className="text-xs font-bold text-gray-500">
+                                                        {product.stockCount}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium">
+                                                <div className="flex justify-center items-center space-x-2">
+                                                    <Link
+                                                        href={`/admin/products/${product.id}`}
+                                                        className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-1.5 border border-black transition-colors"
+                                                        title="Edit Product"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Link>
+                                                    <button
+                                                        onClick={async () => {
+                                                            await toggleHidden(product.id, !product.isHidden);
+                                                            loadProducts();
+                                                        }}
+                                                        className={`p-1.5 border border-black transition-colors ${product.isHidden
+                                                            ? "text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100"
+                                                            : "text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100"
+                                                            }`}
+                                                        title={product.isHidden ? "Show Product" : "Hide Product"}
+                                                    >
+                                                        {product.isHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (confirm('Are you sure?')) {
+                                                                await deleteProduct(product.id);
+                                                                loadProducts();
+                                                            }
+                                                        }}
+                                                        className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-1.5 border border-black transition-colors"
+                                                        title="Remove Product"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div >

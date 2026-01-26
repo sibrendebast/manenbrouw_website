@@ -88,6 +88,31 @@ export async function deleteAdminUser(id: string) {
     }
 }
 
+export async function updateAdminPassword(id: string, formData: FormData) {
+    const password = formData.get("password") as string;
+
+    if (!password || password.length < 6) {
+        return { success: false, error: "Invalid input. Password must be at least 6 characters." };
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await prisma.adminUser.update({
+            where: { id },
+            data: {
+                password: hashedPassword,
+            },
+        });
+
+        revalidatePath("/admin/users");
+        return { success: true };
+    } catch (error) {
+        console.error("Update password error:", error);
+        return { success: false, error: "Failed to update password" };
+    }
+}
+
 export async function getAdminUsers() {
     try {
         const users = await prisma.adminUser.findMany({

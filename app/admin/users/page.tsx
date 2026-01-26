@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
-import { createAdminUser, deleteAdminUser, getAdminUsers } from "@/app/actions/authActions";
-import { Users, ArrowLeft, Trash2, Plus, Shield } from "lucide-react";
+import { createAdminUser, deleteAdminUser, getAdminUsers, updateAdminPassword } from "@/app/actions/authActions";
+import { Users, ArrowLeft, Trash2, Plus, Shield, Key } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminUsersPage() {
@@ -20,7 +20,15 @@ export default function AdminUsersPage() {
         confirmPassword: "",
     });
     const [loading, setLoading] = useState(false);
+
     const [error, setError] = useState("");
+
+    // Password Reset State
+    const [editingUserId, setEditingUserId] = useState<string | null>(null);
+    const [resetPassword, setResetPassword] = useState({
+        password: "",
+        confirmPassword: ""
+    });
 
     const loadUsers = async () => {
         const data = await getAdminUsers();
@@ -91,6 +99,42 @@ export default function AdminUsersPage() {
         }
     };
 
+    const handleUpdatePassword = async (e: React.FormEvent, id: string) => {
+        e.preventDefault();
+        setLoading(true);
+
+        if (resetPassword.password !== resetPassword.confirmPassword) {
+            alert("Passwords do not match");
+            setLoading(false);
+            return;
+        }
+
+        // Basic complexity check (same as creation)
+        const hasUpperCase = /[A-Z]/.test(resetPassword.password);
+        const hasLowerCase = /[a-z]/.test(resetPassword.password);
+        const hasNumbers = /[0-9]/.test(resetPassword.password);
+
+        if (resetPassword.password.length < 8 || !hasUpperCase || !hasLowerCase || !hasNumbers) {
+            alert("Password must be at least 8 chars long and contain uppercase, lowercase, and numbers");
+            setLoading(false);
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("password", resetPassword.password);
+
+        const result = await updateAdminPassword(id, formData);
+
+        if (result.success) {
+            alert("Password updated successfully");
+            setEditingUserId(null);
+            setResetPassword({ password: "", confirmPassword: "" });
+        } else {
+            alert(result.error || "Failed to update password");
+        }
+        setLoading(false);
+    };
+
     if (!mounted || !isAuthenticated) return null;
 
     return (
@@ -157,7 +201,7 @@ export default function AdminUsersPage() {
                                     <input
                                         required
                                         type="password"
-                                        value={newUser.confirmPassword}
+                                        value={newUser.confirmPassword || ""}
                                         onChange={(e) =>
                                             setNewUser({ ...newUser, confirmPassword: e.target.value })
                                         }
@@ -187,32 +231,94 @@ export default function AdminUsersPage() {
                             </div>
                         ) : (
                             users.map((user: any) => (
-                                <div
-                                    key={user.id}
-                                    className="bg-white p-6 border-2 border-black flex flex-col sm:flex-row justify-between items-center"
-                                >
-                                    <div className="flex items-center mb-4 sm:mb-0">
-                                        <div className="bg-gray-100 p-3 rounded-full mr-4 border-2 border-black">
-                                            <Shield className="h-6 w-6 text-brewery-dark" />
+                                <div key={user.id} className="flex flex-col">
+                                    <div
+                                        className="bg-white p-6 border-2 border-black flex flex-col sm:flex-row justify-between items-center"
+                                    >
+                                        <div className="flex items-center mb-4 sm:mb-0">
+                                            <div className="bg-gray-100 p-3 rounded-full mr-4 border-2 border-black">
+                                                <Shield className="h-6 w-6 text-brewery-dark" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xl font-bold text-brewery-dark">
+                                                    {user.username}
+                                                </h3>
+                                                <p className="text-sm text-gray-500">
+                                                    Created: {new Date(user.createdAt).toLocaleDateString()}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 className="text-xl font-bold text-brewery-dark">
-                                                {user.username}
-                                            </h3>
-                                            <p className="text-sm text-gray-500">
-                                                Created: {new Date(user.createdAt).toLocaleDateString()}
-                                            </p>
+
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    if (editingUserId === user.id) {
+                                                        setEditingUserId(null);
+                                                    } else {
+                                                        setEditingUserId(user.id);
+                                                        setResetPassword({ password: "", confirmPassword: "" });
+                                                    }
+                                                }}
+                                                className="p-3 text-blue-600 hover:bg-blue-50 border-2 border-transparent hover:border-blue-600 transition-all rounded-none flex items-center justify-center"
+                                                title="Change Password"
+                                            >
+                                                <Key className="h-6 w-6" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteUser(user.id, user.username)}
+                                                className="p-3 text-red-600 hover:bg-red-50 border-2 border-transparent hover:border-red-600 transition-all rounded-none flex items-center justify-center"
+                                                title="Remove User"
+                                                disabled={users.length <= 1} // Prevent deleting last user
+                                            >
+                                                <Trash2 className="h-6 w-6" />
+                                            </button>
                                         </div>
                                     </div>
-
-                                    <button
-                                        onClick={() => handleDeleteUser(user.id, user.username)}
-                                        className="p-3 text-red-600 hover:bg-red-50 border-2 border-transparent hover:border-red-600 transition-all rounded-none flex items-center justify-center"
-                                        title="Remove User"
-                                        disabled={users.length <= 1} // Prevent deleting last user
-                                    >
-                                        <Trash2 className="h-6 w-6" />
-                                    </button>
+                                    {editingUserId === user.id && (
+                                        <div className="bg-gray-50 p-6 border-t-2 border-black -mt-0.5 border-x-2 border-b-2 mb-6 mx-0">
+                                            <h4 className="font-bold mb-4">Reset Password for {user.username}</h4>
+                                            <form onSubmit={(e) => handleUpdatePassword(e, user.id)} className="space-y-4">
+                                                <div>
+                                                    <input
+                                                        required
+                                                        type="password"
+                                                        value={resetPassword.password}
+                                                        onChange={(e) => setResetPassword({ ...resetPassword, password: e.target.value })}
+                                                        className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                                        placeholder="New Password (min 8 chars, 1 upper, 1 lower, 1 number)"
+                                                        minLength={8}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <input
+                                                        required
+                                                        type="password"
+                                                        value={resetPassword.confirmPassword}
+                                                        onChange={(e) => setResetPassword({ ...resetPassword, confirmPassword: e.target.value })}
+                                                        className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                                        placeholder="Confirm New Password"
+                                                        minLength={8}
+                                                    />
+                                                </div>
+                                                <div className="flex justify-end gap-3">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setEditingUserId(null)}
+                                                        className="px-4 py-2 border-2 border-gray-300 hover:border-black font-bold text-gray-600"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        type="submit"
+                                                        disabled={loading}
+                                                        className="px-4 py-2 bg-brewery-dark text-white font-bold border-2 border-black hover:bg-opacity-90 disabled:opacity-50"
+                                                    >
+                                                        {loading ? "Updating..." : "Update Password"}
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    )}
                                 </div>
                             ))
                         )}

@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
-import { getOrders, updateOrderStatus } from "@/app/actions/orderActions";
-import { Package, ArrowLeft, FileText } from "lucide-react";
+import { getOrders, updateOrderStatus, deleteOrder } from "@/app/actions/orderActions";
+import { Package, ArrowLeft, FileText, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminOrdersPage() {
@@ -96,27 +96,41 @@ export default function AdminOrdersPage() {
                                                 </p>
                                             </div>
                                             <div className="flex flex-col items-end gap-2">
-                                                <select
-                                                    value={order.status}
-                                                    onChange={async (e) => {
-                                                        await updateOrderStatus(order.id, e.target.value);
-                                                        loadOrders();
-                                                    }}
-                                                    className={`px-4 py-2 border-2 border-black font-bold ${order.status === "paid"
-                                                        ? "bg-green-100"
-                                                        : order.status === "completed"
-                                                            ? "bg-blue-100"
-                                                            : order.status === "cancelled"
-                                                                ? "bg-red-100"
-                                                                : "bg-yellow-100"
-                                                        }`}
-                                                >
-                                                    <option value="pending_payment">Pending Payment</option>
-                                                    <option value="paid">Paid</option>
-                                                    <option value="shipped">Shipped</option>
-                                                    <option value="completed">Completed</option>
-                                                    <option value="cancelled">Cancelled</option>
-                                                </select>
+                                                <div className="flex items-center gap-2">
+                                                    <select
+                                                        value={order.status}
+                                                        onChange={async (e) => {
+                                                            await updateOrderStatus(order.id, e.target.value);
+                                                            loadOrders();
+                                                        }}
+                                                        className={`px-4 py-2 border-2 border-black font-bold ${order.status === "paid"
+                                                            ? "bg-green-100"
+                                                            : order.status === "completed"
+                                                                ? "bg-blue-100"
+                                                                : order.status === "cancelled"
+                                                                    ? "bg-red-100"
+                                                                    : "bg-yellow-100"
+                                                            }`}
+                                                    >
+                                                        <option value="pending_payment">Pending Payment</option>
+                                                        <option value="paid">Paid</option>
+                                                        <option value="shipped">Shipped</option>
+                                                        <option value="completed">Completed</option>
+                                                        <option value="cancelled">Cancelled</option>
+                                                    </select>
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (confirm("Are you sure you want to delete this order? This action cannot be undone.")) {
+                                                                await deleteOrder(order.id);
+                                                                loadOrders();
+                                                            }
+                                                        }}
+                                                        className="p-2 text-red-600 hover:bg-red-50 border-2 border-transparent hover:border-red-600 transition-all rounded-none"
+                                                        title="Delete Order"
+                                                    >
+                                                        <Trash2 className="h-5 w-5" />
+                                                    </button>
+                                                </div>
                                                 {order.invoiceUrl && (
                                                     <a
                                                         href={order.invoiceUrl}

@@ -13,11 +13,11 @@ export default function ShopContent({ products }: { products: any[] }) {
     );
 
     const categories = [
-        { id: "ALL", label: t("shop.all") || "All" },
-        { id: "BEER", label: "Beers" },
-        { id: "GIFTBOX", label: "Giftboxes" },
-        { id: "GLASS", label: "Glassware" },
-        { id: "MERCH", label: "Merch" },
+        { id: "ALL", label: t("shop.categories.all") || "All" },
+        { id: "BEER", label: t("shop.categories.beer") || "Beers" },
+        { id: "GIFTBOX", label: t("shop.categories.giftbox") || "Giftboxes" },
+        { id: "GLASS", label: t("shop.categories.glass") || "Glassware" },
+        { id: "MERCH", label: t("shop.categories.merch") || "Merch" },
     ];
 
     return (
@@ -35,8 +35,8 @@ export default function ShopContent({ products }: { products: any[] }) {
                         <button
                             key={category.id}
                             onClick={() => setActiveCategory(category.id)}
-                            className={`px-6 py-2 rounded-full font-bold border-2 border-black transition-all ${activeCategory === category.id
-                                ? "bg-brewery-dark text-white"
+                            className={`px-6 py-2 rounded-none font-bold border-2 border-black transition-all ${activeCategory === category.id
+                                ? "bg-brewery-green text-white"
                                 : "bg-white text-black hover:bg-gray-100"
                                 }`}
                         >

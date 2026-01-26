@@ -61,7 +61,14 @@
         "subtitle": "Browse our current selection of small-batch craft beers.",
         "addToCart": "Add to Cart",
         "outOfStock": "Out of Stock",
-        "inStock": "In Stock"
+        "inStock": "In Stock",
+        "categories": {
+            "all": "All",
+            "beer": "Beers",
+            "giftbox": "Giftboxes",
+            "glass": "Glassware",
+            "merch": "Merch"
+        }
     },
     "productDetails": {
         "notFoundTitle": "Product not found",

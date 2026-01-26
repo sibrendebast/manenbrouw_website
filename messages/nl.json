@@ -61,7 +61,14 @@
         "subtitle": "Bekijk onze huidige selectie van kleinschalige ambachtelijke bieren.",
         "addToCart": "Toevoegen",
         "outOfStock": "Niet op Voorraad",
-        "inStock": "Op Voorraad"
+        "inStock": "Op Voorraad",
+        "categories": {
+            "all": "Alles",
+            "beer": "Bieren",
+            "giftbox": "Geschenkdozen",
+            "glass": "Glazen",
+            "merch": "Merchandise"
+        }
     },
     "productDetails": {
         "notFoundTitle": "Product niet gevonden",

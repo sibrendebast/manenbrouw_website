@@ -70,9 +70,9 @@ export default function AdminDashboard() {
                 alert("Failed to save subscription: " + result.error);
             }
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Subscription error", error);
-            alert("Failed to subscribe. Make sure you accepted permissions.");
+            alert("Failed to subscribe: " + (error.message || "Unknown error"));
         }
         setLoading(false);
     };

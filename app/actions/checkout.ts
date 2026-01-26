@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Product } from "@/data/products";
 import { safeGetProduct } from "@/lib/product-utils";
 import { generateOrderNumber } from "@/lib/orderNumber";
+import { sendNotificationToAdmins } from "@/app/actions/notificationActions";
 
 export interface CartItem extends Product {
     quantity: number;
@@ -200,6 +201,13 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                 console.error("Failed to subscribe to newsletter:", error);
                 // Don't fail the order if newsletter subscription fails
             }
+        }
+
+        // Send Push Notification to Admins
+        try {
+            await sendNotificationToAdmins(`New order ${(order as any).orderNumber} received from ${customerName}!`);
+        } catch (error) {
+            console.error("Failed to send notification:", error);
         }
 
         return { success: true, orderId: order.id };

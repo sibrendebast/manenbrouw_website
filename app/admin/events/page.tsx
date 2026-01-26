@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
-import { getEvents, createEvent, deleteEvent, updateEvent } from "@/app/actions/eventActions";
+import { getEvents, createEvent, deleteEvent, updateEvent, toggleEventHidden } from "@/app/actions/eventActions";
 import { getEventTickets } from "@/app/actions/ticketActions";
-import { Plus, Trash2, LogOut, Upload, X, ArrowLeft, Calendar, MapPin, Users, Euro, Edit, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Trash2, LogOut, Upload, X, ArrowLeft, Calendar, MapPin, Users, Euro, Edit, ChevronDown, ChevronUp, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -33,7 +33,16 @@ export default function AdminEventsPage() {
 
     const loadEvents = async () => {
         const data = await getEvents();
-        setEvents(data);
+        // Sort: Hidden events at the bottom
+        // Sort: Hidden events at the bottom
+        // Create a copy before sorting to avoid mutating read-only array from server action
+        const sorted = [...data].sort((a: any, b: any) => {
+            if (a.isHidden && !b.isHidden) return 1;
+            if (!a.isHidden && b.isHidden) return -1;
+            // Then by date
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+        });
+        setEvents(sorted);
     };
 
     useEffect(() => {
@@ -404,6 +413,20 @@ export default function AdminEventsPage() {
                                             >
                                                 <Edit className="h-6 w-6" />
                                             </Link>
+                                            <button
+                                                type="button"
+                                                onClick={async () => {
+                                                    await toggleEventHidden(event.id, !event.isHidden);
+                                                    loadEvents();
+                                                }}
+                                                className={`p-3 border-2 border-transparent transition-all rounded-none flex items-center justify-center ${event.isHidden
+                                                    ? "text-gray-400 hover:text-gray-600 hover:bg-gray-50 hover:border-gray-400"
+                                                    : "text-indigo-600 hover:bg-indigo-50 hover:border-indigo-600"
+                                                    }`}
+                                                title={event.isHidden ? "Show Event" : "Hide Event"}
+                                            >
+                                                {event.isHidden ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                                            </button>
                                             <button
                                                 onClick={async () => {
                                                     if (confirm("Are you sure you want to delete this event?")) {

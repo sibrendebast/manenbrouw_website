@@ -98,3 +98,18 @@ export async function deleteEvent(id: string) {
         return { success: false, error: "Failed to delete event" };
     }
 }
+
+export async function toggleEventHidden(id: string, isHidden: boolean) {
+    try {
+        await prisma.event.update({
+            where: { id },
+            data: { isHidden }
+        });
+        revalidatePath("/admin/events");
+        revalidatePath("/events");
+        return { success: true };
+    } catch (error) {
+        console.error("Error toggling event visibility:", error);
+        return { success: false, error: "Failed to toggle event visibility" };
+    }
+}

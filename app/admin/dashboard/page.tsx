@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
-import { Package, Beer, LogOut, Mail, Calendar } from "lucide-react";
+import { Package, Beer, LogOut, Mail, Calendar, Users } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminDashboard() {
@@ -109,6 +109,24 @@ export default function AdminDashboard() {
                             </h2>
                             <p className="text-gray-600">
                                 Create and manage brewery events
+                            </p>
+                        </div>
+                    </Link>
+
+                    {/* Users Management Card */}
+                    <Link
+                        href="/admin/users"
+                        className="bg-white p-8 border-2 border-black hover:border-brewery-green transition-all group"
+                    >
+                        <div className="flex flex-col items-center text-center">
+                            <div className="bg-brewery-dark p-6 mb-6 group-hover:bg-brewery-green transition-colors">
+                                <Users className="h-16 w-16 text-white" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-brewery-dark mb-3">
+                                User Management
+                            </h2>
+                            <p className="text-gray-600">
+                                Manage admin users and access
                             </p>
                         </div>
                     </Link>

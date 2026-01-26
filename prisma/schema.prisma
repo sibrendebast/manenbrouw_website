@@ -50,7 +50,7 @@ model Order {
 model OrderItem {
   id          String  @id @default(uuid())
   orderId     String
-  order       Order   @relation(fields: [orderId], references: [id])
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId   String
   product     Product @relation(fields: [productId], references: [id])
   quantity    Int
@@ -76,6 +76,7 @@ model Event {
   ticketPrice Float?   // Only for paid events
   capacity    Int?     // Maximum number of attendees
   ticketsSold Int      @default(0)
+  isHidden    Boolean  @default(false)
   image       String?  // Event image URL
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -85,12 +86,20 @@ model Event {
 model EventTicket {
   id            String   @id @default(uuid())
   eventId       String
-  event         Event    @relation(fields: [eventId], references: [id])
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   orderId       String?
-  order         Order?   @relation(fields: [orderId], references: [id])
+  order         Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   buyerName     String
   buyerEmail    String
   quantity      Int      @default(1)
   totalPrice    Float
   purchasedAt   DateTime @default(now())
+}
+
+model AdminUser {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String   // Hashed password
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

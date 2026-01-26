@@ -10,14 +10,19 @@ import { useI18n } from "@/lib/i18n-context";
 export default function EventsPage() {
     const [events, setEvents] = useState<any[]>([]);
     const [mounted, setMounted] = useState(false);
+    const [loading, setLoading] = useState(true);
     const addTicket = useCartStore((state) => state.addTicket);
     const { t } = useI18n();
 
     useEffect(() => {
         setMounted(true);
         const loadEvents = async () => {
-            const data = await getEvents();
-            setEvents(data);
+            try {
+                const data = await getEvents();
+                setEvents(data.filter((e: any) => !e.isHidden));
+            } finally {
+                setLoading(false);
+            }
         };
         loadEvents();
     }, []);
@@ -206,7 +211,7 @@ export default function EventsPage() {
                 )}
 
                 {/* No Upcoming Events Message */}
-                {upcomingEvents.length === 0 && (
+                {!loading && upcomingEvents.length === 0 && (
                     <div className="text-center py-16 bg-gray-50 border-2 border-black mb-16">
                         <Clock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                         <h2 className="text-2xl font-bold text-brewery-dark mb-2">
@@ -215,6 +220,14 @@ export default function EventsPage() {
                         <p className="text-gray-600 max-w-md mx-auto">
                             {t("events.noEventsMessage")}
                         </p>
+                    </div>
+                )}
+
+                {/* Loading State */}
+                {loading && (
+                    <div className="text-center py-16">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brewery-green mx-auto mb-4"></div>
+                        <p className="text-gray-600">{t("common.loading") || "Loading events..."}</p>
                     </div>
                 )}
 

@@ -3,22 +3,29 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
+import { loginAction } from "@/app/actions/authActions";
 import { Lock } from "lucide-react";
 
 export default function AdminLogin() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
     const login = useAdminStore((state) => state.login);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (username === "admin" && password === "beer123") {
+        setLoading(true);
+        setError("");
+
+        const formData = new FormData(e.currentTarget);
+        const result = await loginAction(null, formData);
+
+        if (result.success) {
             login();
             router.push("/admin/dashboard");
         } else {
-            setError("Invalid credentials");
+            setError(result.error || "Login failed");
+            setLoading(false);
         }
     };
 
@@ -38,15 +45,15 @@ export default function AdminLogin() {
                         {error}
                     </div>
                 )}
-                <form onSubmit={handleLogin} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         <label className="block text-sm font-bold mb-2">
                             Username
                         </label>
                         <input
+                            name="username"
                             type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            required
                             className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
                             placeholder="Enter username"
                         />
@@ -56,18 +63,19 @@ export default function AdminLogin() {
                             Password
                         </label>
                         <input
+                            name="password"
                             type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            required
                             className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
                             placeholder="Enter password"
                         />
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-brewery-dark text-white font-bold py-3 px-4 hover:bg-opacity-90 transition-colors border-2 border-black"
+                        disabled={loading}
+                        className="w-full bg-brewery-dark text-white font-bold py-3 px-4 hover:bg-opacity-90 transition-colors border-2 border-black disabled:opacity-50"
                     >
-                        Login
+                        {loading ? "Logging in..." : "Login"}
                     </button>
                 </form>
             </div>

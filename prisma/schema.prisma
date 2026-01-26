@@ -102,4 +102,13 @@ model AdminUser {
   password  String   // Hashed password
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  pushSubscriptions PushSubscription[]
+}
+
+model PushSubscription {
+  id        String    @id @default(uuid())
+  endpoint  String
+  keys      Json      // Stores p256dh and auth keys
+  adminId   String
+  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
 }

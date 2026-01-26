@@ -20,6 +20,18 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Man & Brouw",
   description: "Craft Brewery in Wilsele",
+  manifest: "/manifest.json",
+  themeColor: "#ffffff",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "ManEnBrouw",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  },
 };
 
 export default function RootLayout({

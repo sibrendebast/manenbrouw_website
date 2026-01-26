@@ -34,9 +34,9 @@ export async function subscribeUser(subscription: webPush.PushSubscription) {
         });
 
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Subscription error:", error);
-        return { success: false, error: "Failed to subscribe" };
+        return { success: false, error: "Failed to subscribe: " + (error.message || String(error)) };
     }
 }
 

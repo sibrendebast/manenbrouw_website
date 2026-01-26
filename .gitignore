@@ -46,3 +46,7 @@ next-env.d.ts
 .env*.local
 
 .history/
+
+# PWA
+public/sw.js
+public/workbox-*.js

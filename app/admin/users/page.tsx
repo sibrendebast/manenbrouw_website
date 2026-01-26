@@ -26,6 +26,7 @@ export default function AdminUsersPage() {
     // Password Reset State
     const [editingUserId, setEditingUserId] = useState<string | null>(null);
     const [resetPassword, setResetPassword] = useState({
+        currentPassword: "",
         password: "",
         confirmPassword: ""
     });
@@ -121,14 +122,15 @@ export default function AdminUsersPage() {
         }
 
         const formData = new FormData();
-        formData.append("password", resetPassword.password);
+        formData.append("currentPassword", resetPassword.currentPassword);
+        formData.append("newPassword", resetPassword.password);
 
         const result = await updateAdminPassword(id, formData);
 
         if (result.success) {
             alert("Password updated successfully");
             setEditingUserId(null);
-            setResetPassword({ password: "", confirmPassword: "" });
+            setResetPassword({ currentPassword: "", password: "", confirmPassword: "" });
         } else {
             alert(result.error || "Failed to update password");
         }
@@ -256,7 +258,7 @@ export default function AdminUsersPage() {
                                                         setEditingUserId(null);
                                                     } else {
                                                         setEditingUserId(user.id);
-                                                        setResetPassword({ password: "", confirmPassword: "" });
+                                                        setResetPassword({ currentPassword: "", password: "", confirmPassword: "" });
                                                     }
                                                 }}
                                                 className="p-3 text-blue-600 hover:bg-blue-50 border-2 border-transparent hover:border-blue-600 transition-all rounded-none flex items-center justify-center"
@@ -278,6 +280,16 @@ export default function AdminUsersPage() {
                                         <div className="bg-gray-50 p-6 border-t-2 border-black -mt-0.5 border-x-2 border-b-2 mb-6 mx-0">
                                             <h4 className="font-bold mb-4">Reset Password for {user.username}</h4>
                                             <form onSubmit={(e) => handleUpdatePassword(e, user.id)} className="space-y-4">
+                                                <div>
+                                                    <input
+                                                        required
+                                                        type="password"
+                                                        value={resetPassword.currentPassword}
+                                                        onChange={(e) => setResetPassword({ ...resetPassword, currentPassword: e.target.value })}
+                                                        className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                                        placeholder="Current Password"
+                                                    />
+                                                </div>
                                                 <div>
                                                     <input
                                                         required

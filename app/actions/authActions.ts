@@ -89,14 +89,29 @@ export async function deleteAdminUser(id: string) {
 }
 
 export async function updateAdminPassword(id: string, formData: FormData) {
-    const password = formData.get("password") as string;
+    const currentPassword = formData.get("currentPassword") as string;
+    const newPassword = formData.get("newPassword") as string;
 
-    if (!password || password.length < 6) {
-        return { success: false, error: "Invalid input. Password must be at least 6 characters." };
+    if (!currentPassword || !newPassword || newPassword.length < 6) {
+        return { success: false, error: "Invalid input. Check all fields." };
     }
 
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await prisma.adminUser.findUnique({
+            where: { id },
+        });
+
+        if (!user) {
+            return { success: false, error: "User not found" };
+        }
+
+        const isCurrentValid = await bcrypt.compare(currentPassword, user.password);
+
+        if (!isCurrentValid) {
+            return { success: false, error: "Incorrect current password" };
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         await prisma.adminUser.update({
             where: { id },

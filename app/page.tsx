@@ -8,7 +8,7 @@ async function getFeaturedProducts() {
     const products = await prisma.product.findMany({
       take: 2,
       orderBy: { createdAt: 'desc' },
-      where: { inStock: true }
+      where: { inStock: true, isHidden: false }
     });
     return products.map((p: any) => ({
       ...p,
@@ -23,7 +23,7 @@ async function getFeaturedProducts() {
         const products = await prisma.$queryRaw`
           SELECT id, slug, name, style, abv, volume, price, description, images, "inStock", "stockCount", "createdAt", "updatedAt"
           FROM "Product"
-          WHERE "inStock" = true
+          WHERE "inStock" = true AND "isHidden" = false
           ORDER BY "createdAt" DESC
           LIMIT 2
         ` as any[];

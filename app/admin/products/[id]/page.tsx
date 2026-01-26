@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
 import { getProductById, updateProduct } from "@/app/actions/productActions";
-import { ArrowLeft, Save, Upload, X, LogOut } from "lucide-react";
+import { ArrowLeft, Save, Upload, X, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -107,6 +107,20 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         }));
     };
 
+    const moveImage = (index: number, direction: 'left' | 'right') => {
+        setProduct((prev) => {
+            const newImages = [...prev.images];
+            if (direction === 'left') {
+                if (index === 0) return prev;
+                [newImages[index - 1], newImages[index]] = [newImages[index], newImages[index - 1]];
+            } else {
+                if (index === newImages.length - 1) return prev;
+                [newImages[index], newImages[index + 1]] = [newImages[index + 1], newImages[index]];
+            }
+            return { ...prev, images: newImages };
+        });
+    };
+
     const handleUpdateProduct = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
@@ -126,7 +140,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             });
 
             if (result.success) {
-                alert("Product updated successfully");
+                // Return to products page without alert
                 router.push("/admin/products");
                 router.refresh();
             } else {
@@ -338,25 +352,56 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                 </label>
                             </div>
                             {product.images.length > 0 && (
-                                <div className="grid grid-cols-4 gap-4 mt-4">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                                     {product.images.map((img, index) => (
                                         <div
                                             key={index}
-                                            className="relative h-24 w-full border border-black"
+                                            className="relative border border-black group"
                                         >
-                                            <Image
-                                                src={img}
-                                                alt="Preview"
-                                                fill
-                                                className="object-cover"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => removeImage(index)}
-                                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md"
-                                            >
-                                                <X className="h-3 w-3" />
-                                            </button>
+                                            <div className="relative h-32 w-full bg-gray-50">
+                                                <Image
+                                                    src={img}
+                                                    alt={`Product image ${index + 1}`}
+                                                    fill
+                                                    className="object-contain" // Changed to contain to see full image
+                                                />
+                                            </div>
+
+                                            {/* Action buttons overlay */}
+                                            <div className="absolute top-1 right-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeImage(index)}
+                                                    className="bg-red-500 text-white p-1.5 shadow-md hover:bg-red-600 transition-colors border border-black"
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </button>
+                                            </div>
+
+                                            {/* Order controls */}
+                                            <div className="flex border-t-2 border-black divide-x-2 divide-black">
+                                                <button
+                                                    type="button"
+                                                    disabled={index === 0}
+                                                    onClick={() => moveImage(index, 'left')}
+                                                    className="flex-1 p-2 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center transition-colors"
+                                                    title="Move Left"
+                                                >
+                                                    <ChevronLeft className="h-5 w-5" />
+                                                </button>
+                                                <div className="px-3 flex items-center justify-center bg-gray-50 font-bold text-sm">
+                                                    {index + 1}
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    disabled={index === product.images.length - 1}
+                                                    onClick={() => moveImage(index, 'right')}
+                                                    className="flex-1 p-2 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center transition-colors"
+                                                    title="Move Right"
+                                                >
+                                                    <ChevronRight className="h-5 w-5" />
+                                                </button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

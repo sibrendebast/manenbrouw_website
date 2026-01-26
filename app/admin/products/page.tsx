@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
-import { getProducts, createProduct, deleteProduct, updateStock, updateStockCount, updatePrice } from "@/app/actions/productActions";
-import { Plus, Trash2, LogOut, Upload, X, RefreshCw, ArrowLeft, Pencil } from "lucide-react";
+import { getProducts, createProduct, deleteProduct, updateStock, updateStockCount, updatePrice, toggleHidden } from "@/app/actions/productActions";
+import { Plus, Trash2, LogOut, Upload, X, RefreshCw, ArrowLeft, Pencil, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -31,7 +31,20 @@ export default function AdminDashboard() {
 
     const loadProducts = async () => {
         const data = await getProducts();
-        setProducts(data);
+        // Sort: 1. In Stock & Not Hidden, 2. Out of Stock & Not Hidden, 3. Hidden
+        const sorted = data.sort((a: any, b: any) => {
+            if (a.isHidden && !b.isHidden) return 1;
+            if (!a.isHidden && b.isHidden) return -1;
+
+            // If both are hidden or both are visible, sort by stock if visible
+            if (!a.isHidden && !b.isHidden) {
+                if (a.inStock && !b.inStock) return -1;
+                if (!a.inStock && b.inStock) return 1;
+            }
+
+            return 0; // Keep original order (createdAt)
+        });
+        setProducts(sorted);
     };
 
     useEffect(() => {
@@ -425,6 +438,19 @@ export default function AdminDashboard() {
                                 </Link>
                                 <button
                                     onClick={async () => {
+                                        await toggleHidden(product.id, !product.isHidden);
+                                        loadProducts();
+                                    }}
+                                    className={`p-3 border-2 border-transparent transition-all rounded-none ${product.isHidden
+                                        ? "text-gray-400 hover:text-gray-600 hover:bg-gray-50 hover:border-gray-400"
+                                        : "text-indigo-600 hover:bg-indigo-50 hover:border-indigo-600"
+                                        }`}
+                                    title={product.isHidden ? "Show Product" : "Hide Product"}
+                                >
+                                    {product.isHidden ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                                </button>
+                                <button
+                                    onClick={async () => {
                                         if (confirm('Are you sure?')) {
                                             await deleteProduct(product.id);
                                             loadProducts();
@@ -436,6 +462,7 @@ export default function AdminDashboard() {
                                     <Trash2 className="h-6 w-6" />
                                 </button>
                             </div>
+
                         ))}
                     </div>
                 </div>

@@ -4,7 +4,8 @@ import ShopContent from "./ShopContent";
 export const dynamic = 'force-dynamic';
 
 export default async function ShopPage() {
-    const products = await getProducts();
+    const allProducts = await getProducts();
+    const products = allProducts.filter((p: any) => !p.isHidden);
 
     return <ShopContent products={products} />;
 }

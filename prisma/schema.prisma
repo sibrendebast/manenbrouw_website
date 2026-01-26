@@ -20,6 +20,7 @@ model Product {
   images      String   // Stored as JSON string
   inStock     Boolean  @default(true)
   stockCount  Int      @default(0)
+  isHidden    Boolean  @default(false)
   btwCategory Int?     @default(21) // BTW/VAT percentage: 0, 6, 12, or 21
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

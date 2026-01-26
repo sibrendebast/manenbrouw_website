@@ -95,3 +95,11 @@ model EventTicket {
   totalPrice    Float
   purchasedAt   DateTime @default(now())
 }
+
+model AdminUser {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String   // Hashed password
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

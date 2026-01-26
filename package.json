@@ -13,6 +13,7 @@
     "@prisma/extension-accelerate": "^3.0.0",
     "@react-email/components": "^1.0.1",
     "@stripe/stripe-js": "^8.5.3",
+    "bcryptjs": "^3.0.3",
     "cloudinary": "^2.8.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.24",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

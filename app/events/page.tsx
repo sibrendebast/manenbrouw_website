@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getEvents } from "@/app/actions/eventActions";
 import Image from "next/image";
-import { Calendar, MapPin, Users, Euro, Clock, ShoppingCart, Check } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, ShoppingCart, Check } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useI18n } from "@/lib/i18n-context";
 

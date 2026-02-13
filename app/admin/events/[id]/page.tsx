@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
 import { getEvent, updateEvent } from "@/app/actions/eventActions";
-import { ArrowLeft, Save, Upload, X, LogOut, Calendar, MapPin, Users, Euro } from "lucide-react";
+import { ArrowLeft, Save, Upload, X, LogOut, MapPin, Users, Euro } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 

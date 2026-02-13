@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
-import { getEvents, createEvent, deleteEvent, updateEvent, toggleEventHidden } from "@/app/actions/eventActions";
+import { getEvents, createEvent, deleteEvent, toggleEventHidden } from "@/app/actions/eventActions";
 import { getEventTickets } from "@/app/actions/ticketActions";
 import { Plus, Trash2, LogOut, Upload, X, ArrowLeft, Calendar, MapPin, Users, Euro, Edit, ChevronDown, ChevronUp, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";

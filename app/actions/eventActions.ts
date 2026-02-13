@@ -38,6 +38,9 @@ export async function createEvent(data: {
     ticketPrice?: number;
     capacity?: number;
     image?: string;
+    ticketSalesStartDate?: Date;
+    earlyBirdPrice?: number;
+    earlyBirdEndDate?: Date;
 }) {
     try {
         const event = await prisma.event.create({
@@ -50,6 +53,9 @@ export async function createEvent(data: {
                 ticketPrice: data.isPaid ? data.ticketPrice : null,
                 capacity: data.capacity,
                 image: data.image,
+                ticketSalesStartDate: data.ticketSalesStartDate,
+                earlyBirdPrice: data.earlyBirdPrice,
+                earlyBirdEndDate: data.earlyBirdEndDate,
             }
         });
         revalidatePath("/admin/events");
@@ -70,6 +76,9 @@ export async function updateEvent(id: string, data: {
     ticketPrice?: number;
     capacity?: number;
     image?: string;
+    ticketSalesStartDate?: Date;
+    earlyBirdPrice?: number;
+    earlyBirdEndDate?: Date;
 }) {
     try {
         const event = await prisma.event.update({

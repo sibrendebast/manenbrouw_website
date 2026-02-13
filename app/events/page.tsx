@@ -47,13 +47,28 @@ export default function EventsPage() {
     };
 
     const EventCard = ({ event, isPast = false }: { event: any; isPast?: boolean }) => {
+        const now = new Date();
         const isSoldOut = event.capacity && event.ticketsSold >= event.capacity;
         const [ticketQuantity, setTicketQuantity] = useState(1);
         const [isAdded, setIsAdded] = useState(false);
         const ticketsAvailable = event.capacity ? Math.max(0, event.capacity - event.ticketsSold) : Infinity;
+        
+        // Check if tickets are available for sale yet
+        const ticketSalesStartDate = event.ticketSalesStartDate ? new Date(event.ticketSalesStartDate) : null;
+        const ticketsNotYetAvailable = ticketSalesStartDate && now < ticketSalesStartDate;
+        
+        // Check if early-bird pricing applies
+        const earlyBirdEndDate = event.earlyBirdEndDate ? new Date(event.earlyBirdEndDate) : null;
+        const isEarlyBird = event.earlyBirdPrice && earlyBirdEndDate && now < earlyBirdEndDate;
+        const currentPrice = isEarlyBird ? event.earlyBirdPrice : event.ticketPrice;
 
         const handleAddTickets = () => {
-            addTicket(event, ticketQuantity);
+            // Pass the event with the current price
+            const eventWithCurrentPrice = {
+                ...event,
+                ticketPrice: currentPrice
+            };
+            addTicket(eventWithCurrentPrice, ticketQuantity);
             setIsAdded(true);
             setTimeout(() => {
                 setIsAdded(false);
@@ -89,9 +104,21 @@ export default function EventsPage() {
                                 {event.title}
                             </h3>
                             {event.isPaid && !isPast && (
-                                <span className="text-2xl font-bold text-brewery-green whitespace-nowrap ml-4">
-                                    €{event.ticketPrice?.toFixed(2)}
-                                </span>
+                                <div className="flex flex-col items-end ml-4">
+                                    <span className="text-2xl font-bold text-brewery-green whitespace-nowrap">
+                                        €{currentPrice?.toFixed(2)}
+                                    </span>
+                                    {isEarlyBird && (
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-sm line-through text-gray-500">
+                                                €{event.ticketPrice?.toFixed(2)}
+                                            </span>
+                                            <span className="text-xs bg-yellow-400 text-black px-2 py-1 font-bold border border-black mt-1">
+                                                EARLY BIRD
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                             {!event.isPaid && !isPast && (
                                 <span className="bg-brewery-green text-white px-3 py-1 text-sm font-bold border-2 border-black whitespace-nowrap ml-4">
@@ -125,7 +152,15 @@ export default function EventsPage() {
                     </div>
 
                     <div className="md:self-start w-full md:w-auto mt-4 md:mt-0">
-                        {!isPast && event.isPaid && !isSoldOut && (
+                        {!isPast && event.isPaid && ticketsNotYetAvailable && (
+                            <div className="w-full bg-blue-50 border-2 border-blue-300 p-4">
+                                <p className="text-sm font-bold text-blue-900 mb-1">Tickets Not Yet Available</p>
+                                <p className="text-xs text-blue-700">
+                                    Tickets will be available from: {formatDate(ticketSalesStartDate!)}
+                                </p>
+                            </div>
+                        )}
+                        {!isPast && event.isPaid && !ticketsNotYetAvailable && !isSoldOut && (
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">
                                     <label className="text-sm font-bold text-black">Tickets:</label>

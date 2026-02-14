@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
-import { getEvents, createEvent, deleteEvent, updateEvent, toggleEventHidden } from "@/app/actions/eventActions";
+import { getEvents, createEvent, deleteEvent, toggleEventHidden } from "@/app/actions/eventActions";
 import { getEventTickets } from "@/app/actions/ticketActions";
 import { Plus, Trash2, LogOut, Upload, X, ArrowLeft, Calendar, MapPin, Users, Euro, Edit, ChevronDown, ChevronUp, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
@@ -29,6 +29,9 @@ export default function AdminEventsPage() {
         ticketPrice: "",
         capacity: "",
         image: "",
+        ticketSalesStartDate: "",
+        earlyBirdPrice: "",
+        earlyBirdEndDate: "",
     });
 
     const loadEvents = async () => {
@@ -104,6 +107,9 @@ export default function AdminEventsPage() {
             ticketPrice: newEvent.isPaid ? parseFloat(newEvent.ticketPrice) : undefined,
             capacity: newEvent.capacity ? parseInt(newEvent.capacity) : undefined,
             image: newEvent.image || undefined,
+            ticketSalesStartDate: newEvent.ticketSalesStartDate ? new Date(newEvent.ticketSalesStartDate) : undefined,
+            earlyBirdPrice: newEvent.earlyBirdPrice ? parseFloat(newEvent.earlyBirdPrice) : undefined,
+            earlyBirdEndDate: newEvent.earlyBirdEndDate ? new Date(newEvent.earlyBirdEndDate) : undefined,
         });
 
         if (result.success) {
@@ -117,6 +123,9 @@ export default function AdminEventsPage() {
                 ticketPrice: "",
                 capacity: "",
                 image: "",
+                ticketSalesStartDate: "",
+                earlyBirdPrice: "",
+                earlyBirdEndDate: "",
             });
         } else {
             alert("Failed to add event");
@@ -259,21 +268,69 @@ export default function AdminEventsPage() {
                                 </div>
 
                                 {newEvent.isPaid && (
-                                    <div>
-                                        <label className="block text-sm font-bold mb-1 text-black">
-                                            Ticket Price (€)
-                                        </label>
-                                        <input
-                                            required={newEvent.isPaid}
-                                            type="number"
-                                            step="0.01"
-                                            value={newEvent.ticketPrice}
-                                            onChange={(e) =>
-                                                setNewEvent({ ...newEvent, ticketPrice: e.target.value })
-                                            }
-                                            className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
-                                        />
-                                    </div>
+                                    <>
+                                        <div>
+                                            <label className="block text-sm font-bold mb-1 text-black">
+                                                Ticket Price (€)
+                                            </label>
+                                            <input
+                                                required={newEvent.isPaid}
+                                                type="number"
+                                                step="0.01"
+                                                value={newEvent.ticketPrice}
+                                                onChange={(e) =>
+                                                    setNewEvent({ ...newEvent, ticketPrice: e.target.value })
+                                                }
+                                                className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-bold mb-1 text-black">
+                                                Tickets Available From (Optional)
+                                            </label>
+                                            <input
+                                                type="datetime-local"
+                                                value={newEvent.ticketSalesStartDate}
+                                                onChange={(e) =>
+                                                    setNewEvent({ ...newEvent, ticketSalesStartDate: e.target.value })
+                                                }
+                                                className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">When tickets become available for purchase</p>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-bold mb-1 text-black">
+                                                Early-Bird Price (€, Optional)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={newEvent.earlyBirdPrice}
+                                                onChange={(e) =>
+                                                    setNewEvent({ ...newEvent, earlyBirdPrice: e.target.value })
+                                                }
+                                                className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">Discounted price for early purchasers</p>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-bold mb-1 text-black">
+                                                Early-Bird Deadline (Optional)
+                                            </label>
+                                            <input
+                                                type="datetime-local"
+                                                value={newEvent.earlyBirdEndDate}
+                                                onChange={(e) =>
+                                                    setNewEvent({ ...newEvent, earlyBirdEndDate: e.target.value })
+                                                }
+                                                className="w-full px-3 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">Deadline for early-bird discount</p>
+                                        </div>
+                                    </>
                                 )}
 
                                 <div>

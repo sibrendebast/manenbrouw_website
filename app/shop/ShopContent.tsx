@@ -8,9 +8,17 @@ export default function ShopContent({ products }: { products: any[] }) {
     const { t } = useI18n();
     const [activeCategory, setActiveCategory] = useState("ALL");
 
-    const filteredProducts = products.filter(product =>
-        activeCategory === "ALL" ? true : product.category === activeCategory
-    );
+    const filteredProducts = products
+        .filter((product) =>
+            activeCategory === "ALL" ? true : product.category === activeCategory
+        )
+        .sort((a, b) => {
+            if (activeCategory === "ALL") {
+                if (a.category === "BEER" && b.category !== "BEER") return -1;
+                if (a.category !== "BEER" && b.category === "BEER") return 1;
+            }
+            return 0;
+        });
 
     const categories = [
         { id: "ALL", label: t("shop.categories.all") || "All" },

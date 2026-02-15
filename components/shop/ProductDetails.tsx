@@ -43,7 +43,7 @@ export default function ProductDetails({ product }: { product: any }) {
     };
 
     useEffect(() => {
-        if (product && product.images && product.images.length > 0) {
+        if (product?.images && product.images.length > 0) {
             // Set the first image as selected, or fallback if empty
             const firstImage = (!product.images || product.images.length === 0 || product.images[0].includes("placehold.co")) ? "/logo.png" : product.images[0];
             setSelectedImage(firstImage);
@@ -53,13 +53,14 @@ export default function ProductDetails({ product }: { product: any }) {
     }, [product]);
 
     const handleAddToCart = () => {
+        if (!product) return;
         addItem(product, quantity);
         setIsAdded(true);
         setTimeout(() => setIsAdded(false), 2000);
     };
 
     const handlePrevImage = () => {
-        if (!product.images || product.images.length <= 1) return;
+        if (!product?.images || product.images.length <= 1) return;
         setDirection(-1);
         const currentIndex = product.images.indexOf(selectedImage);
         const newIndex = currentIndex > 0 ? currentIndex - 1 : product.images.length - 1;
@@ -67,7 +68,7 @@ export default function ProductDetails({ product }: { product: any }) {
     };
 
     const handleNextImage = () => {
-        if (!product.images || product.images.length <= 1) return;
+        if (!product?.images || product.images.length <= 1) return;
         setDirection(1);
         const currentIndex = product.images.indexOf(selectedImage);
         const newIndex = currentIndex < product.images.length - 1 ? currentIndex + 1 : 0;
@@ -75,6 +76,7 @@ export default function ProductDetails({ product }: { product: any }) {
     };
 
     const handleThumbnailClick = (img: string) => {
+        if (!product?.images) return;
         const currentIndex = product.images.indexOf(selectedImage);
         const newIndex = product.images.indexOf(img);
         setDirection(newIndex > currentIndex ? 1 : -1);
@@ -187,13 +189,19 @@ export default function ProductDetails({ product }: { product: any }) {
                             {product.name}
                         </h1>
                         <div className="flex items-center gap-4 mb-6">
-                            <span className="bg-brewery-green text-white px-3 py-1 text-sm font-bold border-2 border-black">
-                                {product.style}
-                            </span>
-                            <span className="text-gray-600 font-semibold">{product.abv}</span>
-                            <span className="text-gray-600 font-semibold">
-                                {product.volume}
-                            </span>
+                            {product.style && (
+                                <span className="bg-brewery-green text-white px-3 py-1 text-sm font-bold border-2 border-black">
+                                    {product.style}
+                                </span>
+                            )}
+                            {product.abv && (
+                                <span className="text-gray-600 font-semibold">{product.abv}</span>
+                            )}
+                            {product.volume && (
+                                <span className="text-gray-600 font-semibold">
+                                    {product.volume}
+                                </span>
+                            )}
                         </div>
 
                         <div className="mb-8">

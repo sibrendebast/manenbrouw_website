@@ -37,6 +37,14 @@ interface OrderInvoiceProps {
             price: number;
             btwCategory: number;
         }[];
+        tickets?: {
+            event: {
+                title: string;
+                date: Date;
+            };
+            quantity: number;
+            totalPrice: number;
+        }[];
     };
 }
 
@@ -59,7 +67,8 @@ const translations = {
         totalLabel: "Total",
         footer: "Thank you for your business!<br />If you have any questions, please contact us at info@manenbrouw.be",
         orderNumber: "Order #",
-        nA: "N/A"
+        nA: "N/A",
+        ticket: "Ticket"
     },
     nl: {
         invoiceTitle: "FACTUUR",
@@ -78,7 +87,8 @@ const translations = {
         totalLabel: "Totaal",
         footer: "Bedankt voor je bestelling!<br />Vragen? Mail naar info@manenbrouw.be",
         orderNumber: "Bestelling #",
-        nA: "N/A"
+        nA: "N/A",
+        ticket: "Ticket"
     }
 };
 
@@ -105,7 +115,14 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
         });
     }
 
-    const btwBreakdown = calculateBtwBreakdown(itemsForBtw);
+    const btwBreakdown = calculateBtwBreakdown([
+        ...itemsForBtw,
+        ...(order.tickets?.map(ticket => ({
+            price: ticket.totalPrice / ticket.quantity,
+            quantity: ticket.quantity,
+            btwCategory: 21 // Tickets are 21% BTW
+        })) || [])
+    ]);
 
     return (
         <Html>
@@ -187,6 +204,21 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                                 <Column style={{ width: "15%", textAlign: "center" }}><Text style={tableCell}>{item.quantity}</Text></Column>
                                 <Column style={{ width: "15%", textAlign: "right" }}><Text style={tableCell}>€{item.price.toFixed(2)}</Text></Column>
                                 <Column style={{ width: "20%", textAlign: "right" }}><Text style={tableCell}>€{(item.price * item.quantity).toFixed(2)}</Text></Column>
+                            </Row>
+                        ))}
+                        {order.tickets?.map((ticket, index) => (
+                            <Row key={`ticket-${index}`} style={{ marginBottom: "10px" }}>
+                                <Column style={{ width: "50%" }}>
+                                    <Text style={tableCell}>
+                                        {t.ticket}: {ticket.event.title}<br />
+                                        <span style={{ fontSize: '12px', color: '#666666' }}>
+                                            {new Date(ticket.event.date).toLocaleDateString(locale === 'nl' ? 'nl-BE' : 'en-GB')}
+                                        </span>
+                                    </Text>
+                                </Column>
+                                <Column style={{ width: "15%", textAlign: "center" }}><Text style={tableCell}>{ticket.quantity}</Text></Column>
+                                <Column style={{ width: "15%", textAlign: "right" }}><Text style={tableCell}>€{(ticket.totalPrice / ticket.quantity).toFixed(2)}</Text></Column>
+                                <Column style={{ width: "20%", textAlign: "right" }}><Text style={tableCell}>€{ticket.totalPrice.toFixed(2)}</Text></Column>
                             </Row>
                         ))}
                         {order.shippingMethod === "shipment" && (

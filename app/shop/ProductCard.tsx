@@ -190,8 +190,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                     {[product.style, product.volume, product.abv].filter(Boolean).join(" • ")}
                 </p>
                 {product.inStock && product.stockCount !== undefined && (
-                    <p className="text-xs text-gray-600 mb-4">
-                        {product.stockCount} {t("shop.inStock")}
+                    <p className={`text-xs font-bold mb-4 ${product.stockCount < 6 ? 'text-red-500' : 'text-gray-600'}`}>
+                        {product.stockCount < 6 ? t("shop.almostGone") : t("shop.inStock")}
                     </p>
                 )}
 

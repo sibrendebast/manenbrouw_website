@@ -209,8 +209,8 @@ export default function ProductDetails({ product }: { product: any }) {
                                 €{product.price.toFixed(2)}
                             </p>
                             {product.inStock && product.stockCount !== undefined && (
-                                <p className="text-sm text-gray-600 font-medium">
-                                    {product.stockCount} {t("shop.inStock")}
+                                <p className={`text-sm font-bold ${product.stockCount < 6 ? 'text-red-500' : 'text-gray-600'}`}>
+                                    {product.stockCount < 6 ? t("shop.almostGone") : t("shop.inStock")}
                                 </p>
                             )}
                         </div>

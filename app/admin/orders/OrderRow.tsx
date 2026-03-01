@@ -126,14 +126,29 @@ export default function OrderRow({ order, onUpdateStatus, onDelete }: OrderRowPr
                             <div className="space-y-4">
                                 <div>
                                     <h4 className="font-bold text-sm mb-2 text-brewery-dark border-b pb-1">
-                                        Order Items ({order.items.length})
+                                        Order Items ({(order.items?.length || 0) + (order.tickets?.length || 0)})
                                     </h4>
                                     <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
-                                        {order.items.map((item: any) => (
+                                        {/* Products */}
+                                        {order.items?.map((item: any) => (
                                             <div key={item.id} className="flex justify-between items-center text-sm border-b border-gray-100 pb-1 last:border-0 last:pb-0">
                                                 <span className="flex-1 mr-2">{item.product.name}</span>
                                                 <span className="text-gray-500 mr-4">x{item.quantity}</span>
                                                 <span className="font-semibold">€{(item.price * item.quantity).toFixed(2)}</span>
+                                            </div>
+                                        ))}
+
+                                        {/* Tickets */}
+                                        {order.tickets?.map((ticket: any) => (
+                                            <div key={ticket.id} className="flex justify-between items-center text-sm border-b border-gray-100 pb-1 last:border-0 last:pb-0">
+                                                <span className="flex-1 mr-2">
+                                                    Ticket: {ticket.event.title}
+                                                    <span className="block text-xs text-gray-400">
+                                                        {new Date(ticket.event.date).toLocaleDateString()}
+                                                    </span>
+                                                </span>
+                                                <span className="text-gray-500 mr-4">x{ticket.quantity}</span>
+                                                <span className="font-semibold">€{ticket.totalPrice.toFixed(2)}</span>
                                             </div>
                                         ))}
                                         {order.shippingMethod === "shipment" && (

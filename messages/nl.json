@@ -62,6 +62,7 @@
         "addToCart": "Toevoegen",
         "outOfStock": "Niet op Voorraad",
         "inStock": "Op Voorraad",
+        "almostGone": "Bijna uitverkocht",
         "categories": {
             "all": "Alles",
             "beer": "Bieren",
@@ -113,6 +114,8 @@
         "creditCard": "Creditcard",
         "placeOrder": "Bestelling Plaatsen",
         "processing": "Verwerken...",
+        "nA": "Niet van toepassing",
+        "noShippingRequired": "Geen verzending of ophaling vereist voor deze artikelen.",
         "success": {
             "title": "Betaling geslaagd",
             "message": "Bedankt voor je bestelling bij Man & Brouw. We gaan meteen voor je aan de slag.",

@@ -61,7 +61,11 @@ export async function POST(req: NextRequest) {
                                     product: true,
                                 },
                             },
-                            tickets: true,
+                            tickets: {
+                                include: {
+                                    event: true,
+                                },
+                            },
                         },
                     });
 
@@ -91,6 +95,11 @@ export async function POST(req: NextRequest) {
                             items: {
                                 include: {
                                     product: true,
+                                },
+                            },
+                            tickets: {
+                                include: {
+                                    event: true,
                                 },
                             },
                         },

@@ -15,7 +15,7 @@ declare module "jspdf" {
 type OrderWithItems = Order & {
     orderNumber?: string | null;
     items: (OrderItem & { product: { name: string } })[];
-    tickets: EventTicket[];
+    tickets: (EventTicket & { event: { title: string } })[];
 };
 
 // --- Configuration: Edit Company Details Here ---
@@ -156,7 +156,7 @@ export async function generateInvoice(order: OrderWithItems): Promise<Buffer> {
             ];
         }),
         ...order.tickets.map(ticket => [
-            `Ticket: ${ticket.buyerName}`,
+            `Ticket: ${ticket.event.title}`,
             "21%", // Tickets usually 21% unless stated otherwise
             ticket.quantity,
             `€ ${(ticket.totalPrice / ticket.quantity).toFixed(2)}`,

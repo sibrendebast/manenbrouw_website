@@ -62,6 +62,7 @@
         "addToCart": "Add to Cart",
         "outOfStock": "Out of Stock",
         "inStock": "In Stock",
+        "almostGone": "Almost gone",
         "categories": {
             "all": "All",
             "beer": "Beers",
@@ -113,6 +114,8 @@
         "creditCard": "Credit Card",
         "placeOrder": "Place Order",
         "processing": "Processing...",
+        "nA": "Not applicable",
+        "noShippingRequired": "No shipping or pickup required for these items.",
         "success": {
             "title": "Payment successful",
             "message": "Thanks for supporting Man & Brouw. Your order is confirmed and the brewing team is already preparing it.",

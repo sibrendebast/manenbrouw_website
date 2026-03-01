@@ -86,13 +86,19 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                     throw new Error(`Event is not a paid event: ${item.eventId}`);
                 }
 
-                totalAmount += event.ticketPrice * item.quantity;
+                // Check if early-bird pricing applies
+                const now = new Date();
+                const earlyBirdEndDate = event.earlyBirdEndDate ? new Date(event.earlyBirdEndDate) : null;
+                const isEarlyBird = event.earlyBirdPrice && earlyBirdEndDate && now < earlyBirdEndDate;
+                const currentPrice = isEarlyBird ? event.earlyBirdPrice : event.ticketPrice;
+
+                totalAmount += currentPrice * item.quantity;
                 ticketData.push({
                     eventId: event.id,
                     buyerName: customerName,
                     buyerEmail: customerEmail,
                     quantity: item.quantity,
-                    totalPrice: event.ticketPrice * item.quantity,
+                    totalPrice: currentPrice * item.quantity,
                 });
             }
         }

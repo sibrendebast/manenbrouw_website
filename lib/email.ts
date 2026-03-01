@@ -39,6 +39,14 @@ type OrderWithItems = {
         price: number;
         btwCategory: number;
     }[];
+    tickets?: {
+        event: {
+            title: string;
+            date: Date;
+        };
+        quantity: number;
+        totalPrice: number;
+    }[];
 };
 
 export async function sendOrderConfirmationEmail(order: OrderWithItems, invoicePdf?: Buffer | string) {

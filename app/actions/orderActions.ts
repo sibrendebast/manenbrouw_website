@@ -27,6 +27,11 @@ export async function getOrders() {
                         product: true,
                     },
                 },
+                tickets: {
+                    include: {
+                        event: true,
+                    },
+                },
             },
             orderBy: {
                 createdAt: "desc",

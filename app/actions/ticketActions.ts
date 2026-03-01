@@ -47,6 +47,13 @@ export async function getEventTickets(eventId: string) {
     try {
         const tickets = await prisma.eventTicket.findMany({
             where: { eventId },
+            include: {
+                order: {
+                    select: {
+                        status: true
+                    }
+                }
+            },
             orderBy: {
                 purchasedAt: 'desc'
             }

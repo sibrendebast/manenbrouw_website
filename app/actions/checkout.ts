@@ -176,18 +176,6 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
             }
         }
 
-        // Update tickets sold count for each event
-        for (const ticket of ticketData) {
-            await prisma.event.update({
-                where: { id: ticket.eventId },
-                data: {
-                    ticketsSold: {
-                        increment: ticket.quantity
-                    }
-                }
-            });
-        }
-
         if (newsletter) {
             try {
                 const nameParts = customerName.trim().split(" ");

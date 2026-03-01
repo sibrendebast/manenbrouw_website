@@ -506,7 +506,7 @@ export default function AdminEventsPage() {
                                                     onClick={() => handleToggleTickets(event.id)}
                                                     className="flex items-center justify-between w-full text-left font-bold text-brewery-dark hover:text-brewery-green transition-colors"
                                                 >
-                                                    <span>Ticket Buyers ({event.ticketsSold})</span>
+                                                    <span>Tickets Sold ({event.ticketsSold})</span>
                                                     {expandedEventId === event.id ? (
                                                         <ChevronUp className="h-5 w-5" />
                                                     ) : (
@@ -516,16 +516,22 @@ export default function AdminEventsPage() {
 
                                                 {expandedEventId === event.id && (
                                                     <div className="mt-4 space-y-2">
-                                                        {/* ... Ticket Buyers List ... */}
                                                         {eventTickets[event.id] ? (
                                                             eventTickets[event.id].length > 0 ? (
                                                                 eventTickets[event.id].map((ticket: any) => (
                                                                     <div
                                                                         key={ticket.id}
-                                                                        className="flex justify-between items-center p-3 bg-gray-50 border border-gray-200"
+                                                                        className={`flex justify-between items-center p-3 bg-gray-50 border ${ticket.order?.status === 'paid' ? 'border-gray-200' : 'border-red-200 opacity-75'}`}
                                                                     >
                                                                         <div>
-                                                                            <p className="font-semibold text-black">{ticket.buyerName}</p>
+                                                                            <div className="flex items-center gap-2">
+                                                                                <p className="font-semibold text-black">{ticket.buyerName}</p>
+                                                                                {ticket.order?.status !== 'paid' && (
+                                                                                    <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 font-bold uppercase border border-red-200">
+                                                                                        {ticket.order?.status || 'unpaid'}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
                                                                             <p className="text-sm text-gray-600">{ticket.buyerEmail}</p>
                                                                         </div>
                                                                         <div className="text-right">

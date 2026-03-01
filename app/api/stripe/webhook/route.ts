@@ -73,6 +73,12 @@ export async function POST(req: NextRequest) {
                         throw new Error(`Order with ID ${orderId} not found.`);
                     }
 
+                    // If order is already marked as paid, skip processing (idempotency)
+                    if (order.status === "paid") {
+                        console.log(`Order ${orderId} is already marked as paid. Skipping.`);
+                        return NextResponse.json({ received: true });
+                    }
+
                     // Generate invoice
                     const invoicePdf = await generateInvoice(order);
 
@@ -122,6 +128,19 @@ export async function POST(req: NextRequest) {
                         });
 
                         console.log(`Updated stock for ${product.name}: ${product.stockCount} -> ${newStockCount}`);
+                    }
+
+                    // Update tickets sold count for each event
+                    for (const ticket of updatedOrder.tickets) {
+                        await prisma.event.update({
+                            where: { id: ticket.eventId },
+                            data: {
+                                ticketsSold: {
+                                    increment: ticket.quantity
+                                }
+                            }
+                        });
+                        console.log(`Incremented ticketsSold for event ${ticket.eventId} by ${ticket.quantity}`);
                     }
 
                     // Send confirmation email to customer (with BCC to admin)

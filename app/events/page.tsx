@@ -52,11 +52,11 @@ export default function EventsPage() {
         const [ticketQuantity, setTicketQuantity] = useState(1);
         const [isAdded, setIsAdded] = useState(false);
         const ticketsAvailable = event.capacity ? Math.max(0, event.capacity - event.ticketsSold) : Infinity;
-        
+
         // Check if tickets are available for sale yet
         const ticketSalesStartDate = event.ticketSalesStartDate ? new Date(event.ticketSalesStartDate) : null;
         const ticketsNotYetAvailable = ticketSalesStartDate && now < ticketSalesStartDate;
-        
+
         // Check if early-bird pricing applies
         const earlyBirdEndDate = event.earlyBirdEndDate ? new Date(event.earlyBirdEndDate) : null;
         const isEarlyBird = event.earlyBirdPrice && earlyBirdEndDate && now < earlyBirdEndDate;
@@ -127,7 +127,7 @@ export default function EventsPage() {
                             )}
                         </div>
 
-                        <p className="text-gray-700 mb-6 leading-relaxed">
+                        <p className="text-gray-700 mb-6 leading-relaxed whitespace-pre-wrap">
                             {event.description}
                         </p>
 
@@ -143,8 +143,14 @@ export default function EventsPage() {
                             {event.capacity && (
                                 <div className="flex items-center">
                                     <Users className="h-5 w-5 mr-3 text-brewery-green flex-shrink-0" />
-                                    <span>
-                                        {Math.max(0, event.capacity - event.ticketsSold)} {event.isPaid ? t("events.ticketsAvailable") : t("events.attendees")}
+                                    <span className={event.isPaid && (event.capacity - event.ticketsSold) / event.capacity <= 0.2 && (event.capacity - event.ticketsSold) > 0 ? "text-red-500 font-bold" : ""}>
+                                        {event.isPaid ? (
+                                            (event.capacity - event.ticketsSold) / event.capacity <= 0.2 && (event.capacity - event.ticketsSold) > 0
+                                                ? t("events.almostSoldOut")
+                                                : t("events.ticketsAvailable")
+                                        ) : (
+                                            `${Math.max(0, event.capacity - event.ticketsSold)} ${t("events.attendees")}`
+                                        )}
                                     </span>
                                 </div>
                             )}

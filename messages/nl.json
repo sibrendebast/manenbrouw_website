@@ -152,7 +152,8 @@
         "ticketsSold": "tickets verkocht",
         "attendees": "deelnemers",
         "tickets": "Tickets",
-        "ticketsAvailable": "tickets beschikbaar",
+        "ticketsAvailable": "Tickets beschikbaar",
+        "almostSoldOut": "Bijna uitverkocht!",
         "register": "Registreren (Binnenkort)"
     },
     "footer": {

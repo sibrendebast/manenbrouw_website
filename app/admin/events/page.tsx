@@ -431,7 +431,7 @@ export default function AdminEventsPage() {
                                             <h3 className="text-xl font-bold text-brewery-dark mb-2">
                                                 {event.title}
                                             </h3>
-                                            <p className="text-sm text-gray-600 mb-3">
+                                            <p className="text-sm text-gray-600 mb-3 whitespace-pre-wrap">
                                                 {event.description}
                                             </p>
                                             <div className="space-y-1 text-sm text-black">

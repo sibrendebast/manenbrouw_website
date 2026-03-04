@@ -124,3 +124,24 @@ model PushSubscription {
   adminId   String
   admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
 }
+
+model Backup {
+  id          String   @id @default(uuid())
+  status      String   @default("completed") // "completed" | "failed"
+  size        Int?     // approximate size in bytes
+  duration    Int?     // in milliseconds
+  checksum    String?  // SHA-256 hash of the data
+  data        String   // JSON-serialised backup payload
+  triggeredBy String?  // admin username who triggered it
+  notes       String?
+  createdAt   DateTime @default(now())
+}
+
+model BackupConfig {
+  id            String   @id @default(uuid())
+  schedule      String   @default("manual") // "manual" | "daily" | "weekly"
+  retentionDays Int      @default(30)
+  maxBackups    Int      @default(10)
+  updatedAt     DateTime @updatedAt
+  updatedBy     String?
+}

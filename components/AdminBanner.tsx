@@ -3,7 +3,7 @@
 import { useAdminStore } from "@/store/adminStore";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Calendar, ShoppingCart, Mail, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, Calendar, ShoppingCart, Mail, LogOut, Database } from "lucide-react";
 
 export default function AdminBanner() {
     const { isAuthenticated, logout } = useAdminStore();
@@ -20,6 +20,7 @@ export default function AdminBanner() {
         { href: "/admin/events", label: "Events", icon: Calendar },
         { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
         { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
+        { href: "/admin/backup", label: "Backups", icon: Database },
     ];
 
     return (

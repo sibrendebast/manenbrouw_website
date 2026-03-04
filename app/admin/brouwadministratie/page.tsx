@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
-import { FlaskConical, Package, Archive, BookOpen, ArrowLeft } from "lucide-react";
+import { FlaskConical, Package, Archive, BookOpen, ArrowLeft, ClipboardList } from "lucide-react";
 import Link from "next/link";
 
 const SECTIES = [
@@ -11,7 +11,14 @@ const SECTIES = [
         href: "/admin/brouwadministratie/receptuur",
         icon: FlaskConical,
         title: "Receptuur",
-        beschrijving: "Beheer brouwrecepten, ingrediënten per stap en automatische brouwberekeningen.",
+        beschrijving: "Beheer brouwreceptsjabloons, ingrediënten per stap en automatische brouwberekeningen.",
+        actief: true,
+    },
+    {
+        href: "/admin/brouwadministratie/brouwsels",
+        icon: ClipboardList,
+        title: "Brouwsels",
+        beschrijving: "Registreer uitgevoerde brouwsels, inclusief gemeten waarden en geproduceerd volume.",
         actief: true,
     },
     {
@@ -76,15 +83,15 @@ export default function BrouwadministratiePage() {
                             key={href}
                             href={href}
                             className={`bg-white p-8 border-2 transition-all group ${actief
-                                    ? "border-black hover:border-brewery-green"
-                                    : "border-gray-300 hover:border-gray-400 opacity-70"
+                                ? "border-black hover:border-brewery-green"
+                                : "border-gray-300 hover:border-gray-400 opacity-70"
                                 }`}
                         >
                             <div className="flex flex-col items-center text-center">
                                 <div
                                     className={`p-6 mb-6 transition-colors ${actief
-                                            ? "bg-brewery-dark group-hover:bg-brewery-green"
-                                            : "bg-gray-400"
+                                        ? "bg-brewery-dark group-hover:bg-brewery-green"
+                                        : "bg-gray-400"
                                         }`}
                                 >
                                     <Icon className="h-16 w-16 text-white" />

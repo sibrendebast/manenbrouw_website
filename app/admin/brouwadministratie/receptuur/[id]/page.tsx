@@ -48,7 +48,6 @@ interface FermentatieStap {
 }
 
 interface Basics {
-    brouwnummer: string;           // bewerkbaar
     naam: string;
     stijl: string;
     notities: string;
@@ -57,11 +56,6 @@ interface Basics {
     aantalBatches: string;         // aantal batches; totaal = batchVolume × aantalBatches
     brouwEfficiency: string;
     attenuation: string;
-    ogGemeten: string;
-    fgGemeten: string;
-    abvGemeten: string;
-    platoGemeten: string;
-    brouwefficientieGemeten: string;
 }
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -106,11 +100,11 @@ function Stat({ label, val, highlight }: { label: string; val: string | null; hi
 // ─── GevraagdPanel (berekend uit target ABV + attenuation) ───────────────────
 function GevraagdPanel({ basics }: { basics: Basics }) {
     const vals = useMemo(() => {
-        const abv  = parseFloat(basics.abvGevraagd);
-        const att  = parseFloat(basics.attenuation);
+        const abv = parseFloat(basics.abvGevraagd);
+        const att = parseFloat(basics.attenuation);
         if (!abv || !att || isNaN(abv) || isNaN(att)) return null;
-        const bv  = parseFloat(basics.batchVolume);
-        const nb  = parseFloat(basics.aantalBatches);
+        const bv = parseFloat(basics.batchVolume);
+        const nb = parseFloat(basics.aantalBatches);
         const totalVol = bv > 0 && nb > 0 && !isNaN(bv) && !isNaN(nb) ? bv * nb : undefined; // totaal = batch × aantal
         const eff = parseFloat(basics.brouwEfficiency);
         return berekenGevraagd(
@@ -125,12 +119,12 @@ function GevraagdPanel({ basics }: { basics: Basics }) {
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Gevraagde waarden</h3>
             <p className="text-xs text-gray-400 mb-3">Automatisch berekend op basis van de basiskarakteristieken (target ABV + attenuatie).</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <Stat label="OG gevraagd"      val={vals ? vals.ogGevraagd.toFixed(3)                        : null} highlight />
-                <Stat label="FG gevraagd"      val={vals ? vals.fgGevraagd.toFixed(3)                        : null} highlight />
-                <Stat label="ABV gevraagd"     val={vals ? vals.abvGevraagd.toFixed(2) + " %"                : null} highlight />
-                <Stat label="Plato gevraagd"   val={vals ? vals.platoGevraagd.toFixed(2) + " °P"             : null} highlight />
-                <Stat label="Suikers nodig"    val={vals?.suikersNodig != null ? vals.suikersNodig.toFixed(2) + " kg" : null} highlight />
-                <Stat label="Granen nodig"     val={vals?.granenNodig  != null ? vals.granenNodig.toFixed(2)  + " kg" : null} highlight />
+                <Stat label="OG gevraagd" val={vals ? vals.ogGevraagd.toFixed(3) : null} highlight />
+                <Stat label="FG gevraagd" val={vals ? vals.fgGevraagd.toFixed(3) : null} highlight />
+                <Stat label="ABV gevraagd" val={vals ? vals.abvGevraagd.toFixed(2) + " %" : null} highlight />
+                <Stat label="Plato gevraagd" val={vals ? vals.platoGevraagd.toFixed(2) + " °P" : null} highlight />
+                <Stat label="Suikers nodig" val={vals?.suikersNodig != null ? vals.suikersNodig.toFixed(2) + " kg" : null} highlight />
+                <Stat label="Granen nodig" val={vals?.granenNodig != null ? vals.granenNodig.toFixed(2) + " kg" : null} highlight />
             </div>
             {vals && (vals.suikersNodig == null || vals.granenNodig == null) && (
                 <p className="text-xs text-gray-400 mt-2">
@@ -150,8 +144,8 @@ function GevraagdPanel({ basics }: { basics: Basics }) {
 // VerwachtPanel: use total quantities with total volume
 function VerwachtPanel({ basics, ingredients }: { basics: Basics; ingredients: Ingredient[] }) {
     const vals = useMemo(() => {
-        const bv  = parseFloat(basics.batchVolume);
-        const nb  = parseFloat(basics.aantalBatches);
+        const bv = parseFloat(basics.batchVolume);
+        const nb = parseFloat(basics.aantalBatches);
         const eff = parseFloat(basics.brouwEfficiency);
         const att = parseFloat(basics.attenuation);
         if (!bv || !nb || !eff || !att || isNaN(bv) || isNaN(nb) || isNaN(eff) || isNaN(att)) return null;
@@ -181,14 +175,14 @@ function VerwachtPanel({ basics, ingredients }: { basics: Basics; ingredients: I
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Verwachte waarden</h3>
             <p className="text-xs text-gray-400 mb-3">Berekend op basis van de ingrediëntenlijst (mout, hop, efficiëntie).</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-                <Stat label="OG verwacht"    val={vals ? vals.og.toFixed(3)                     : null} />
-                <Stat label="FG verwacht"    val={vals ? vals.fg.toFixed(3)                     : null} />
-                <Stat label="ABV verwacht"   val={vals ? vals.abv.toFixed(2) + " %"             : null} />
-                <Stat label="Plato verwacht" val={vals ? vals.platoOG.toFixed(2) + " °P"        : null} />
-                <Stat label="IBU"            val={vals ? vals.ibu.toFixed(1)                    : null} />
-                <Stat label="EBC"            val={vals ? vals.ebc.toFixed(1)                    : null} />
-                <Stat label="Suikers nodig"  val={vals ? vals.totaalSuikersNodig.toFixed(2) + " kg" : null} />
-                <Stat label="Granen nodig"   val={vals ? vals.totaalGranenNodig.toFixed(2) + " kg"  : null} />
+                <Stat label="OG verwacht" val={vals ? vals.og.toFixed(3) : null} />
+                <Stat label="FG verwacht" val={vals ? vals.fg.toFixed(3) : null} />
+                <Stat label="ABV verwacht" val={vals ? vals.abv.toFixed(2) + " %" : null} />
+                <Stat label="Plato verwacht" val={vals ? vals.platoOG.toFixed(2) + " °P" : null} />
+                <Stat label="IBU" val={vals ? vals.ibu.toFixed(1) : null} />
+                <Stat label="EBC" val={vals ? vals.ebc.toFixed(1) : null} />
+                <Stat label="Suikers nodig" val={vals ? vals.totaalSuikersNodig.toFixed(2) + " kg" : null} />
+                <Stat label="Granen nodig" val={vals ? vals.totaalGranenNodig.toFixed(2) + " kg" : null} />
             </div>
             {vals && volumeL > 0 && (
                 <p className="text-xs text-gray-400">
@@ -347,7 +341,7 @@ function IngredientRij({
     onVerwijder: (key: string) => void;
 }) {
     const isMout = ing.type === "MOUT";
-    const isHop  = ing.type === "HOP";
+    const isHop = ing.type === "HOP";
     const isToev = (stap === "OVERIG") && !isHop;
     const isKoken = stap === "KOKEN";
 
@@ -386,17 +380,17 @@ function IngredientRij({
     const col4 = isMout
         ? numInput(ing.extractPotential, "78", "Graanrendement (%)", v => onChange(ing._key, { extractPotential: parseFloat(v) || null }), { max: "100", step: "0.1" })
         : isHop
-        ? numInput(ing.alfazuur, "AA%", "Alpha-zuur (%)", v => onChange(ing._key, { alfazuur: parseFloat(v) || null }), { max: "30", step: "0.1" })
-        : isToev
-        ? numInput(ing.doseringGPerL, "g/L", "Dosering (g/L)", v => onChange(ing._key, { doseringGPerL: parseFloat(v) || null }), { step: "0.01" })
-        : <span className="text-gray-300 px-2">—</span>;
+            ? numInput(ing.alfazuur, "AA%", "Alpha-zuur (%)", v => onChange(ing._key, { alfazuur: parseFloat(v) || null }), { max: "30", step: "0.1" })
+            : isToev
+                ? numInput(ing.doseringGPerL, "g/L", "Dosering (g/L)", v => onChange(ing._key, { doseringGPerL: parseFloat(v) || null }), { step: "0.01" })
+                : <span className="text-gray-300 px-2">—</span>;
 
     // Column 5: EBC / Kooktijd(min)
     const col5 = isMout
         ? numInput(ing.kleurEbc, "EBC", "Kleur EBC", v => onChange(ing._key, { kleurEbc: parseFloat(v) || null }), { step: "1" })
         : (isHop && isKoken)
-        ? numInput(ing.tijdMinuten, "min", "Kooktijd (min)", v => onChange(ing._key, { tijdMinuten: parseInt(v) || null }), { step: "1" })
-        : <span className="text-gray-300 px-2">—</span>;
+            ? numInput(ing.tijdMinuten, "min", "Kooktijd (min)", v => onChange(ing._key, { tijdMinuten: parseInt(v) || null }), { step: "1" })
+            : <span className="text-gray-300 px-2">—</span>;
 
     // Column 6: Pellet/Bloem / Tijdstip
     const col6 = isHop
@@ -410,17 +404,17 @@ function IngredientRij({
             </select>
         )
         : isToev
-        ? (
-            <select
-                value={ing.tijdstip ?? ""}
-                onChange={e => onChange(ing._key, { tijdstip: e.target.value || null })}
-                className="border border-gray-200 px-1 py-1 text-sm focus:outline-none focus:border-brewery-dark bg-white"
-            >
-                <option value="">—</option>
-                {TIJDSTIP_OPTIES.map(o => <option key={o} value={o}>{o}</option>)}
-            </select>
-        )
-        : <span className="text-gray-300 px-2">—</span>;
+            ? (
+                <select
+                    value={ing.tijdstip ?? ""}
+                    onChange={e => onChange(ing._key, { tijdstip: e.target.value || null })}
+                    className="border border-gray-200 px-1 py-1 text-sm focus:outline-none focus:border-brewery-dark bg-white"
+                >
+                    <option value="">—</option>
+                    {TIJDSTIP_OPTIES.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+            )
+            : <span className="text-gray-300 px-2">—</span>;
 
     return (
         <tr className="border-t border-gray-100 group hover:bg-amber-50/30">
@@ -491,8 +485,8 @@ function StapSectie({
     const [open, setOpen] = useState(
         stap === "MAISCHEN" || stap === "KOKEN" || stap === "FERMENTATIE"
     );
-    const isMaischen  = stap === "MAISCHEN";
-    const isHopStap   = stap === "KOKEN";
+    const isMaischen = stap === "MAISCHEN";
+    const isHopStap = stap === "KOKEN";
     const isToevoeging = stap === "OVERIG";
     const totaalKg = isMaischen
         ? ingredients.filter(i => i.type === "MOUT").reduce((s, i) => s + (i.hoeveelheid || 0), 0)
@@ -577,12 +571,10 @@ export default function ReceptDetail() {
     const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
 
     const [basics, setBasics] = useState<Basics>({
-        brouwnummer: "",
         naam: "", stijl: "", notities: "",
         abvGevraagd: "",
         batchVolume: "", aantalBatches: "",
         brouwEfficiency: "70", attenuation: "80",
-        ogGemeten: "", fgGemeten: "", abvGemeten: "", platoGemeten: "", brouwefficientieGemeten: "",
     });
 
     const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -600,7 +592,6 @@ export default function ReceptDetail() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const r = result.data as any;
             setBasics({
-                brouwnummer: r.brouwnummer ?? "",
                 naam: r.naam ?? "",
                 stijl: r.stijl ?? "",
                 notities: r.notities ?? "",
@@ -609,11 +600,6 @@ export default function ReceptDetail() {
                 aantalBatches: r.aantalBatches != null ? String(r.aantalBatches) : "",
                 brouwEfficiency: r.brouwEfficiency != null ? String(r.brouwEfficiency) : "70",
                 attenuation: r.attenuation != null ? String(r.attenuation) : "80",
-                ogGemeten: r.ogGemeten != null ? String(r.ogGemeten) : "",
-                fgGemeten: r.fgGemeten != null ? String(r.fgGemeten) : "",
-                abvGemeten: r.abvGemeten != null ? String(r.abvGemeten) : "",
-                platoGemeten: r.platoGemeten != null ? String(r.platoGemeten) : "",
-                brouwefficientieGemeten: r.brouwefficientieGemeten != null ? String(r.brouwefficientieGemeten) : "",
             });
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             setIngredients(r.ingredients.map((i: any) => ({
@@ -666,11 +652,9 @@ export default function ReceptDetail() {
 
     const handleOpslaan = async () => {
         if (!basics.naam.trim()) { alert("Naam is verplicht."); return; }
-        if (!basics.brouwnummer.trim()) { alert("Brouwnummer is verplicht."); return; }
         setSaving(true);
         setSaveStatus("idle");
         const result = await updateRecipe(id, {
-            brouwnummer: basics.brouwnummer.trim(),
             naam: basics.naam,
             stijl: basics.stijl || undefined,
             notities: basics.notities || undefined,
@@ -679,11 +663,6 @@ export default function ReceptDetail() {
             aantalBatches: parseFloat(basics.aantalBatches) || null,
             brouwEfficiency: parseFloat(basics.brouwEfficiency) || null,
             attenuation: parseFloat(basics.attenuation) || null,
-            ogGemeten: parseFloat(basics.ogGemeten) || null,
-            fgGemeten: parseFloat(basics.fgGemeten) || null,
-            abvGemeten: parseFloat(basics.abvGemeten) || null,
-            platoGemeten: parseFloat(basics.platoGemeten) || null,
-            brouwefficientieGemeten: parseFloat(basics.brouwefficientieGemeten) || null,
             ingredients: ingredients.map((ing, i) => ({
                 id: ing.id,
                 stap: ing.stap,
@@ -752,8 +731,8 @@ export default function ReceptDetail() {
                 [field]: field === "stapNaam"
                     ? val
                     : field === "duurDagen"
-                    ? (parseInt(val) || null)
-                    : (parseFloat(val) || null),
+                        ? (parseInt(val) || null)
+                        : (parseFloat(val) || null),
             }));
         },
         []
@@ -817,7 +796,7 @@ export default function ReceptDetail() {
                     <span>/</span>
                     <Link href="/admin/brouwadministratie/receptuur" className="hover:text-brewery-dark">Receptuur</Link>
                     <span>/</span>
-                    <span className="text-brewery-dark font-mono font-medium">{basics.brouwnummer || "…"}</span>
+                    <span className="text-brewery-dark font-mono font-medium">{basics.naam || "…"}</span>
                 </div>
 
                 {loading ? (
@@ -829,18 +808,8 @@ export default function ReceptDetail() {
                         {/* ── Header ── */}
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
                             <div>
-                                <div className="flex items-center gap-3 mb-1">
-                                    <FlaskConical className="h-5 w-5 text-brewery-dark" />
-                                    <input
-                                        type="text"
-                                        value={basics.brouwnummer}
-                                        onChange={setBasicsField("brouwnummer")}
-                                        aria-label="Brouwnummer"
-                                        title="Brouwnummer (bewerkbaar)"
-                                        className="font-mono text-lg font-bold text-brewery-dark bg-transparent border-b-2 border-transparent hover:border-gray-300 focus:border-brewery-dark focus:outline-none w-32 pb-0.5"
-                                    />
-                                </div>
-                                <h1 className="text-3xl font-bold text-brewery-dark">
+                                <h1 className="text-3xl font-bold text-brewery-dark flex items-center gap-3">
+                                    <FlaskConical className="h-6 w-6 text-brewery-dark" />
                                     {basics.naam || "Naamloos recept"}
                                 </h1>
                             </div>
@@ -925,21 +894,6 @@ export default function ReceptDetail() {
                         {/* ── 3. Verwachte waarden ── */}
                         <div className="bg-white border-2 border-black p-6 mb-6">
                             <VerwachtPanel basics={basics} ingredients={ingredients} />
-                        </div>
-
-                        {/* ── 3. Gemeten waarden ── */}
-                        <div className="bg-white border-2 border-black p-6 mb-6">
-                            <h2 className="text-lg font-bold text-brewery-dark mb-4">
-                                Gemeten waarden{" "}
-                                <span className="text-xs font-normal text-gray-400">(in te vullen na het brouwen)</span>
-                            </h2>
-                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                                <NumField label="OG Gemeten"             field="ogGemeten"                  placeholder="1.052" step="0.001" />
-                                <NumField label="FG Gemeten"             field="fgGemeten"                  placeholder="1.010" step="0.001" />
-                                <NumField label="ABV Gemeten (%)"        field="abvGemeten"                 placeholder="5.5"   step="0.1"  />
-                                <NumField label="Plato Gemeten (°P)"     field="platoGemeten"               placeholder="13.0"  step="0.1"  />
-                                <NumField label="Efficiëntie Gemeten (%)" field="brouwefficientieGemeten"   placeholder="72"    step="1" max="100" />
-                            </div>
                         </div>
 
                         {/* ── 4. Ingrediënten per stap ── */}

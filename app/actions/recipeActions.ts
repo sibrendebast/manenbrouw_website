@@ -38,7 +38,6 @@ export interface FermentatieStapInput {
 }
 
 export interface RecipeInput {
-  brouwnummer?: string           // optioneel: als opgegeven, wordt het bijgewerkt
   naam: string
   stijl?: string
   notities?: string
@@ -48,12 +47,6 @@ export interface RecipeInput {
   aantalBatches?: number | null  // aantal batches; totaal = batchVolume × aantalBatches
   brouwEfficiency?: number | null
   attenuation?: number | null
-  // Gemeten waarden (post-brew)
-  ogGemeten?: number | null
-  fgGemeten?: number | null
-  abvGemeten?: number | null
-  platoGemeten?: number | null
-  brouwefficientieGemeten?: number | null
   ingredients: IngredientInput[]
   maischStappen?: MaischStapInput[]
   fermentatieStappen?: FermentatieStapInput[]
@@ -70,11 +63,11 @@ function berekenCache(input: RecipeInput) {
   // Gevraagde waarden (vanuit target ABV + attenuation)
   const gevraagd = (input.abvGevraagd && input.attenuation)
     ? berekenGevraagd(
-        input.abvGevraagd,
-        input.attenuation,
-        totalVolume,
-        input.brouwEfficiency ?? undefined,
-      )
+      input.abvGevraagd,
+      input.attenuation,
+      totalVolume,
+      input.brouwEfficiency ?? undefined,
+    )
     : { ogGevraagd: null, fgGevraagd: null, platoGevraagd: null, suikersNodig: null, granenNodig: null }
 
   if (!input.batchVolume || !input.brouwEfficiency || !input.attenuation) {
@@ -127,39 +120,14 @@ function berekenCache(input: RecipeInput) {
   }
 }
 
-// ─── Brouwnummer generatie ────────────────────────────────────────────────────
-
-async function genereerBrouwnummer(): Promise<string> {
-  const jaar = new Date().getFullYear()
-
-  const seq = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-    await tx.$executeRaw`
-      INSERT INTO "RecipeSequence" (jaar, teller)
-      VALUES (${jaar}, 0)
-      ON CONFLICT (jaar) DO NOTHING
-    `
-    const result = await tx.$queryRaw<{ teller: number }[]>`
-      UPDATE "RecipeSequence"
-      SET teller = teller + 1
-      WHERE jaar = ${jaar}
-      RETURNING teller
-    `
-    return result[0].teller
-  })
-
-  const numStr = String(seq).padStart(3, '0')
-  return `${jaar}/${numStr}`
-}
-
 // ─── Read ─────────────────────────────────────────────────────────────────────
 
 export async function getRecipes() {
   try {
     const recipes = await prisma.recipe.findMany({
-      orderBy: { brouwnummer: 'desc' },
+      orderBy: { createdAt: 'desc' },
       select: {
         id: true,
-        brouwnummer: true,
         naam: true,
         stijl: true,
         abvGevraagd: true,
@@ -173,11 +141,6 @@ export async function getRecipes() {
         ibuCalc: true,
         ebcCalc: true,
         brouwEfficiency: true,
-        ogGemeten: true,
-        fgGemeten: true,
-        abvGemeten: true,
-        platoGemeten: true,
-        brouwefficientieGemeten: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -216,20 +179,18 @@ export async function getRecipe(id: string) {
 // ─── Create ───────────────────────────────────────────────────────────────────
 
 export async function createRecipe(): Promise<{
-  success: boolean; id?: string; brouwnummer?: string; error?: string
+  success: boolean; id?: string; error?: string
 }> {
   try {
-    const brouwnummer = await genereerBrouwnummer()
     const recipe = await prisma.recipe.create({
       data: {
-        brouwnummer,
-        naam: `Nieuw recept ${brouwnummer}`,
+        naam: `Nieuw recept`,
         brouwEfficiency: 70,
         attenuation: 80,
       },
     })
     revalidatePath('/admin/brouwadministratie/receptuur')
-    return { success: true, id: recipe.id, brouwnummer: recipe.brouwnummer }
+    return { success: true, id: recipe.id }
   } catch (error) {
     console.error('createRecipe error:', error)
     return { success: false, error: 'Kon recept niet aanmaken' }
@@ -255,7 +216,6 @@ export async function updateRecipe(
       await tx.recipe.update({
         where: { id },
         data: {
-          ...(input.brouwnummer ? { brouwnummer: input.brouwnummer } : {}),
           naam: input.naam,
           stijl: input.stijl ?? null,
           notities: input.notities ?? null,
@@ -263,11 +223,6 @@ export async function updateRecipe(
           aantalBatches: input.aantalBatches ?? null,
           brouwEfficiency: input.brouwEfficiency ?? null,
           attenuation: input.attenuation ?? null,
-          ogGemeten: input.ogGemeten ?? null,
-          fgGemeten: input.fgGemeten ?? null,
-          abvGemeten: input.abvGemeten ?? null,
-          platoGemeten: input.platoGemeten ?? null,
-          brouwefficientieGemeten: input.brouwefficientieGemeten ?? null,
           ...cache,
           ingredients: {
             create: input.ingredients.map((ing, idx) => ({

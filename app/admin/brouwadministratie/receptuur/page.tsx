@@ -10,12 +10,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-type SortKey = "brouwnummer" | "naam" | "ogCalc" | "fgCalc" | "abvCalc" | "platoCalc" | "ibuCalc" | "ebcCalc" | "brouwEfficiency";
+type SortKey = "naam" | "ogCalc" | "fgCalc" | "abvCalc" | "platoCalc" | "ibuCalc" | "ebcCalc" | "brouwEfficiency";
 type SortDir = "asc" | "desc";
 
 type Recipe = {
     id: string;
-    brouwnummer: string;
     naam: string;
     stijl: string | null;
     ogCalc: number | null;
@@ -25,11 +24,6 @@ type Recipe = {
     ibuCalc: number | null;
     ebcCalc: number | null;
     brouwEfficiency: number | null;
-    ogGemeten: number | null;
-    fgGemeten: number | null;
-    abvGemeten: number | null;
-    platoGemeten: number | null;
-    brouwefficientieGemeten: number | null;
     createdAt: Date;
     updatedAt: Date;
 };
@@ -52,8 +46,8 @@ export default function ReceptuurOverzicht() {
     const [creating, setCreating] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [zoekterm, setZoekterm] = useState("");
-    const [sortKey, setSortKey] = useState<SortKey>("brouwnummer");
-    const [sortDir, setSortDir] = useState<SortDir>("desc");
+    const [sortKey, setSortKey] = useState<SortKey>("naam");
+    const [sortDir, setSortDir] = useState<SortDir>("asc");
     const [pagina, setPagina] = useState(1);
     const [error, setError] = useState<string | null>(null);
 
@@ -90,7 +84,6 @@ export default function ReceptuurOverzicht() {
     const gefilterd = useMemo(() => {
         const q = zoekterm.toLowerCase();
         return recipes.filter(r =>
-            r.brouwnummer.toLowerCase().includes(q) ||
             r.naam.toLowerCase().includes(q) ||
             (r.stijl ?? "").toLowerCase().includes(q)
         );
@@ -135,7 +128,6 @@ export default function ReceptuurOverzicht() {
     if (!mounted || !isAuthenticated) return null;
 
     const COLS: { key: SortKey; label: string; title?: string }[] = [
-        { key: "brouwnummer", label: "Brouwnummer" },
         { key: "naam", label: "Naam" },
         { key: "ogCalc", label: "OG", title: "Original Gravity (verwacht)" },
         { key: "fgCalc", label: "FG", title: "Final Gravity (verwacht)" },
@@ -189,7 +181,7 @@ export default function ReceptuurOverzicht() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Zoek op brouwnummer, naam of stijl…"
+                        placeholder="Zoek op naam of stijl…"
                         value={zoekterm}
                         onChange={e => { setZoekterm(e.target.value); setPagina(1); }}
                         className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 focus:border-brewery-dark focus:outline-none bg-white text-sm"
@@ -219,21 +211,21 @@ export default function ReceptuurOverzicht() {
                                         <SortIcon col={col.key} sortKey={sortKey} sortDir={sortDir} />
                                     </th>
                                 ))}
-                                    <th className="px-4 py-3 text-left font-bold">Stijl</th>
+                                <th className="px-4 py-3 text-left font-bold">Stijl</th>
                                 <th className="px-4 py-3 text-right font-bold">Acties</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan={12} className="px-4 py-16 text-center text-gray-400">
+                                    <td colSpan={10} className="px-4 py-16 text-center text-gray-400">
                                         <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2" />
                                         Recepten laden…
                                     </td>
                                 </tr>
                             ) : paginaData.length === 0 ? (
                                 <tr>
-                                    <td colSpan={12} className="px-4 py-16 text-center text-gray-400">
+                                    <td colSpan={10} className="px-4 py-16 text-center text-gray-400">
                                         <FlaskConical className="h-10 w-10 mx-auto mb-3 opacity-30" />
                                         {zoekterm ? "Geen recepten gevonden voor deze zoekopdracht." : "Nog geen recepten. Klik op 'Nieuw recept' om te beginnen."}
                                     </td>
@@ -244,10 +236,11 @@ export default function ReceptuurOverzicht() {
                                         key={r.id}
                                         className={`border-t border-gray-100 hover:bg-gray-50 transition-colors ${i % 2 === 0 ? "" : "bg-gray-50/40"}`}
                                     >
-                                        <td className="px-4 py-3 font-mono font-bold text-brewery-dark whitespace-nowrap">
-                                            {r.brouwnummer}
+                                        <td className="px-4 py-3 font-medium max-w-xs truncate">
+                                            <Link href={`/admin/brouwadministratie/receptuur/${r.id}`} className="hover:underline">
+                                                {r.naam}
+                                            </Link>
                                         </td>
-                                        <td className="px-4 py-3 font-medium max-w-xs truncate">{r.naam}</td>
                                         <td className="px-4 py-3 tabular-nums">
                                             {r.ogCalc ? r.ogCalc.toFixed(3) : <span className="text-gray-300">—</span>}
                                         </td>

@@ -69,3 +69,28 @@ export async function deleteOngedierteInspectie(id: string): Promise<{
         return { success: false, error: (e as Error).message }
     }
 }
+// ─── Update ───────────────────────────────────────────────────────────────────
+
+export async function updateOngedierteInspectie(id: string, input: OngedierteInput): Promise<{
+    success: boolean; error?: string
+}> {
+    try {
+        await prisma.ongedierteInspectie.update({
+            where: { id },
+            data: {
+                datum: new Date(input.datum),
+                verantwoordelijke: input.verantwoordelijke,
+                brouwcontainer: input.brouwcontainer,
+                kelder: input.kelder,
+                omgeving: input.omgeving,
+                afvalcontainer: input.afvalcontainer,
+                opmerkingen: input.opmerkingen || null,
+                actie: input.actie || null,
+            },
+        })
+        revalidatePath('/admin/brouwadministratie/logboek')
+        return { success: true }
+    } catch (e: unknown) {
+        return { success: false, error: (e as Error).message }
+    }
+}

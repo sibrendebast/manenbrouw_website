@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  prisma-backup:
+    build: .
+    container_name: prisma_backup_dashboard
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Required Connection String (Supports direct Prisma urls like postgres://... or mysql://...)
+      - DATABASE_URL=${DATABASE_URL:-}
+      
+      # Backup Configuration
+      - BACKUP_CRON_SCHEDULE=${BACKUP_CRON_SCHEDULE:-0 2 * * *}
+      - BACKUP_RETENTION_COUNT=${BACKUP_RETENTION_COUNT:-7}
+      
+      # Optional: Set timezone for accurate Cron timing
+      - TZ=${TZ:-Europe/Brussels}
+    volumes:
+      # Mount a local folder on your host to store the SQL backups
+      - ./backups:/usr/src/app/backups
+      
+      # Optional: persist the log file
+      - ./backup-system.log:/usr/src/app/backup-system.log

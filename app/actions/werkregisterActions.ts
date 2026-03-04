@@ -68,3 +68,27 @@ export async function deleteWerkregisterEntry(id: string): Promise<{
         return { success: false, error: (e as Error).message }
     }
 }
+// ─── Update ───────────────────────────────────────────────────────────────────
+
+export async function updateWerkregisterEntry(id: string, input: WerkregisterInput): Promise<{
+    success: boolean; error?: string
+}> {
+    try {
+        await prisma.werkregisterEntry.update({
+            where: { id },
+            data: {
+                datum: new Date(input.datum),
+                handeling: input.handeling,
+                brouwaanvraagDatum: input.brouwaanvraagDatum ? new Date(input.brouwaanvraagDatum) : null,
+                brouwaanvraagNummer: input.brouwaanvraagNummer || null,
+                brouwnummer: input.brouwnummer || null,
+                volume: input.volume ?? null,
+                fermentatievat: input.fermentatievat || null,
+            },
+        })
+        revalidatePath('/admin/brouwadministratie/logboek')
+        return { success: true }
+    } catch (e: unknown) {
+        return { success: false, error: (e as Error).message }
+    }
+}

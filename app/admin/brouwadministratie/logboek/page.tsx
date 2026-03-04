@@ -6,21 +6,25 @@ import { useAdminStore } from "@/store/adminStore";
 import {
     getWerkregisterEntries,
     createWerkregisterEntry,
+    updateWerkregisterEntry,
     deleteWerkregisterEntry,
 } from "@/app/actions/werkregisterActions";
+import { getBrouwsels } from "@/app/actions/brouwselActions";
 import {
     getOngedierteInspecties,
     createOngedierteInspectie,
+    updateOngedierteInspectie,
     deleteOngedierteInspectie,
 } from "@/app/actions/ongedierteActions";
 import {
     getCcpEntries,
     createCcpEntry,
+    updateCcpEntry,
     deleteCcpEntry,
 } from "@/app/actions/ccpActions";
 import {
     Plus, Search, ChevronUp, ChevronDown, ChevronsUpDown,
-    Trash2, RefreshCw, BookOpen, X, Check, Minus,
+    Trash2, RefreshCw, BookOpen, X, Check, Minus, Pencil,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -34,6 +38,8 @@ const HANDELING_LABELS: Record<Handeling, string> = {
     BOTTELEN_KEGGEN: "Bottelen / Keggen",
     VERNIETIGING: "Vernietiging",
 };
+
+const TANK_OPTIONS = ['Jay - 300l', 'Devon - 300l', 'Randy - 600l'];
 
 type WerkEntry = {
     id: string;
@@ -115,32 +121,58 @@ function BoolIcon({ value }: { value: boolean }) {
 
 // ─── Add Werkregister Modal ──────────────────────────────────────────────────
 
-function AddWerkregisterModal({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
+// ─── Werkregister Modal ──────────────────────────────────────────────────────
+
+function WerkregisterModal({ editEntry, onClose, onSaved }: { editEntry?: WerkEntry | null; onClose: () => void; onSaved: () => void }) {
     const [saving, setSaving] = useState(false);
+    const [loadingBrouwsels, setLoadingBrouwsels] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [brouwselLijst, setBrouwselLijst] = useState<{ brouwnummer: string; recipeName: string }[]>([]);
 
     const today = new Date().toISOString().split("T")[0];
-    const [datum, setDatum] = useState(today);
-    const [handeling, setHandeling] = useState<Handeling>("BROUWEN");
-    const [brouwaanvraagDatum, setBrouwaanvraagDatum] = useState("");
-    const [brouwaanvraagNummer, setBrouwaanvraagNummer] = useState("");
-    const [brouwnummer, setBrouwnummer] = useState("");
-    const [volume, setVolume] = useState("");
-    const [fermentatievat, setFermentatievat] = useState("");
+    const [datum, setDatum] = useState(editEntry ? editEntry.datum.split("T")[0] : today);
+    const [handeling, setHandeling] = useState<Handeling>(editEntry?.handeling ?? "BROUWEN");
+    const [brouwaanvraagDatum, setBrouwaanvraagDatum] = useState(editEntry?.brouwaanvraagDatum ? editEntry.brouwaanvraagDatum.split("T")[0] : "");
+    const [brouwaanvraagNummer, setBrouwaanvraagNummer] = useState(editEntry?.brouwaanvraagNummer ?? "");
+    const [brouwnummer, setBrouwnummer] = useState(editEntry?.brouwnummer ?? "");
+    const [volume, setVolume] = useState(editEntry?.volume?.toString() ?? "");
+    const [fermentatievat, setFermentatievat] = useState(editEntry?.fermentatievat ?? "");
+
+    useEffect(() => {
+        async function vinkBrouwsels() {
+            setLoadingBrouwsels(true);
+            const r = await getBrouwsels();
+            if (r.success) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                setBrouwselLijst(r.data.map((b: any) => ({
+                    brouwnummer: b.brouwnummer,
+                    recipeName: b.recipe?.naam ?? "Onbekend recept"
+                })));
+            }
+            setLoadingBrouwsels(false);
+        }
+        vinkBrouwsels();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!datum) { setError("Datum is verplicht."); return; }
         setSaving(true);
         setError(null);
-        const result = await createWerkregisterEntry({
+
+        const payload = {
             datum, handeling,
             brouwaanvraagDatum: brouwaanvraagDatum || null,
             brouwaanvraagNummer: brouwaanvraagNummer || null,
             brouwnummer: brouwnummer || null,
             volume: volume ? parseFloat(volume) : null,
             fermentatievat: fermentatievat || null,
-        });
+        };
+
+        const result = editEntry
+            ? await updateWerkregisterEntry(editEntry.id, payload)
+            : await createWerkregisterEntry(payload);
+
         if (result.success) { onSaved(); onClose(); }
         else { setError(result.error ?? "Opslaan mislukt."); setSaving(false); }
     };
@@ -149,7 +181,7 @@ function AddWerkregisterModal({ onClose, onSaved }: { onClose: () => void; onSav
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
             <div className="bg-white border-2 border-black w-full max-w-lg mx-4" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between px-6 py-4 border-b-2 border-black bg-brewery-dark text-white">
-                    <h2 className="text-lg font-bold">Nieuwe registratie</h2>
+                    <h2 className="text-lg font-bold">{editEntry ? "Registratie bewerken" : "Nieuwe registratie"}</h2>
                     <button onClick={onClose} className="hover:opacity-70"><X className="h-5 w-5" /></button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -181,9 +213,18 @@ function AddWerkregisterModal({ onClose, onSaved }: { onClose: () => void; onSav
                     </div>
                     <div>
                         <label className="block text-sm font-bold mb-1">Brouwnummer</label>
-                        <input type="text" value={brouwnummer} onChange={e => setBrouwnummer(e.target.value)}
-                            placeholder="bv. 2025/009"
-                            className="w-full border-2 border-gray-200 px-3 py-2 text-sm focus:border-brewery-dark focus:outline-none" />
+                        <select
+                            value={brouwnummer}
+                            onChange={e => setBrouwnummer(e.target.value)}
+                            className="w-full border-2 border-gray-200 px-3 py-2 text-sm focus:border-brewery-dark focus:outline-none bg-white">
+                            <option value="">— Selecteer brouwsel —</option>
+                            {brouwselLijst.map(b => (
+                                <option key={b.brouwnummer} value={b.brouwnummer}>
+                                    {b.brouwnummer} - {b.recipeName}
+                                </option>
+                            ))}
+                        </select>
+                        {loadingBrouwsels && <p className="text-xs text-gray-400 mt-1">Brouwsels laden…</p>}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -194,9 +235,11 @@ function AddWerkregisterModal({ onClose, onSaved }: { onClose: () => void; onSav
                         </div>
                         <div>
                             <label className="block text-sm font-bold mb-1">Fermentatievat</label>
-                            <input type="text" value={fermentatievat} onChange={e => setFermentatievat(e.target.value)}
-                                placeholder="bv. Devon - 300l"
-                                className="w-full border-2 border-gray-200 px-3 py-2 text-sm focus:border-brewery-dark focus:outline-none" />
+                            <select value={fermentatievat} onChange={e => setFermentatievat(e.target.value)}
+                                className="w-full border-2 border-gray-200 px-3 py-2 text-sm focus:border-brewery-dark focus:outline-none bg-white">
+                                <option value="">— Geen tank —</option>
+                                {TANK_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                            </select>
                         </div>
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
@@ -213,39 +256,46 @@ function AddWerkregisterModal({ onClose, onSaved }: { onClose: () => void; onSav
     );
 }
 
-// ─── Add Ongedierte Modal ────────────────────────────────────────────────────
+// ─── Ongedierte Modal ────────────────────────────────────────────────────────
 
-function AddOngedierteModal({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
+function OngedierteModal({ editEntry, onClose, onSaved }: { editEntry?: OngedierteEntry | null; onClose: () => void; onSaved: () => void }) {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const today = new Date().toISOString().split("T")[0];
-    const [datum, setDatum] = useState(today);
-    const [verantwoordelijke, setVerantwoordelijke] = useState("Sibren");
+    const [datum, setDatum] = useState(editEntry ? editEntry.datum.split("T")[0] : today);
+    const [verantwoordelijke, setVerantwoordelijke] = useState(editEntry?.verantwoordelijke ?? "Sibren");
     const [customVerantwoordelijke, setCustomVerantwoordelijke] = useState("");
-    const isCustom = verantwoordelijke === "__custom__";
-    const [brouwcontainer, setBrouwcontainer] = useState(true);
-    const [kelder, setKelder] = useState(true);
-    const [omgeving, setOmgeving] = useState(true);
-    const [afvalcontainer, setAfvalcontainer] = useState(true);
-    const [opmerkingen, setOpmerkingen] = useState("Geen activiteit");
-    const [actie, setActie] = useState("");
+    const isCustom = (verantwoordelijke !== "Sibren" && verantwoordelijke !== "Tom" && !editEntry) || (editEntry && verantwoordelijke !== "Sibren" && verantwoordelijke !== "Tom");
+
+    const [brouwcontainer, setBrouwcontainer] = useState(editEntry?.brouwcontainer ?? true);
+    const [kelder, setKelder] = useState(editEntry?.kelder ?? true);
+    const [omgeving, setOmgeving] = useState(editEntry?.omgeving ?? true);
+    const [afvalcontainer, setAfvalcontainer] = useState(editEntry?.afvalcontainer ?? true);
+    const [opmerkingen, setOpmerkingen] = useState(editEntry?.opmerkingen ?? "Geen activiteit");
+    const [actie, setActie] = useState(editEntry?.actie ?? "");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const finalVerantwoordelijke = isCustom ? customVerantwoordelijke.trim() : verantwoordelijke;
+        const finalVerantwoordelijke = verantwoordelijke === "__custom__" ? customVerantwoordelijke.trim() : verantwoordelijke;
         if (!datum || !finalVerantwoordelijke) {
             setError("Datum en verantwoordelijke zijn verplicht.");
             return;
         }
         setSaving(true);
         setError(null);
-        const result = await createOngedierteInspectie({
+
+        const payload = {
             datum, verantwoordelijke: finalVerantwoordelijke,
             brouwcontainer, kelder, omgeving, afvalcontainer,
             opmerkingen: opmerkingen || null,
             actie: actie || null,
-        });
+        };
+
+        const result = editEntry
+            ? await updateOngedierteInspectie(editEntry.id, payload)
+            : await createOngedierteInspectie(payload);
+
         if (result.success) { onSaved(); onClose(); }
         else { setError(result.error ?? "Opslaan mislukt."); setSaving(false); }
     };
@@ -256,7 +306,7 @@ function AddOngedierteModal({ onClose, onSaved }: { onClose: () => void; onSaved
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
             <div className="bg-white border-2 border-black w-full max-w-lg mx-4" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between px-6 py-4 border-b-2 border-black bg-brewery-dark text-white">
-                    <h2 className="text-lg font-bold">Nieuwe inspectie</h2>
+                    <h2 className="text-lg font-bold">{editEntry ? "Inspectie bewerken" : "Nieuwe inspectie"}</h2>
                     <button onClick={onClose} className="hover:opacity-70"><X className="h-5 w-5" /></button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -269,14 +319,17 @@ function AddOngedierteModal({ onClose, onSaved }: { onClose: () => void; onSaved
                         </div>
                         <div>
                             <label className="block text-sm font-bold mb-1">Verantwoordelijke *</label>
-                            <select value={verantwoordelijke} onChange={e => setVerantwoordelijke(e.target.value)}
+                            <select value={verantwoordelijke === "Sibren" || verantwoordelijke === "Tom" ? verantwoordelijke : "__custom__"} onChange={e => setVerantwoordelijke(e.target.value)}
                                 className="w-full border-2 border-gray-200 px-3 py-2 text-sm focus:border-brewery-dark focus:outline-none">
                                 <option value="Sibren">Sibren</option>
                                 <option value="Tom">Tom</option>
                                 <option value="__custom__">Anders…</option>
                             </select>
-                            {isCustom && (
-                                <input type="text" value={customVerantwoordelijke} onChange={e => setCustomVerantwoordelijke(e.target.value)}
+                            {(verantwoordelijke === "__custom__" || (editEntry && verantwoordelijke !== "Sibren" && verantwoordelijke !== "Tom")) && (
+                                <input type="text" value={verantwoordelijke === "__custom__" ? customVerantwoordelijke : verantwoordelijke} onChange={e => {
+                                    if (verantwoordelijke === "__custom__") setCustomVerantwoordelijke(e.target.value);
+                                    else setVerantwoordelijke(e.target.value);
+                                }}
                                     placeholder="Naam invullen" required
                                     className="w-full border-2 border-gray-200 px-3 py-2 text-sm focus:border-brewery-dark focus:outline-none mt-2" />
                             )}
@@ -329,33 +382,39 @@ function AddOngedierteModal({ onClose, onSaved }: { onClose: () => void; onSaved
     );
 }
 
-// ─── Add CCP Modal ───────────────────────────────────────────────────────────
+// ─── CCP Modal ───────────────────────────────────────────────────────────
 
-function AddCcpModal({ ccpType, label, onClose, onSaved }: { ccpType: CcpTypeKey; label: string; onClose: () => void; onSaved: () => void }) {
+function CcpModal({ editEntry, ccpType, label, onClose, onSaved }: { editEntry?: CcpEntry | null; ccpType: CcpTypeKey; label: string; onClose: () => void; onSaved: () => void }) {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const today = new Date().toISOString().split("T")[0];
-    const [datum, setDatum] = useState(today);
-    const [lotnummer, setLotnummer] = useState("");
-    const [uitgevoerd, setUitgevoerd] = useState(true);
-    const [uitvoerder, setUitvoerder] = useState("Sibren");
+    const [datum, setDatum] = useState(editEntry ? editEntry.datum.split("T")[0] : today);
+    const [lotnummer, setLotnummer] = useState(editEntry?.lotnummer ?? "");
+    const [uitgevoerd, setUitgevoerd] = useState(editEntry?.uitgevoerd ?? true);
+    const [uitvoerder, setUitvoerder] = useState(editEntry?.uitvoerder ?? "Sibren");
     const [customUitvoerder, setCustomUitvoerder] = useState("");
-    const isCustom = uitvoerder === "__custom__";
+    const isCustom = (uitvoerder !== "Sibren" && uitvoerder !== "Tom" && !editEntry) || (editEntry && uitvoerder !== "Sibren" && uitvoerder !== "Tom");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const finalUitvoerder = isCustom ? customUitvoerder.trim() : uitvoerder;
+        const finalUitvoerder = uitvoerder === "__custom__" ? customUitvoerder.trim() : uitvoerder;
         if (!datum) { setError("Datum is verplicht."); return; }
         setSaving(true);
         setError(null);
-        const result = await createCcpEntry({
+
+        const payload = {
             type: ccpType,
             datum,
             lotnummer: lotnummer || null,
             uitgevoerd,
             uitvoerder: finalUitvoerder || null,
-        });
+        };
+
+        const result = editEntry
+            ? await updateCcpEntry(editEntry.id, payload)
+            : await createCcpEntry(payload);
+
         if (result.success) { onSaved(); onClose(); }
         else { setError(result.error ?? "Opslaan mislukt."); setSaving(false); }
     };
@@ -364,7 +423,7 @@ function AddCcpModal({ ccpType, label, onClose, onSaved }: { ccpType: CcpTypeKey
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
             <div className="bg-white border-2 border-black w-full max-w-lg mx-4" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between px-6 py-4 border-b-2 border-black bg-brewery-dark text-white">
-                    <h2 className="text-lg font-bold">Nieuwe {label} controle</h2>
+                    <h2 className="text-lg font-bold">{editEntry ? `${label} controle bewerken` : `Nieuwe ${label} controle`}</h2>
                     <button onClick={onClose} className="hover:opacity-70"><X className="h-5 w-5" /></button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -385,14 +444,17 @@ function AddCcpModal({ ccpType, label, onClose, onSaved }: { ccpType: CcpTypeKey
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-bold mb-1">Uitvoerder</label>
-                            <select value={uitvoerder} onChange={e => setUitvoerder(e.target.value)}
+                            <select value={uitvoerder === "Sibren" || uitvoerder === "Tom" ? uitvoerder : "__custom__"} onChange={e => setUitvoerder(e.target.value)}
                                 className="w-full border-2 border-gray-200 px-3 py-2 text-sm focus:border-brewery-dark focus:outline-none">
                                 <option value="Sibren">Sibren</option>
                                 <option value="Tom">Tom</option>
                                 <option value="__custom__">Anders…</option>
                             </select>
-                            {isCustom && (
-                                <input type="text" value={customUitvoerder} onChange={e => setCustomUitvoerder(e.target.value)}
+                            {(uitvoerder === "__custom__" || (editEntry && uitvoerder !== "Sibren" && uitvoerder !== "Tom")) && (
+                                <input type="text" value={uitvoerder === "__custom__" ? customUitvoerder : uitvoerder} onChange={e => {
+                                    if (uitvoerder === "__custom__") setCustomUitvoerder(e.target.value);
+                                    else setUitvoerder(e.target.value);
+                                }}
                                     placeholder="Naam invullen" required
                                     className="w-full border-2 border-gray-200 px-3 py-2 text-sm focus:border-brewery-dark focus:outline-none mt-2" />
                             )}
@@ -471,6 +533,12 @@ export default function Logboek() {
     const [schimPagina, setSchimPagina] = useState(1);
     const [schimDeletingId, setSchimDeletingId] = useState<string | null>(null);
     const [showAddSchim, setShowAddSchim] = useState(false);
+
+    // ── Edit states ──
+    const [editWerk, setEditWerk] = useState<WerkEntry | null>(null);
+    const [editOng, setEditOng] = useState<OngedierteEntry | null>(null);
+    const [editGlas, setEditGlas] = useState<CcpEntry | null>(null);
+    const [editSchim, setEditSchim] = useState<CcpEntry | null>(null);
 
     // ── Loaders ──
 
@@ -817,7 +885,11 @@ export default function Logboek() {
                                             <td className="px-4 py-3 tabular-nums">{entry.volume != null ? `${entry.volume} L` : <span className="text-gray-300">—</span>}</td>
                                             <td className="px-4 py-3">{entry.fermentatievat ?? <span className="text-gray-300">—</span>}</td>
                                             <td className="px-4 py-3">
-                                                <div className="flex justify-end">
+                                                <div className="flex justify-end gap-2">
+                                                    <button onClick={() => setEditWerk(entry)}
+                                                        className="flex items-center gap-1 px-3 py-1.5 bg-brewery-dark text-white text-xs font-bold hover:opacity-80 transition-colors">
+                                                        <Pencil className="h-3.5 w-3.5" />
+                                                    </button>
                                                     <button onClick={() => handleWerkDelete(entry.id)} disabled={werkDeletingId === entry.id}
                                                         className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white text-xs font-bold hover:bg-red-700 transition-colors disabled:opacity-50">
                                                         <Trash2 className="h-3.5 w-3.5" />{werkDeletingId === entry.id ? "…" : ""}
@@ -902,7 +974,11 @@ export default function Logboek() {
                                             </td>
                                             <td className="px-4 py-3 text-gray-600 max-w-xs truncate">{entry.actie ?? <span className="text-gray-300">—</span>}</td>
                                             <td className="px-4 py-3">
-                                                <div className="flex justify-end">
+                                                <div className="flex justify-end gap-2">
+                                                    <button onClick={() => setEditOng(entry)}
+                                                        className="flex items-center gap-1 px-3 py-1.5 bg-brewery-dark text-white text-xs font-bold hover:opacity-80 transition-colors">
+                                                        <Pencil className="h-3.5 w-3.5" />
+                                                    </button>
                                                     <button onClick={() => handleOngDelete(entry.id)} disabled={ongDeletingId === entry.id}
                                                         className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white text-xs font-bold hover:bg-red-700 transition-colors disabled:opacity-50">
                                                         <Trash2 className="h-3.5 w-3.5" />{ongDeletingId === entry.id ? "…" : ""}
@@ -1011,7 +1087,11 @@ export default function Logboek() {
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    <div className="flex justify-end">
+                                                    <div className="flex justify-end gap-2">
+                                                        <button onClick={() => isGlas ? setEditGlas(entry) : setEditSchim(entry)}
+                                                            className="flex items-center gap-1 px-3 py-1.5 bg-brewery-dark text-white text-xs font-bold hover:opacity-80 transition-colors">
+                                                            <Pencil className="h-3.5 w-3.5" />
+                                                        </button>
                                                         <button onClick={() => handleDel(entry.id)} disabled={deletingId === entry.id}
                                                             className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white text-xs font-bold hover:bg-red-700 transition-colors disabled:opacity-50">
                                                             <Trash2 className="h-3.5 w-3.5" />{deletingId === entry.id ? "…" : ""}
@@ -1044,10 +1124,10 @@ export default function Logboek() {
             </div>
 
             {/* Modals */}
-            {showAddWerk && <AddWerkregisterModal onClose={() => setShowAddWerk(false)} onSaved={laadWerk} />}
-            {showAddOng && <AddOngedierteModal onClose={() => setShowAddOng(false)} onSaved={laadOng} />}
-            {showAddGlas && <AddCcpModal ccpType="GLASBREUK" label="glasbreuk" onClose={() => setShowAddGlas(false)} onSaved={laadGlas} />}
-            {showAddSchim && <AddCcpModal ccpType="SCHIMMELVORMING" label="schimmelvorming" onClose={() => setShowAddSchim(false)} onSaved={laadSchim} />}
+            {(showAddWerk || editWerk) && <WerkregisterModal editEntry={editWerk} onClose={() => { setShowAddWerk(false); setEditWerk(null); }} onSaved={laadWerk} />}
+            {(showAddOng || editOng) && <OngedierteModal editEntry={editOng} onClose={() => { setShowAddOng(false); setEditOng(null); }} onSaved={laadOng} />}
+            {(showAddGlas || editGlas) && <CcpModal editEntry={editGlas} ccpType="GLASBREUK" label="glasbreuk" onClose={() => { setShowAddGlas(false); setEditGlas(null); }} onSaved={laadGlas} />}
+            {(showAddSchim || editSchim) && <CcpModal editEntry={editSchim} ccpType="SCHIMMELVORMING" label="schimmelvorming" onClose={() => { setShowAddSchim(false); setEditSchim(null); }} onSaved={laadSchim} />}
         </div >
     );
 }

@@ -65,3 +65,25 @@ export async function deleteCcpEntry(id: string): Promise<{
         return { success: false, error: (e as Error).message }
     }
 }
+// ─── Update ───────────────────────────────────────────────────────────────────
+
+export async function updateCcpEntry(id: string, input: CcpInput): Promise<{
+    success: boolean; error?: string
+}> {
+    try {
+        await prisma.ccpEntry.update({
+            where: { id },
+            data: {
+                type: input.type,
+                datum: new Date(input.datum),
+                lotnummer: input.lotnummer || null,
+                uitgevoerd: input.uitgevoerd,
+                uitvoerder: input.uitvoerder || null,
+            },
+        })
+        revalidatePath('/admin/brouwadministratie/logboek')
+        return { success: true }
+    } catch (e: unknown) {
+        return { success: false, error: (e as Error).message }
+    }
+}

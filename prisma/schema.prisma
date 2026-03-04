@@ -8,124 +8,248 @@ datasource db {
   directUrl = env("DATABASE_URL")
 }
 
+model Product {
+  id          String      @id @default(uuid())
+  slug        String      @unique
+  name        String
+  style       String?
+  abv         String?
+  volume      String?
+  price       Float
+  description String
+  images      String
+  inStock     Boolean     @default(true)
+  stockCount  Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  btwCategory Int?        @default(21)
+  isHidden    Boolean     @default(false)
+  category    ProductType @default(BEER)
+  OrderItem   OrderItem[]
+}
+
+model Order {
+  id              String        @id @default(uuid())
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress String
+  shippingMethod  String
+  totalAmount     Float
+  status          String        @default("pending")
+  stripeSessionId String?
+  paymentMethod   String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  invoiceUrl      String?
+  orderNumber     String?       @unique
+  locale          String        @default("nl")
+  comment         String?
+  tickets         EventTicket[]
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id          String  @id @default(uuid())
+  orderId     String
+  productId   String
+  quantity    Int
+  price       Float
+  btwCategory Int?    @default(21)
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product @relation(fields: [productId], references: [id])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  firstName String?
+  lastName  String?
+}
+
+model Event {
+  id                   String        @id @default(uuid())
+  title                String
+  description          String
+  date                 DateTime
+  location             String
+  isPaid               Boolean       @default(false)
+  ticketPrice          Float?
+  capacity             Int?
+  ticketsSold          Int           @default(0)
+  image                String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  isHidden             Boolean       @default(false)
+  earlyBirdEndDate     DateTime?
+  earlyBirdPrice       Float?
+  ticketSalesStartDate DateTime?
+  tickets              EventTicket[]
+}
+
+model EventTicket {
+  id          String   @id @default(uuid())
+  eventId     String
+  orderId     String?
+  buyerName   String
+  buyerEmail  String
+  quantity    Int      @default(1)
+  totalPrice  Float
+  purchasedAt DateTime @default(now())
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  order       Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model AdminUser {
+  id                String             @id @default(uuid())
+  username          String             @unique
+  password          String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  pushSubscriptions PushSubscription[]
+}
+
+model PushSubscription {
+  id       String    @id @default(uuid())
+  endpoint String
+  keys     Json
+  adminId  String
+  admin    AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+}
+
+/// Atomaire teller per kalenderjaar voor het genereren van brouwnummers (YYYY/NNN).
+model RecipeSequence {
+  jaar   Int @id
+  teller Int @default(0)
+}
+
+model Recipe {
+  id                      String             @id @default(uuid())
+  brouwnummer             String             @unique
+  naam                    String
+  stijl                   String?
+  notities                String?
+  batchVolume             Float?
+  brouwEfficiency         Float?
+  attenuation             Float?
+  ogCalc                  Float?
+  fgCalc                  Float?
+  abvCalc                 Float?
+  platoCalc               Float?
+  ibuCalc                 Float?
+  ebcCalc                 Float?
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  abvGemeten              Float?
+  brouwefficientieGemeten Float?
+  fgGemeten               Float?
+  ogGemeten               Float?
+  platoGemeten            Float?
+  abvGevraagd             Float?
+  fgGevraagd              Float?
+  ogGevraagd              Float?
+  platoGevraagd           Float?
+  aantalBatches           Float?
+  fermentatieStappen      FermentatieStap[]
+  maischStappen           MaischStap[]
+  ingredients             RecipeIngredient[]
+
+  @@index([brouwnummer])
+}
+
+model RecipeIngredient {
+  id               String         @id @default(uuid())
+  recipeId         String
+  stap             BrewingStap    @default(MAISCHEN)
+  type             IngredientType @default(MOUT)
+  naam             String
+  hoeveelheid      Float
+  eenheid          String
+  extractPotential Float?
+  kleurEbc         Float?
+  alfazuur         Float?
+  tijdMinuten      Int?
+  volgorde         Int            @default(0)
+  doseringGPerL    Float?
+  lot              String?
+  pelletOfBloem    String?
+  tijdstip         String?
+  recipe           Recipe         @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+}
+
+/// Maischstappen per recept (Protein Rest, Beta-Amylase, Alpha-Amylase, Mash Out).
+model MaischStap {
+  id       String @id @default(uuid())
+  recipeId String
+  stapNaam String
+  tempC    Float?
+  duurMin  Int?
+  volgorde Int    @default(0)
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+}
+
+/// Fermentatieschema-stappen per recept (hoofd, cold crash, …).
+model FermentatieStap {
+  id        String @id @default(uuid())
+  recipeId  String
+  stapNaam  String
+  tempC     Float?
+  duurDagen Int?
+  volgorde  Int    @default(0)
+  recipe    Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+}
+
+model CcpEntry {
+  id         String   @id
+  type       CcpType
+  datum      DateTime
+  lotnummer  String?
+  uitgevoerd Boolean  @default(false)
+  uitvoerder String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+}
+
+model OngedierteInspectie {
+  id                String   @id
+  datum             DateTime
+  verantwoordelijke String
+  brouwcontainer    Boolean  @default(false)
+  kelder            Boolean  @default(false)
+  omgeving          Boolean  @default(false)
+  afvalcontainer    Boolean  @default(false)
+  opmerkingen       String?
+  actie             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime
+}
+
+model WerkregisterEntry {
+  id                  String                @id
+  datum               DateTime
+  handeling           WerkregisterHandeling
+  brouwaanvraagDatum  DateTime?
+  brouwaanvraagNummer String?
+  brouwnummer         String?
+  volume              Float?
+  fermentatievat      String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime
+}
+
 enum ProductType {
   BEER
   GIFTBOX
   GLASS
   MERCH
 }
-
-model Product {
-  id          String      @id @default(uuid())
-  slug        String      @unique
-  name        String
-  category    ProductType @default(BEER)
-  style       String?
-  abv         String?
-  volume      String?
-  price       Float
-  description String
-  images      String // Stored as JSON string
-  inStock     Boolean     @default(true)
-  stockCount  Int         @default(0)
-  isHidden    Boolean     @default(false)
-  btwCategory Int?        @default(21) // BTW/VAT percentage: 0, 6, 12, or 21
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  OrderItem   OrderItem[]
-}
-
-model Order {
-  id              String      @id @default(uuid())
-  orderNumber     String?     @unique // Format: YYYY/####
-  customerName    String
-  customerEmail   String
-  customerPhone   String
-  shippingAddress String // Stored as JSON string
-  shippingMethod  String // "shipment" | "pickup"
-  totalAmount     Float
-  status          String      @default("pending") // "pending", "pending_payment", "paid", "shipped", "completed", "cancelled"
-  stripeSessionId String?
-  paymentMethod   String? // "bancontact", "card", "payconiq"
-  invoiceUrl      String?
-  items           OrderItem[]
-  tickets         EventTicket[]
-  locale          String      @default("nl") // "nl" | "en"
-  comment         String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-}
-
-model OrderItem {
-  id          String  @id @default(uuid())
-  orderId     String
-  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId   String
-  product     Product @relation(fields: [productId], references: [id])
-  quantity    Int
-  price       Float
-  btwCategory Int?    @default(21) // BTW/VAT percentage at time of purchase
-}
-
-model NewsletterSubscriber {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  createdAt DateTime @default(now())
-}
-
-model Event {
-  id                   String    @id @default(uuid())
-  title                String
-  description          String
-  date                 DateTime
-  location             String
-  isPaid               Boolean   @default(false)
-  ticketPrice          Float?    // Only for paid events
-  capacity             Int?      // Maximum number of attendees
-  ticketsSold          Int       @default(0)
-  isHidden             Boolean   @default(false)
-  image                String?   // Event image URL
-  ticketSalesStartDate DateTime? // When tickets become available for purchase
-  earlyBirdPrice       Float?    // Discounted price for early bird tickets
-  earlyBirdEndDate     DateTime? // Deadline for early bird discount
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  tickets              EventTicket[]
-}
-
-model EventTicket {
-  id            String   @id @default(uuid())
-  eventId       String
-  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  orderId       String?
-  order         Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  buyerName     String
-  buyerEmail    String
-  quantity      Int      @default(1)
-  totalPrice    Float
-  purchasedAt   DateTime @default(now())
-}
-
-model AdminUser {
-  id        String   @id @default(uuid())
-  username  String   @unique
-  password  String   // Hashed password
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  pushSubscriptions PushSubscription[]
-}
-
-model PushSubscription {
-  id        String    @id @default(uuid())
-  endpoint  String
-  keys      Json      // Stores p256dh and auth keys
-  adminId   String
-  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
-}
-
-// ─── Brouwadministratie ──────────────────────────────────────────────────────
 
 enum BrewingStap {
   MAISCHEN
@@ -143,111 +267,16 @@ enum IngredientType {
   ANDERE
 }
 
-/// Atomaire teller per kalenderjaar voor het genereren van brouwnummers (YYYY/NNN).
-model RecipeSequence {
-  jaar    Int @id
-  teller  Int @default(0)
+enum CcpType {
+  GLASBREUK
+  SCHIMMELVORMING
 }
 
-model Recipe {
-  id              String   @id @default(uuid())
-  brouwnummer     String   @unique // formaat: YYYY/NNN
-  naam            String
-  stijl           String?
-  notities        String?
-
-  // Basisinputs (cfr Excel "Gevraagd"-sectie)
-  batchVolume     Float?   // liter per batch, na koken in fermentor
-  aantalBatches   Float?   // aantal batches; totaal volume = batchVolume × aantalBatches
-  brouwEfficiency Float?   // % (0-100); standaard 75 — "Brouwefficientie" als decimaal × 100
-  attenuation     Float?   // % (0-100); verwachte vergistingsgraad
-
-  // Gevraagde (target) waarden — basisinput + berekend uit ABV + attenuation
-  abvGevraagd     Float?   // Gevraagde ABV (%) — directe input van de brouwer
-  ogGevraagd      Float?   // Gevraagde OG (berekend: 1 + abvGevraagd×100/(131.25×att))
-  fgGevraagd      Float?   // Gevraagde FG (berekend)
-  platoGevraagd   Float?   // Gevraagde Plato (berekend)
-
-  // Verwachte (berekende) waarden — gecached, berekend uit ingrediëntenlijst
-  ogCalc          Float?   // Original Gravity  (bv. 1.052)
-  fgCalc          Float?   // Final Gravity     (bv. 1.010)
-  abvCalc         Float?   // Alcohol By Volume (%)
-  platoCalc       Float?   // Graden Plato van OG
-  ibuCalc         Float?   // International Bitterness Units (Tinseth)
-  ebcCalc         Float?   // EBC kleur (Morey)
-
-  // Gemeten waarden — ingevuld na het brouwen
-  ogGemeten       Float?
-  fgGemeten       Float?
-  abvGemeten      Float?
-  platoGemeten    Float?
-  brouwefficientieGemeten Float?
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  ingredients     RecipeIngredient[]
-  maischStappen   MaischStap[]
-  fermentatieStappen FermentatieStap[]
-
-  @@index([brouwnummer])
-}
-
-model RecipeIngredient {
-  id              String         @id @default(uuid())
-  recipeId        String
-  recipe          Recipe         @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-
-  stap            BrewingStap    @default(MAISCHEN)
-  type            IngredientType @default(MOUT)
-  naam            String
-  hoeveelheid     Float          // totale hoeveelheid (numeriek)
-  eenheid         String         // "kg" | "g" | "L" | "ml" | "stuks"
-
-  // Mout/graan-specifiek
-  extractPotential Float?        // Graanrendement % (bv. 78 voor pilsnermout)
-  kleurEbc        Float?         // EBC kleur van de mout/graan
-
-  // Hop-specifiek
-  alfazuur        Float?         // Alpha-zuur % (AA%)
-  tijdMinuten     Int?           // Kooktijd in minuten (0 = dryhop/geen IBU-bijdrage)
-  pelletOfBloem   String?        // "Pellet" | "Bloem"
-
-  // Toevoeging-specifiek
-  tijdstip        String?        // Toevoegingstijdstip (bv. "Secundaire fermentatie")
-  doseringGPerL   Float?         // Dosering in g/L
-
-  // Algemeen
-  lot             String?        // Lotnummer
-  volgorde        Int            @default(0)
-
-  @@index([recipeId])
-}
-
-/// Maischstappen per recept (Protein Rest, Beta-Amylase, Alpha-Amylase, Mash Out).
-model MaischStap {
-  id          String  @id @default(uuid())
-  recipeId    String
-  recipe      Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  stapNaam    String  // bv. "Protein Rest (52°C)"
-  tempC       Float?  // temperatuur in °C
-  duurMin     Int?    // duur in minuten
-  volgorde    Int     @default(0)
-
-  @@index([recipeId])
-}
-
-/// Fermentatieschema-stappen per recept (hoofd, cold crash, …).
-model FermentatieStap {
-  id          String  @id @default(uuid())
-  recipeId    String
-  recipe      Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  stapNaam    String  // bv. "hoofd", "rest", "cold crash"
-  tempC       Float?  // temperatuur in °C
-  duurDagen   Int?    // duur in dagen
-  volgorde    Int     @default(0)
-
-  @@index([recipeId])
+enum WerkregisterHandeling {
+  BROUWEN
+  OVERHEVELEN
+  BOTTELEN_KEGGEN
+  VERNIETIGING
 }
 
 // ─── Logboek — Werkregister ─────────────────────────────────────────────────

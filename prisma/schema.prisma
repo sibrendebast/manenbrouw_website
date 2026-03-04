@@ -249,3 +249,63 @@ model FermentatieStap {
 
   @@index([recipeId])
 }
+
+// ─── Logboek — Werkregister ─────────────────────────────────────────────────
+
+enum WerkregisterHandeling {
+  BROUWEN
+  OVERHEVELEN
+  BOTTELEN_KEGGEN
+  VERNIETIGING
+}
+
+model WerkregisterEntry {
+  id                    String                  @id @default(uuid())
+  datum                 DateTime                // Date of the action
+  handeling             WerkregisterHandeling   // Type of action
+  brouwaanvraagDatum    DateTime?               // Brouwaangifte date
+  brouwaanvraagNummer   String?                 // e.g. "2025/009"
+  brouwnummer           String?                 // e.g. "2025/009"
+  volume                Float?                  // Volume in liters (optional)
+  fermentatievat        String?                 // Fermentation vessel name
+
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+}
+
+// ─── Logboek — Ongediertebestrijdingsplan ───────────────────────────────────
+
+model OngedierteInspectie {
+  id                String   @id @default(uuid())
+  datum             DateTime
+  verantwoordelijke String              // Who performed the inspection
+  brouwcontainer    Boolean  @default(false)
+  kelder            Boolean  @default(false)
+  omgeving          Boolean  @default(false)
+  afvalcontainer    Boolean  @default(false)
+  opmerkingen       String?             // Observations
+  actie             String?             // Actions taken
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ─── Logboek — CCP Tracker ──────────────────────────────────────────────────
+
+enum CcpType {
+  GLASBREUK
+  SCHIMMELVORMING
+}
+
+model CcpEntry {
+  id            String   @id @default(uuid())
+  type          CcpType
+  datum         DateTime
+  lotnummer     String?             // e.g. "2025/007"
+  uitgevoerd    Boolean  @default(false)
+  uitvoerder    String?             // Who performed the check
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+

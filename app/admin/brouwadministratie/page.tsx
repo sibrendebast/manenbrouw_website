@@ -33,7 +33,7 @@ const SECTIES = [
         icon: BookOpen,
         title: "Logboek",
         beschrijving: "Brouwdagboek: metingen, observaties en brouwnotities per batch.",
-        actief: false,
+        actief: true,
     },
 ];
 
@@ -75,19 +75,17 @@ export default function BrouwadministratiePage() {
                         <Link
                             key={href}
                             href={href}
-                            className={`bg-white p-8 border-2 transition-all group ${
-                                actief
+                            className={`bg-white p-8 border-2 transition-all group ${actief
                                     ? "border-black hover:border-brewery-green"
                                     : "border-gray-300 hover:border-gray-400 opacity-70"
-                            }`}
+                                }`}
                         >
                             <div className="flex flex-col items-center text-center">
                                 <div
-                                    className={`p-6 mb-6 transition-colors ${
-                                        actief
+                                    className={`p-6 mb-6 transition-colors ${actief
                                             ? "bg-brewery-dark group-hover:bg-brewery-green"
                                             : "bg-gray-400"
-                                    }`}
+                                        }`}
                                 >
                                     <Icon className="h-16 w-16 text-white" />
                                 </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
-import { FlaskConical, Package, Archive, BookOpen, ArrowLeft, ClipboardList } from "lucide-react";
+import { FlaskConical, Package, Archive, BookOpen, ArrowLeft, ClipboardList, Building2 } from "lucide-react";
 import Link from "next/link";
 
 const SECTIES = [
@@ -26,7 +26,14 @@ const SECTIES = [
         icon: Package,
         title: "Voorraad Grondstoffen",
         beschrijving: "Beheer de voorraad van mout, hop, gist en overige grondstoffen.",
-        actief: false,
+        actief: true,
+    },
+    {
+        href: "/admin/brouwadministratie/leveranciers",
+        icon: Building2,
+        title: "Leveranciers",
+        beschrijving: "Overzicht van leveranciers met KBO, FAVV en contactgegevens.",
+        actief: true,
     },
     {
         href: "/admin/brouwadministratie/voorraadbeheer-producten",
@@ -77,7 +84,7 @@ export default function BrouwadministratiePage() {
                 </div>
 
                 {/* Sectie-kaarten */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl">
                     {SECTIES.map(({ href, icon: Icon, title, beschrijving, actief }) => (
                         <Link
                             key={href}

@@ -162,7 +162,8 @@ model Brouwsel {
   brouwnummer     String   @unique
   recipeId        String
   recipe          Recipe   @relation(fields: [recipeId], references: [id])
-  datum           DateTime
+  datum           DateTime // Brew date
+  aanvraagDatum   DateTime? // Application date
   volume          Float?
   ogGemeten       Float?
   fgGemeten       Float?

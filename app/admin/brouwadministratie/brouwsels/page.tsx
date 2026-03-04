@@ -7,11 +7,11 @@ import { getBrouwsels, createBrouwsel, deleteBrouwsel, updateBrouwsel, getVolgen
 import { getRecipes } from "@/app/actions/recipeActions";
 import {
     Plus, ArrowLeft, Search, ChevronUp, ChevronDown, ChevronsUpDown,
-    Pencil, Trash2, RefreshCw, X, Calendar, Save
+    Pencil, Trash2, RefreshCw, X, Calendar, Save, FileDown
 } from "lucide-react";
 import Link from "next/link";
 
-type SortKey = "brouwnummer" | "receptNaam" | "datum" | "volume" | "ogGemeten" | "fgGemeten" | "abvGemeten";
+type SortKey = "brouwnummer" | "receptNaam" | "datum" | "aanvraagDatum" | "volume" | "ogGemeten" | "fgGemeten" | "abvGemeten";
 type SortDir = "asc" | "desc";
 
 type Brouwsel = {
@@ -20,6 +20,7 @@ type Brouwsel = {
     recipeId: string;
     recipe: { naam: string; stijl: string | null };
     datum: Date;
+    aanvraagDatum: Date | null;
     volume: number | null;
     ogGemeten: number | null;
     fgGemeten: number | null;
@@ -67,6 +68,7 @@ export default function BrouwselsOverzicht() {
         brouwnummer: "",
         recipeId: "",
         datum: new Date().toISOString().split("T")[0],
+        aanvraagDatum: new Date().toISOString().split("T")[0],
         volume: "",
         ogGemeten: "",
         fgGemeten: "",
@@ -128,9 +130,9 @@ export default function BrouwselsOverzicht() {
                 av = a.recipe.naam;
                 bv = b.recipe.naam;
             }
-            if (sortKey === "datum") {
-                av = new Date(a.datum).getTime();
-                bv = new Date(b.datum).getTime();
+            if (sortKey === "datum" || sortKey === "aanvraagDatum") {
+                av = a[sortKey] ? new Date(a[sortKey] as Date).getTime() : 0;
+                bv = b[sortKey] ? new Date(b[sortKey] as Date).getTime() : 0;
             }
 
             if (av < bv) return sortDir === "asc" ? -1 : 1;
@@ -150,6 +152,7 @@ export default function BrouwselsOverzicht() {
             brouwnummer: nr, // Prefill with the next number
             recipeId: "",
             datum: new Date().toISOString().split("T")[0],
+            aanvraagDatum: new Date().toISOString().split("T")[0],
             volume: "",
             ogGemeten: "", fgGemeten: "", abvGemeten: "", platoGemeten: "", brouwefficientieGemeten: "",
         });
@@ -162,6 +165,7 @@ export default function BrouwselsOverzicht() {
             brouwnummer: b.brouwnummer,
             recipeId: b.recipeId,
             datum: new Date(b.datum).toISOString().split("T")[0],
+            aanvraagDatum: b.aanvraagDatum ? new Date(b.aanvraagDatum).toISOString().split("T")[0] : "",
             volume: b.volume ? String(b.volume) : "",
             ogGemeten: b.ogGemeten ? String(b.ogGemeten) : "",
             fgGemeten: b.fgGemeten ? String(b.fgGemeten) : "",
@@ -184,6 +188,7 @@ export default function BrouwselsOverzicht() {
             brouwnummer: formData.brouwnummer || undefined,
             recipeId: formData.recipeId,
             datum: formData.datum,
+            aanvraagDatum: formData.aanvraagDatum || null,
             volume: formData.volume ? parseFloat(formData.volume) : null,
             ogGemeten: formData.ogGemeten ? parseFloat(formData.ogGemeten) : null,
             fgGemeten: formData.fgGemeten ? parseFloat(formData.fgGemeten) : null,
@@ -220,10 +225,30 @@ export default function BrouwselsOverzicht() {
         setDeletingId(null);
     };
 
+    const handleDownloadAanvraag = async (b: Brouwsel) => {
+        try {
+            const res = await fetch(`/api/brouwsels/${b.id}/brouwaanvraag`);
+            if (!res.ok) throw new Error("Document generation failed.");
+
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Brouwaanvraag_${b.brouwnummer.replace('/', '-')}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (e: any) {
+            alert(e.message || "Kon brouwaanvraag niet downloaden.");
+        }
+    };
+
     if (!mounted || !isAuthenticated) return null;
 
     const COLS: { key: SortKey; label: string; title?: string }[] = [
-        { key: "datum", label: "Datum" },
+        { key: "aanvraagDatum", label: "Aanvraag" },
+        { key: "datum", label: "Brouwdatum" },
         { key: "brouwnummer", label: "Brouwnummer" },
         { key: "receptNaam", label: "Recept" },
         { key: "volume", label: "Volume (L)" },
@@ -328,6 +353,9 @@ export default function BrouwselsOverzicht() {
                                     {paginaData.map((b, idx) => (
                                         <tr key={b.id} className={`border-t border-gray-200 hover:bg-green-50/50 transition-colors ${idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
                                             <td className="px-4 py-4 whitespace-nowrap">
+                                                {b.aanvraagDatum ? new Intl.DateTimeFormat('nl-BE', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(b.aanvraagDatum)) : <span className="text-gray-300">—</span>}
+                                            </td>
+                                            <td className="px-4 py-4 whitespace-nowrap">
                                                 {new Intl.DateTimeFormat('nl-BE', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(b.datum))}
                                             </td>
                                             <td className="px-4 py-4 font-mono font-bold text-brewery-dark whitespace-nowrap">
@@ -350,6 +378,13 @@ export default function BrouwselsOverzicht() {
                                                 {b.abvGemeten ? `${b.abvGemeten}%` : <span className="text-gray-300">—</span>}
                                             </td>
                                             <td className="px-4 py-4 text-right whitespace-nowrap">
+                                                <button
+                                                    onClick={() => handleDownloadAanvraag(b)}
+                                                    className="p-2 text-gray-400 hover:text-brewery-green hover:bg-green-50 rounded transition-colors mr-1"
+                                                    title="Brouwaanvraag downloaden"
+                                                >
+                                                    <FileDown className="h-4 w-4" />
+                                                </button>
                                                 <button
                                                     onClick={() => handleOpenEdit(b)}
                                                     className="p-2 text-gray-400 hover:text-brewery-dark hover:bg-gray-100 rounded transition-colors mr-1"
@@ -456,7 +491,7 @@ export default function BrouwselsOverzicht() {
                                         </div>
                                         <div>
                                             <label className="block text-sm font-bold text-gray-700 mb-1">
-                                                Datum <span className="text-red-500">*</span>
+                                                Brouwdatum <span className="text-red-500">*</span>
                                             </label>
                                             <div className="relative">
                                                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -465,6 +500,20 @@ export default function BrouwselsOverzicht() {
                                                     required
                                                     value={formData.datum}
                                                     onChange={e => setFormData({ ...formData, datum: e.target.value })}
+                                                    className="w-full pl-10 pr-3 py-2 border-2 border-gray-200 focus:border-brewery-dark focus:outline-none text-black"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-700 mb-1">
+                                                Aanvraagdatum
+                                            </label>
+                                            <div className="relative">
+                                                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                                <input
+                                                    type="date"
+                                                    value={formData.aanvraagDatum}
+                                                    onChange={e => setFormData({ ...formData, aanvraagDatum: e.target.value })}
                                                     className="w-full pl-10 pr-3 py-2 border-2 border-gray-200 focus:border-brewery-dark focus:outline-none text-black"
                                                 />
                                             </div>

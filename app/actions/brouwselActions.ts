@@ -9,7 +9,8 @@ import type { Prisma } from '@prisma/client'
 export interface BrouwselInput {
     brouwnummer?: string
     recipeId: string
-    datum: string
+    datum: string // Brew date
+    aanvraagDatum?: string | null // Application date
     volume?: number | null
     ogGemeten?: number | null
     fgGemeten?: number | null
@@ -102,6 +103,7 @@ export async function createBrouwsel(input: BrouwselInput): Promise<{
                 brouwnummer,
                 recipeId: input.recipeId,
                 datum: new Date(input.datum),
+                aanvraagDatum: input.aanvraagDatum ? new Date(input.aanvraagDatum) : null,
                 volume: input.volume ?? null,
                 ogGemeten: input.ogGemeten ?? null,
                 fgGemeten: input.fgGemeten ?? null,
@@ -132,6 +134,7 @@ export async function updateBrouwsel(
                 ...(input.brouwnummer ? { brouwnummer: input.brouwnummer } : {}),
                 recipeId: input.recipeId,
                 datum: new Date(input.datum),
+                aanvraagDatum: input.aanvraagDatum ? new Date(input.aanvraagDatum) : null,
                 volume: input.volume ?? null,
                 ogGemeten: input.ogGemeten ?? null,
                 fgGemeten: input.fgGemeten ?? null,

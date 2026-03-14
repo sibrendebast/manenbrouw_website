@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 type TastingMessages = {
     title: string;
     subtitle: string;
+    infoTitle: string;
     formulaTitle: string;
     formula4: { title: string; description: string; price: string };
     formula6: { title: string; description: string; price: string };
@@ -109,7 +110,7 @@ export default function TastingPage() {
 
                     <div className="space-y-8">
                         <div className="border-2 border-black p-8 h-full flex flex-col justify-center bg-black text-white">
-                            <h2 className="text-3xl font-bold mb-8 text-brewery-green tracking-widest">{t("nav.about")}</h2>
+                            <h2 className="text-3xl font-bold mb-8 text-brewery-green tracking-widest">{tasting.infoTitle}</h2>
                             
                             <div className="space-y-8">
                                 <div className="flex gap-6">

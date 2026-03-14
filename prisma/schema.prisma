@@ -8,6 +8,436 @@ datasource db {
   directUrl = env("DATABASE_URL")
 }
 
+model Product {
+  id          String      @id @default(uuid())
+  slug        String      @unique
+  name        String
+  style       String?
+  abv         String?
+  volume      String?
+  price       Float
+  description String
+  images      String
+  inStock     Boolean     @default(true)
+  stockCount  Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  btwCategory Int?        @default(21)
+  isHidden    Boolean     @default(false)
+  category    ProductType @default(BEER)
+  OrderItem   OrderItem[]
+}
+
+model Order {
+  id              String        @id @default(uuid())
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress String
+  shippingMethod  String
+  totalAmount     Float
+  status          String        @default("pending")
+  stripeSessionId String?
+  paymentMethod   String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  invoiceUrl      String?
+  orderNumber     String?       @unique
+  locale          String        @default("nl")
+  comment         String?
+  tickets         EventTicket[]
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id          String  @id @default(uuid())
+  orderId     String
+  productId   String
+  quantity    Int
+  price       Float
+  btwCategory Int?    @default(21)
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product @relation(fields: [productId], references: [id])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  firstName String?
+  lastName  String?
+}
+
+model Event {
+  id                   String        @id @default(uuid())
+  title                String
+  description          String
+  date                 DateTime
+  location             String
+  isPaid               Boolean       @default(false)
+  ticketPrice          Float?
+  capacity             Int?
+  ticketsSold          Int           @default(0)
+  image                String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  isHidden             Boolean       @default(false)
+  earlyBirdEndDate     DateTime?
+  earlyBirdPrice       Float?
+  ticketSalesStartDate DateTime?
+  tickets              EventTicket[]
+}
+
+model EventTicket {
+  id          String   @id @default(uuid())
+  eventId     String
+  orderId     String?
+  buyerName   String
+  buyerEmail  String
+  quantity    Int      @default(1)
+  totalPrice  Float
+  purchasedAt DateTime @default(now())
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  order       Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model AdminUser {
+  id                String             @id @default(uuid())
+  username          String             @unique
+  password          String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  pushSubscriptions PushSubscription[]
+}
+
+model PushSubscription {
+  id       String    @id @default(uuid())
+  endpoint String
+  keys     Json
+  adminId  String
+  admin    AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+}
+
+// ─── Recipe & Brewing ────────────────────────────────────────────────────────
+
+model RecipeSequence {
+  jaar   Int @id
+  teller Int @default(0)
+}
+
+model BrouwSequence {
+  jaar    Int @id
+  teller  Int @default(0)
+}
+
+model Recipe {
+  id                      String             @id @default(uuid())
+  brouwnummer             String?            @unique
+  naam                    String
+  stijl                   String?
+  notities                String?
+  batchVolume             Float?
+  aantalBatches           Float?
+  brouwEfficiency         Float?
+  attenuation             Float?
+  ogGevraagd              Float?
+  fgGevraagd              Float?
+  abvGevraagd             Float?
+  platoGevraagd           Float?
+  ogCalc                  Float?
+  fgCalc                  Float?
+  abvCalc                 Float?
+  platoCalc               Float?
+  ibuCalc                 Float?
+  ebcCalc                 Float?
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  ingredients             RecipeIngredient[]
+  maischStappen           MaischStap[]
+  fermentatieStappen      FermentatieStap[]
+  brouwsels               Brouwsel[]
+  stockAllocations        StockAllocation[]
+}
+
+model Brouwsel {
+  id              String   @id @default(uuid())
+  brouwnummer     String   @unique
+  recipeId        String
+  recipe          Recipe   @relation(fields: [recipeId], references: [id])
+  datum           DateTime // Brew date
+  aanvraagDatum   DateTime? // Application date
+  volume          Float?
+  ogGemeten       Float?
+  fgGemeten       Float?
+  abvGemeten      Float?
+  platoGemeten    Float?
+  brouwefficientieGemeten Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([brouwnummer])
+}
+
+model RecipeIngredient {
+  id               String         @id @default(uuid())
+  recipeId         String
+  recipe           Recipe         @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  stap             BrewingStap    @default(MAISCHEN)
+  type             IngredientType @default(MOUT)
+  naam             String
+  hoeveelheid      Float
+  eenheid          String
+  extractPotential Float?
+  kleurEbc         Float?
+  alfazuur         Float?
+  tijdMinuten      Int?
+  pelletOfBloem    String?
+  tijdstip         String?
+  doseringGPerL    Float?
+  lot              String?
+  volgorde         Int            @default(0)
+  materialId       String?
+  material         RawMaterial?   @relation(fields: [materialId], references: [id])
+
+  @@index([recipeId])
+}
+
+model MaischStap {
+  id       String @id @default(uuid())
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  stapNaam String
+  tempC    Float?
+  duurMin  Int?
+  volgorde Int    @default(0)
+
+  @@index([recipeId])
+}
+
+model FermentatieStap {
+  id        String @id @default(uuid())
+  recipeId  String
+  recipe    Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  stapNaam  String
+  tempC     Float?
+  duurDagen Int?
+  volgorde  Int    @default(0)
+
+  @@index([recipeId])
+}
+
+// ─── Logboek ────────────────────────────────────────────────────────────────
+
+model CcpEntry {
+  id            String   @id @default(uuid())
+  type          CcpType
+  datum         DateTime
+  lotnummer     String?
+  uitgevoerd    Boolean  @default(false)
+  uitvoerder    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model OngedierteInspectie {
+  id                String   @id @default(uuid())
+  datum             DateTime
+  verantwoordelijke String
+  brouwcontainer    Boolean  @default(false)
+  kelder            Boolean  @default(false)
+  omgeving          Boolean  @default(false)
+  afvalcontainer    Boolean  @default(false)
+  opmerkingen       String?
+  actie             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model WerkregisterEntry {
+  id                  String                @id @default(uuid())
+  datum               DateTime
+  handeling           WerkregisterHandeling
+  brouwaanvraagDatum  DateTime?
+  brouwaanvraagNummer String?
+  brouwnummer         String?
+  volume              Float?
+  fermentatievat      String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model Supplier {
+  id            String         @id @default(uuid())
+  name          String         @unique
+  address       String?
+  contact       String?
+  phone         String?
+  email         String?
+  kboNumber     String?
+  favvNumber    String?
+  isActive      Boolean        @default(true)
+  stockReceipts StockReceipt[]
+  lots          InventoryLot[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+// ─── Voorraadbeheer Grondstoffen ─────────────────────────────────────────────
+
+model RawMaterial {
+  id                String                @id @default(uuid())
+  name              String                @unique
+  category          RawMaterialCategory
+  unit              String                @default("kg")
+  description       String?
+  isActive          Boolean               @default(true)
+  lots              InventoryLot[]
+  recipeIngredients RecipeIngredient[]
+  allocations       StockAllocationLine[]
+  movements         StockMovement[]
+  receiptLines      StockReceiptLine[]
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+}
+
+model StockReceipt {
+  id              String               @id @default(uuid())
+  receiptNumber   String?
+  invoiceNumber   String?
+  supplierId      String
+  supplier        Supplier             @relation(fields: [supplierId], references: [id])
+  receivedDate    DateTime
+  manufacturer    String?
+  deviationFlag   Boolean              @default(false)
+  deviationAction StockDeviationAction @default(GEEN_AFWIJKING)
+  deviationNotes  String?
+  notes           String?
+  lines           StockReceiptLine[]
+  auditLogs       AuditLog[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([supplierId])
+  @@index([receivedDate])
+}
+
+model StockReceiptLine {
+  id               String       @id @default(uuid())
+  receiptId        String
+  receipt          StockReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  materialId       String
+  material         RawMaterial  @relation(fields: [materialId], references: [id])
+  quantityReceived Decimal      @db.Decimal(10, 3)
+  unitCost         Decimal      @db.Decimal(10, 4)
+  lotId            String?
+  lot              InventoryLot? @relation(fields: [lotId], references: [id])
+  createdAt        DateTime     @default(now())
+
+  @@unique([receiptId, materialId])
+  @@index([materialId])
+}
+
+model InventoryLot {
+  id                String                @id @default(uuid())
+  materialId        String
+  material          RawMaterial           @relation(fields: [materialId], references: [id])
+  lotNumber         String
+  manufacturer      String?
+  supplierId        String?
+  supplier          Supplier?             @relation(fields: [supplierId], references: [id])
+  expiryDate        DateTime
+  quantityTotal     Decimal               @db.Decimal(10, 3)
+  quantityAllocated Decimal               @db.Decimal(10, 3) @default(0)
+  unitCost          Decimal               @db.Decimal(10, 4)
+  isQuarantined     Boolean               @default(false)
+  status            String                @default("active")
+  receiptLines      StockReceiptLine[]
+  allocations       StockAllocationLine[]
+  movements         StockMovement[]
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  @@unique([materialId, lotNumber, supplierId])
+  @@index([materialId])
+  @@index([expiryDate])
+  @@index([status])
+}
+
+model StockAllocation {
+  id             String                @id @default(uuid())
+  brewNumber     String                @unique
+  brew           Recipe                @relation(fields: [brewNumber], references: [brouwnummer])
+  allocationDate DateTime
+  totalCost      Decimal               @db.Decimal(10, 2)
+  notes          String?
+  lines          StockAllocationLine[]
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@index([allocationDate])
+}
+
+model StockAllocationLine {
+  id                   String          @id @default(uuid())
+  allocationId         String
+  allocation           StockAllocation @relation(fields: [allocationId], references: [id], onDelete: Cascade)
+  materialId           String
+  material             RawMaterial     @relation(fields: [materialId], references: [id])
+  lotId                String
+  lot                  InventoryLot    @relation(fields: [lotId], references: [id])
+  quantityAllocated    Decimal         @db.Decimal(10, 3)
+  unitCostAtAllocation Decimal         @db.Decimal(10, 4)
+  lineCost             Decimal         @db.Decimal(10, 2)
+  notes                String?
+
+  @@unique([allocationId, materialId, lotId])
+  @@index([materialId])
+  @@index([lotId])
+}
+
+model StockMovement {
+  id            String      @id @default(uuid())
+  materialId    String
+  material      RawMaterial @relation(fields: [materialId], references: [id])
+  lotId         String
+  lot           InventoryLot @relation(fields: [lotId], references: [id])
+  movementType  String
+  quantity      Decimal     @db.Decimal(10, 3)
+  referenceType String?
+  referenceId   String?
+  movedBy       String?
+  movedAt       DateTime    @default(now())
+  notes         String?
+
+  @@index([materialId])
+  @@index([lotId])
+  @@index([movementType])
+  @@index([movedAt])
+}
+
+model AuditLog {
+  id             String          @id @default(uuid())
+  documentType   String
+  documentId     String
+  action         AuditActionType
+  changedBy      String?
+  changedAt      DateTime        @default(now())
+  oldValue       Json?
+  newValue       Json?
+  context        String?
+  stockReceiptId String?
+  stockReceipt   StockReceipt?   @relation(fields: [stockReceiptId], references: [id], onDelete: SetNull)
+
+  @@index([documentType, documentId])
+  @@index([changedBy])
+  @@index([changedAt])
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────────────
+
 enum ProductType {
   BEER
   GIFTBOX
@@ -15,112 +445,58 @@ enum ProductType {
   MERCH
 }
 
-model Product {
-  id          String      @id @default(uuid())
-  slug        String      @unique
-  name        String
-  category    ProductType @default(BEER)
-  style       String?
-  abv         String?
-  volume      String?
-  price       Float
-  description String
-  images      String // Stored as JSON string
-  inStock     Boolean     @default(true)
-  stockCount  Int         @default(0)
-  isHidden    Boolean     @default(false)
-  btwCategory Int?        @default(21) // BTW/VAT percentage: 0, 6, 12, or 21
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  OrderItem   OrderItem[]
+enum BrewingStap {
+  MAISCHEN
+  KOKEN
+  FERMENTATIE
+  DRY_HOP
+  CONDITIONING
+  OVERIG
 }
 
-model Order {
-  id              String      @id @default(uuid())
-  orderNumber     String?     @unique // Format: YYYY/####
-  customerName    String
-  customerEmail   String
-  customerPhone   String
-  shippingAddress String // Stored as JSON string
-  shippingMethod  String // "shipment" | "pickup"
-  totalAmount     Float
-  status          String      @default("pending") // "pending", "pending_payment", "paid", "shipped", "completed", "cancelled"
-  stripeSessionId String?
-  paymentMethod   String? // "bancontact", "card", "payconiq"
-  invoiceUrl      String?
-  items           OrderItem[]
-  tickets         EventTicket[]
-  locale          String      @default("nl") // "nl" | "en"
-  comment         String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+enum IngredientType {
+  MOUT
+  HOP
+  GIST
+  ANDERE
 }
 
-model OrderItem {
-  id          String  @id @default(uuid())
-  orderId     String
-  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId   String
-  product     Product @relation(fields: [productId], references: [id])
-  quantity    Int
-  price       Float
-  btwCategory Int?    @default(21) // BTW/VAT percentage at time of purchase
+enum CcpType {
+  GLASBREUK
+  SCHIMMELVORMING
 }
 
-model NewsletterSubscriber {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  createdAt DateTime @default(now())
+enum WerkregisterHandeling {
+  BROUWEN
+  OVERHEVELEN
+  BOTTELEN_KEGGEN
+  VERNIETIGING
 }
 
-model Event {
-  id                   String    @id @default(uuid())
-  title                String
-  description          String
-  date                 DateTime
-  location             String
-  isPaid               Boolean   @default(false)
-  ticketPrice          Float?    // Only for paid events
-  capacity             Int?      // Maximum number of attendees
-  ticketsSold          Int       @default(0)
-  isHidden             Boolean   @default(false)
-  image                String?   // Event image URL
-  ticketSalesStartDate DateTime? // When tickets become available for purchase
-  earlyBirdPrice       Float?    // Discounted price for early bird tickets
-  earlyBirdEndDate     DateTime? // Deadline for early bird discount
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  tickets              EventTicket[]
+enum RawMaterialCategory {
+  GRANEN
+  HOP
+  GIST
+  TOEVOEGINGEN
+  VERPAKKING
 }
 
-model EventTicket {
-  id            String   @id @default(uuid())
-  eventId       String
-  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  orderId       String?
-  order         Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  buyerName     String
-  buyerEmail    String
-  quantity      Int      @default(1)
-  totalPrice    Float
-  purchasedAt   DateTime @default(now())
+enum StockDeviationAction {
+  GEWEIGERD
+  RETOUR
+  AFGEPRIJSD
+  VERNIETIGD
+  GEDEELTELIJK
+  QUARANTAINE
+  GEEN_AFWIJKING
 }
 
-model AdminUser {
-  id        String   @id @default(uuid())
-  username  String   @unique
-  password  String   // Hashed password
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  pushSubscriptions PushSubscription[]
-}
-
-model PushSubscription {
-  id        String    @id @default(uuid())
-  endpoint  String
-  keys      Json      // Stores p256dh and auth keys
-  adminId   String
-  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+enum AuditActionType {
+  CREATE
+  UPDATE
+  DELETE
+  ALLOCATE
+  RECEIVE
+  DEVIATION
+  RECOUNT
 }

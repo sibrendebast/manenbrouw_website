@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Backup Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
+
+    <nav class="bg-indigo-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-database text-2xl"></i>
+                    <h1 class="text-xl font-bold">Prisma Backup Dashboard</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span id="status-indicator" class="flex items-center gap-2 text-sm">
+                        <span class="w-3 h-3 bg-red-500 rounded-full animate-pulse" id="status-dot"></span>
+                        <span id="status-text">Disconnected</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
+        
+        <!-- Top Section: Config & Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Configuration Panel -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 lg:col-span-2">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-cog text-gray-400"></i> Configuration
+                </h2>
+                
+                <form id="config-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Backup Schedule (Cron)</label>
+                            <input type="text" id="schedule-input" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="0 2 * * *">
+                            <p class="text-xs text-gray-500 mt-1">Default runs daily at 2:00 AM.</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Retention Count</label>
+                            <input type="number" id="retention-input" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="7">
+                            <p class="text-xs text-gray-500 mt-1">Number of local backups to keep.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-gray-100 flex justify-between items-center">
+                        <p class="text-sm text-gray-600">Next scheduled run: <span id="next-run" class="font-semibold text-indigo-600">Loading...</span></p>
+                        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Save Config</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col justify-center items-center text-center">
+                <div class="bg-indigo-50 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-magic text-2xl"></i>
+                </div>
+                <h3 class="font-bold mb-2">Manual Backup</h3>
+                <p class="text-sm text-gray-500 mb-6">Need a backup right now before a major deployment? Trigger it instantly.</p>
+                <button id="trigger-btn" class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition flex justify-center items-center gap-2">
+                    <i class="fas fa-play"></i> Run Backup Now
+                </button>
+            </div>
+        </div>
+
+        <!-- Middle Section: File Management -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="text-lg font-bold flex items-center gap-2">
+                    <i class="fas fa-folder-open text-gray-400"></i> Stored Backups
+                </h2>
+                <button onclick="fetchBackups()" class="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                    <i class="fas fa-sync-alt"></i> Refresh List
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-500 text-sm">
+                            <th class="p-4 font-medium">Filename</th>
+                            <th class="p-4 font-medium">Date Created</th>
+                            <th class="p-4 font-medium">Size</th>
+                            <th class="p-4 font-medium text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="backup-list" class="divide-y divide-gray-100 text-sm">
+                        <tr><td colspan="4" class="p-8 text-center text-gray-400">Loading backups...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Logs -->
+        <div class="bg-gray-900 rounded-xl shadow-lg border border-gray-800 overflow-hidden">
+            <div class="p-4 bg-gray-800 flex justify-between items-center border-b border-gray-700">
+                <h2 class="text-sm font-bold text-gray-300 flex items-center gap-2">
+                    <i class="fas fa-terminal opacity-70"></i> System Logs
+                </h2>
+                <button onclick="fetchLogs()" class="text-xs text-gray-400 hover:text-white transition">Refresh</button>
+            </div>
+            <div class="p-4 h-64 overflow-y-auto font-mono text-xs text-green-400 leading-relaxed" id="log-viewer">
+                Loading logs...
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        async function fetchStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                
+                const dot = document.getElementById('status-dot');
+                const text = document.getElementById('status-text');
+                
+                if (data.dbUrlConfigured) {
+                    dot.classList.remove('bg-red-500', 'animate-pulse');
+                    dot.classList.add('bg-green-400');
+                    text.textContent = 'Connected & Active';
+                } else {
+                    dot.classList.add('bg-red-500', 'animate-pulse');
+                    dot.classList.remove('bg-green-400');
+                    text.textContent = 'No DATABASE_URL found!';
+                }
+
+                document.getElementById('schedule-input').value = data.schedule;
+                document.getElementById('retention-input').value = data.retention;
+                
+                if (data.nextRun) {
+                    document.getElementById('next-run').textContent = new Date(data.nextRun).toLocaleString();
+                } else {
+                    document.getElementById('next-run').textContent = 'Not scheduled';
+                }
+            } catch (err) {
+                console.error("Failed to fetch status", err);
+            }
+        }
+
+        async function fetchBackups() {
+            const tbody = document.getElementById('backup-list');
+            try {
+                const res = await fetch('/api/backups');
+                const backups = await res.json();
+
+                if (backups.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400">No backups found in local storage.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = backups.map(b => `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-4 font-mono text-indigo-600">${b.name}</td>
+                        <td class="p-4 text-gray-600">${new Date(b.date).toLocaleString()}</td>
+                        <td class="p-4 text-gray-600">${b.size}</td>
+                        <td class="p-4 text-right space-x-2">
+                            <a href="/api/backups/${b.name}" download class="text-blue-600 hover:text-blue-800 p-2"><i class="fas fa-download"></i></a>
+                            <button onclick="deleteBackup('${b.name}')" class="text-red-500 hover:text-red-700 p-2"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-red-400">Failed to load backups.</td></tr>';
+            }
+        }
+
+        async function deleteBackup(filename) {
+            if (!confirm(`Are you sure you want to delete ${filename}?`)) return;
+            await fetch(`/api/backups/${filename}`, { method: 'DELETE' });
+            fetchBackups();
+            fetchLogs();
+        }
+
+        async function fetchLogs() {
+            try {
+                const res = await fetch('/api/logs');
+                const text = await res.text();
+                const logViewer = document.getElementById('log-viewer');
+                logViewer.textContent = text;
+                logViewer.scrollTop = logViewer.scrollHeight; // Auto scroll to bottom
+            } catch (err) {
+                console.error("Failed to fetch logs", err);
+            }
+        }
+
+        document.getElementById('config-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.textContent = 'Saving...';
+
+            await fetch('/api/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    schedule: document.getElementById('schedule-input').value,
+                    retention: document.getElementById('retention-input').value
+                })
+            });
+            
+            await fetchStatus();
+            await fetchLogs();
+            btn.textContent = 'Save Config';
+        });
+
+        document.getElementById('trigger-btn').addEventListener('click', async (e) => {
+            const btn = e.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            btn.disabled = true;
+
+            await fetch('/api/backups/trigger', { method: 'POST' });
+            
+            await fetchBackups();
+            await fetchLogs();
+            
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        });
+
+        // Initialize
+        fetchStatus();
+        fetchBackups();
+        fetchLogs();
+
+        // Auto-refresh logs every 10 seconds
+        setInterval(fetchLogs, 10000);
+    </script>
+</body>
+</html>

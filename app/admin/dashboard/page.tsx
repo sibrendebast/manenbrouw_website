@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
-import { Package, Beer, LogOut, Mail, Calendar, Users, Bell, BellOff } from "lucide-react";
+import { Package, Beer, LogOut, Mail, Calendar, Users, Bell, BellOff, FlaskConical } from "lucide-react";
 import Link from "next/link";
 import { subscribeUser } from "@/app/actions/notificationActions";
 
@@ -204,6 +204,24 @@ export default function AdminDashboard() {
                             </h2>
                             <p className="text-gray-600">
                                 Manage admin users and access
+                            </p>
+                        </div>
+                    </Link>
+
+                    {/* Brouwadministratie Card */}
+                    <Link
+                        href="/admin/brouwadministratie"
+                        className="bg-white p-8 border-2 border-black hover:border-brewery-green transition-all group"
+                    >
+                        <div className="flex flex-col items-center text-center">
+                            <div className="bg-brewery-dark p-6 mb-6 group-hover:bg-brewery-green transition-colors">
+                                <FlaskConical className="h-16 w-16 text-white" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-brewery-dark mb-3">
+                                Brouwadministratie
+                            </h2>
+                            <p className="text-gray-600">
+                                Receptuur, voorraad grondstoffen &amp; producten, logboek
                             </p>
                         </div>
                     </Link>

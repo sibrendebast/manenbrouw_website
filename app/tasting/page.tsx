@@ -57,7 +57,7 @@ export default function TastingPage() {
                 {/* Information Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-24">
                     <div>
-                        <h2 className="text-4xl font-bold text-brewery-dark mb-10 border-l-8 border-brewery-green pl-6 italic">
+                        <h2 className="text-4xl font-bold text-brewery-dark mb-10 border-l-8 border-brewery-green pl-6">
                             {tasting.formulaTitle}
                         </h2>
                         

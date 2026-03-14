@@ -18,13 +18,17 @@ export async function sendTastingRequest(formData: FormData) {
     }
 
     try {
-        // Send email to brewery
+        // Send email to brewery and a copy to the requester
         await resend.emails.send({
             from: FROM_EMAIL,
-            to: [ADMIN_EMAIL],
+            to: [ADMIN_EMAIL, email],
+            replyTo: email,
             subject: `Nieuwe proeverij aanvraag: ${name}`,
             html: `
                 <h1>Nieuwe proeverij aanvraag</h1>
+                <p>Beste ${name},</p>
+                <p>Bedankt voor je aanvraag voor een proeverij bij Man & Brouw. We hebben onderstaande gegevens goed ontvangen en nemen zo snel mogelijk contact met je op.</p>
+                <hr />
                 <p><strong>Naam:</strong> ${name}</p>
                 <p><strong>Email:</strong> ${email}</p>
                 <p><strong>Datum:</strong> ${date}</p>
@@ -33,6 +37,8 @@ export async function sendTastingRequest(formData: FormData) {
                 <p><strong>Houdt glas:</strong> ${keepGlass ? 'Ja' : 'Nee'}</p>
                 <p><strong>Locatie:</strong> ${location}</p>
                 <p><strong>Bericht:</strong> ${message || 'Geen extra bericht'}</p>
+                <hr />
+                <p>Met vriendelijke groeten,<br />Het Man & Brouw team</p>
             `
         });
 

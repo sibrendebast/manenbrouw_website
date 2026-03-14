@@ -4,6 +4,7 @@
         "about": "About",
         "shop": "Shop",
         "events": "Events",
+        "tasting": "Tasting",
         "contact": "Contact",
         "cart": "Cart"
     },
@@ -315,6 +316,50 @@
         "question": "Are you 18 years or older?",
         "yes": "Yes, I am 18+",
         "no": "No, I am under 18"
+    },
+    "tasting": {
+        "title": "Tastings & Tours",
+        "subtitle": "Dive into the world of Man & Brouw. Discover our brewery, listen to our stories, and taste our beers.",
+        "formulaTitle": "Our Formulas",
+        "formula4": {
+            "title": "Basic Tasting",
+            "description": "4 beers of 15cl. A perfect introduction to our brewery.",
+            "price": "€20"
+        },
+        "formula6": {
+            "title": "Extended Tasting",
+            "description": "6 beers of 15cl. For the true explorer.",
+            "price": "€25"
+        },
+        "addonGlass": {
+            "title": "Keep the glass",
+            "description": "Take your Man & Brouw tasting glass home as a souvenir.",
+            "price": "+ €5"
+        },
+        "info": {
+            "minimumTitle": "Group Size",
+            "minimumText": "Minimum €150 per group.",
+            "locationTitle": "Location",
+            "breweryText": "Normally in our brewery in Wilsele, including a tour.",
+            "onLocationText": "On location is also possible! Free within 10km of Leuven, otherwise price on request."
+        },
+        "form": {
+            "title": "Book a tasting",
+            "name": "Name",
+            "email": "Email address",
+            "date": "Preferred date",
+            "people": "Number of people",
+            "formula": "Choose your formula",
+            "formula4": "Basic (4 beers - €20 p.p.)",
+            "formula6": "Extended (6 beers - €25 p.p.)",
+            "keepGlass": "I want to keep the glass (+€5 p.p.)",
+            "location": "Location",
+            "atBrewery": "At the brewery (Wilsele)",
+            "otherLocation": "At my own location",
+            "message": "Extra questions or comments",
+            "submit": "Send request",
+            "success": "Thank you for your request! We will contact you as soon as possible."
+        }
     },
     "common": {
         "loading": "Loading...",

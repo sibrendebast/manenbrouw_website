@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 import { OrderInvoice } from '@/app/emails/OrderInvoice';
 
 // Use a fallback key during build time to prevent build failures
-const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder');
+export const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder');
 
 // Email configuration
 // Email configuration
@@ -15,8 +15,8 @@ const cleanEnvVar = (val: string | undefined) => {
     return val;
 };
 
-const FROM_EMAIL = cleanEnvVar(process.env.FROM_EMAIL) || 'Man & Brouw <onboarding@resend.dev>';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'info@manenbrouw.be';
+export const FROM_EMAIL = cleanEnvVar(process.env.FROM_EMAIL) || 'Man & Brouw <onboarding@resend.dev>';
+export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'info@manenbrouw.be';
 
 // Type definition for order with items included
 type OrderWithItems = {

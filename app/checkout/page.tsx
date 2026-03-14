@@ -384,7 +384,7 @@ export default function CheckoutPage() {
                             )}
 
                             {/* Newsletter Subscription Box */}
-                            <div className=" p-6 border-2 border-black shadow-lg">
+                            <div className=" p-6 border-2 border-black">
                                 <div className="flex items-start gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-start gap-3">
@@ -553,7 +553,7 @@ export default function CheckoutPage() {
                                 type="submit"
                                 form="checkout-form"
                                 disabled={isSubmitting}
-                                className="w-full bg-brewery-green text-white font-bold py-4 hover:bg-opacity-90 transition-colors disabled:opacity-50 border-2 border-black shadow-lg mt-6"
+                                className="w-full bg-brewery-green text-white font-bold py-4 hover:bg-opacity-90 transition-colors disabled:opacity-50 border-2 border-black mt-6"
                             >
                                 {isSubmitting ? t("checkout.processing") : `${t("checkout.placeOrder")} - €${total.toFixed(2)}`}
                             </button>

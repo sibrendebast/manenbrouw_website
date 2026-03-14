@@ -1,6 +1,7 @@
 "use client";
 
 import { useI18n } from "@/lib/i18n-context";
+import PageHeader from "@/components/ui/PageHeader";
 import { Mail, PackageCheck, RefreshCw, Scale, ShoppingBag, TicketCheck } from "lucide-react";
 
 const sectionIconMap = {
@@ -42,16 +43,15 @@ export default function TermsPage() {
     }
 
     return (
-        <div className="bg-white py-16 px-4">
-            <div className="max-w-4xl mx-auto space-y-12">
-                <header className="text-center space-y-4">
-                    {terms.badge ? (
-                        <p className="text-sm uppercase tracking-[0.3em] text-brewery-green">{terms.badge}</p>
-                    ) : null}
-                    <h1 className="text-4xl font-bold text-brewery-dark">{terms.title}</h1>
-                    <p className="text-sm text-gray-500">{terms.lastUpdated}</p>
-                    <p className="text-gray-600 max-w-3xl mx-auto">{terms.intro}</p>
-                </header>
+        <div className="bg-white pb-16">
+            <PageHeader 
+                title={terms.title} 
+                subtitle={terms.intro} 
+            />
+            <div className="max-w-4xl mx-auto space-y-12 mt-16 px-4">
+                <div className="text-center">
+                    <p className="text-sm text-gray-500 font-bold tracking-[0.2em]">{terms.lastUpdated}</p>
+                </div>
 
                 <div className="space-y-8">
                     {sectionOrder.map((key) => {

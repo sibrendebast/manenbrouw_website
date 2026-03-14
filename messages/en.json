@@ -4,6 +4,7 @@
         "about": "About",
         "shop": "Shop",
         "events": "Events",
+        "tasting": "Tasting",
         "contact": "Contact",
         "cart": "Cart"
     },
@@ -57,7 +58,7 @@
         }
     },
     "shop": {
-        "title": "Our Beers",
+        "title": "Shop",
         "subtitle": "Browse our current selection of small-batch craft beers.",
         "addToCart": "Add to Cart",
         "outOfStock": "Out of Stock",
@@ -148,7 +149,7 @@
         "noEvents": "No Upcoming Events",
         "noEventsMessage": "We don't have any events scheduled at the moment. Check back soon or follow us on social media for announcements!",
         "soldOut": "Sold Out",
-        "free": "FREE",
+        "free": "Free",
         "ticketsSold": "tickets sold",
         "attendees": "attendees",
         "tickets": "Tickets",
@@ -315,6 +316,61 @@
         "question": "Are you 18 years or older?",
         "yes": "Yes, I am 18+",
         "no": "No, I am under 18"
+    },
+    "tasting": {
+        "title": "Tastings & Tours",
+        "subtitle": "Dive into the world of Man & Brouw. Discover our brewery, listen to our stories, and taste our beers.",
+        "infoTitle": "Useful Information",
+        "formulaTitle": "Our Formulas",
+        "formula4": {
+            "title": "Basic Tasting",
+            "description": "4 beers of 15cl. A perfect introduction to our brewery.",
+            "price": "€20 pp"
+        },
+        "formula6": {
+            "title": "Extended Tasting",
+            "description": "6 beers of 15cl. For the true explorer.",
+            "price": "€25 pp"
+        },
+        "addonGlass": {
+            "title": "Keep the glass",
+            "description": "Take your Man & Brouw tasting glass home as a souvenir.",
+            "price": "+ €5 pp"
+        },
+        "info": {
+            "minimumTitle": "Group Size",
+            "minimumText": "Minimum €150 per group.",
+            "locationTitle": "Location",
+            "breweryText": "Usually held at our brewery in Wilsele, including a tour.",
+            "onLocationText": "On location is also possible! Free within 10km of Leuven, otherwise price on request.",
+            "tourTitle": "Brewery Tour",
+            "tourText": "Our tastings at the brewery include a look behind the scenes and stories about how we brew our beers."
+        },
+        "form": {
+            "title": "Book a tasting",
+            "subtitle": "Ready to discover our beers? Fill out the form and we'll make it an unforgettable session.",
+            "questions": "Questions?",
+            "name": "Name",
+            "email": "Email address",
+            "date": "Preferred date",
+            "people": "Number of people",
+            "formula": "Choose your formula",
+            "formula4": "Basic (4 beers - €20 pp)",
+            "formula6": "Extended (6 beers - €25 pp)",
+            "keepGlass": "I want to keep the glass (+€5 pp)",
+            "location": "Location",
+            "atBrewery": "At the brewery (Wilsele)",
+            "otherLocation": "At my own location",
+            "message": "Extra questions or comments",
+            "submit": "Send request",
+            "success": "Thank you for your request! We will contact you as soon as possible.",
+            "successDetail": "We will contact you as soon as possible to discuss the details.",
+            "error": "Oops! Something went wrong.",
+            "namePlaceholder": "John Doe",
+            "emailPlaceholder": "john@example.com",
+            "peoplePlaceholder": "e.g. 10",
+            "messagePlaceholder": "Tell us about your group or event..."
+        }
     },
     "common": {
         "loading": "Loading...",

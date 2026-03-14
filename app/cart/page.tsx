@@ -6,6 +6,7 @@ import { useCartStore } from "@/store/cartStore";
 import { Trash2, Plus, Minus, ArrowLeft, ShoppingBag } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n-context";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default function CartPage() {
     const { items, removeItem, updateQuantity, getTotalPrice, clearCart } =
@@ -37,30 +38,36 @@ export default function CartPage() {
 
     if (items.length === 0) {
         return (
-            <div className="min-h-screen bg-white py-16 flex flex-col items-center justify-center text-center px-4">
-                <div className="bg-gray-100 p-6 rounded-full mb-6">
-                    <ShoppingBag className="h-12 w-12 text-gray-400" />
+            <div className="min-h-screen bg-white pb-16">
+                <PageHeader 
+                    title={t("cart.title")} 
+                    subtitle={t("cart.empty")}
+                />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 flex flex-col items-center justify-center text-center">
+                    <div className="bg-gray-100 p-6 rounded-full mb-6 border-2 border-black">
+                        <ShoppingBag className="h-12 w-12 text-gray-400" />
+                    </div>
+                    <p className="text-gray-600 mb-8 max-w-md">
+                        {t("cart.emptyMessage")}
+                    </p>
+                    <Link
+                        href="/shop"
+                        className="bg-brewery-green text-white font-bold py-3 px-8 hover:bg-opacity-90 transition-colors border-2 border-black hover:translate-x-1 hover:translate-y-1"
+                    >
+                        {t("cart.startShopping")}
+                    </Link>
                 </div>
-                <h1 className="text-3xl font-bold text-brewery-dark mb-4">
-                    {t("cart.empty")}
-                </h1>
-                <p className="text-gray-600 mb-8">
-                    {t("cart.emptyMessage")}
-                </p>
-                <Link
-                    href="/shop"
-                    className="bg-brewery-green text-white font-bold py-3 px-8 hover:bg-opacity-90 transition-colors border-2 border-black"
-                >
-                    {t("cart.startShopping")}
-                </Link>
             </div>
         );
     }
 
     return (
-        <div className="bg-white min-h-screen py-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 className="text-3xl font-bold text-brewery-dark mb-8">{t("cart.title")}</h1>
+        <div className="bg-white min-h-screen pb-16">
+            <PageHeader 
+                title={t("cart.title")}
+            />
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2 space-y-6">
@@ -168,7 +175,7 @@ export default function CartPage() {
                             </div>
                             <Link
                                 href="/checkout"
-                                className="block w-full bg-brewery-dark text-white font-bold py-4 text-center hover:bg-opacity-90 transition-colors shadow-lg border-2 border-black"
+                                className="block w-full bg-brewery-dark text-white font-bold py-4 text-center hover:bg-opacity-90 transition-colors border-2 border-black"
                             >
                                 {t("cart.proceedToCheckout")}
                             </Link>

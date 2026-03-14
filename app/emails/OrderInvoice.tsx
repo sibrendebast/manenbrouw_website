@@ -51,7 +51,7 @@ interface OrderInvoiceProps {
 // Simple translation dictionary for email
 const translations = {
     en: {
-        invoiceTitle: "INVOICE",
+        invoiceTitle: "Invoice",
         orderDate: "Order Date",
         billTo: "Bill To",
         shipTo: "Ship To",
@@ -71,7 +71,7 @@ const translations = {
         ticket: "Ticket"
     },
     nl: {
-        invoiceTitle: "FACTUUR",
+        invoiceTitle: "Factuur",
         orderDate: "Datum",
         billTo: "Factuuradres",
         shipTo: "Leveradres",
@@ -297,7 +297,6 @@ const subHeading = {
     fontWeight: "bold",
     margin: "0 0 12px",
     color: "#56c99b",
-    textTransform: "uppercase" as const,
 };
 
 const paragraph = {
@@ -317,7 +316,6 @@ const tableHeader = {
     fontSize: "14px",
     fontWeight: "bold",
     color: "#000000",
-    textTransform: "uppercase" as const,
     borderBottom: "2px solid #000000",
     paddingBottom: "8px",
 };

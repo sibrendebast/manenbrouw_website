@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n-context";
 import ProductCard from "./ProductCard";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default function ShopContent({ products }: { products: any[] }) {
     const { t } = useI18n();
@@ -29,14 +30,13 @@ export default function ShopContent({ products }: { products: any[] }) {
     ];
 
     return (
-        <div className="bg-white min-h-screen py-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-16">
-                    <h1 className="text-4xl font-bold text-brewery-dark mb-4">{t("shop.title")}</h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        {t("shop.subtitle")}
-                    </p>
-                </div>
+        <div className="bg-white min-h-screen pb-16">
+            <PageHeader 
+                title={t("shop.title")} 
+                subtitle={t("shop.subtitle")} 
+            />
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
 
                 <div className="flex justify-center mb-12 flex-wrap gap-4">
                     {categories.map((category) => (

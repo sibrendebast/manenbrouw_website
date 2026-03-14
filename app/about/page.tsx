@@ -3,6 +3,7 @@
 import { Beer, Wrench, Hourglass } from "lucide-react";
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n-context";
+import PageHeader from "@/components/ui/PageHeader";
 
 type AboutMessages = {
     hero: {
@@ -40,16 +41,13 @@ export default function AboutPage() {
     }
 
     return (
-        <div className="bg-white min-h-screen py-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-16">
-                    <h1 className="text-4xl font-bold text-brewery-dark mb-4">
-                        {about.hero.title}
-                    </h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        {about.hero.subtitle}
-                    </p>
-                </div>
+        <div className="bg-white min-h-screen pb-16">
+            <PageHeader 
+                title={about.hero.title} 
+                subtitle={about.hero.subtitle} 
+            />
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-20">
                     <div>

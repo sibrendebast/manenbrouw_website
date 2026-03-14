@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Calendar, MapPin, Users, Clock, ShoppingCart, Check } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useI18n } from "@/lib/i18n-context";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default function EventsPage() {
     const [events, setEvents] = useState<any[]>([]);
@@ -114,7 +115,7 @@ export default function EventsPage() {
                                                 €{event.ticketPrice?.toFixed(2)}
                                             </span>
                                             <span className="text-xs bg-yellow-400 text-black px-2 py-1 font-bold border border-black mt-1">
-                                                EARLY BIRD
+                                                Early Bird
                                             </span>
                                         </div>
                                     )}
@@ -160,7 +161,7 @@ export default function EventsPage() {
                     <div className="md:self-start w-full md:w-auto mt-4 md:mt-0">
                         {!isPast && event.isPaid && ticketsNotYetAvailable && (
                             <div className="w-full bg-blue-50 border-2 border-blue-300 p-4">
-                                <p className="text-sm font-bold text-blue-900 mb-1">Tickets Not Yet Available</p>
+                                <p className="text-sm font-bold text-blue-900 mb-1">Tickets not yet available</p>
                                 <p className="text-xs text-blue-700">
                                     Tickets will be available from: {formatDate(ticketSalesStartDate!)}
                                 </p>
@@ -230,14 +231,13 @@ export default function EventsPage() {
     };
 
     return (
-        <div className="bg-white min-h-screen py-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-16">
-                    <h1 className="text-4xl font-bold text-brewery-dark mb-4">{t("events.title")}</h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        {t("events.subtitle")}
-                    </p>
-                </div>
+        <div className="bg-white min-h-screen pb-16">
+            <PageHeader 
+                title={t("events.title")} 
+                subtitle={t("events.subtitle")} 
+            />
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
 
                 {/* Upcoming Events */}
                 {upcomingEvents.length > 0 && (

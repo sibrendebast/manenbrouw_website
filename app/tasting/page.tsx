@@ -108,8 +108,8 @@ export default function TastingPage() {
                         </div>
                     </div>
 
-                    <div className="space-y-8">
-                        <div className="border-2 border-black p-8 h-full flex flex-col justify-center bg-white text-black">
+                    <div className="lg:pt-[84px] space-y-8">
+                        <div className="border-2 border-black p-8 bg-white text-black">
                             <h2 className="text-3xl font-bold mb-8 text-brewery-green tracking-widest">{tasting.infoTitle}</h2>
                             
                             <div className="space-y-8">

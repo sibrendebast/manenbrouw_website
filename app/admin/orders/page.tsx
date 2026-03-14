@@ -7,6 +7,7 @@ import { getOrders, updateOrderStatus, deleteOrder } from "@/app/actions/orderAc
 import { Package, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import OrderRow from "./OrderRow";
+import OrderStatistics from "./OrderStatistics";
 
 export default function AdminOrdersPage() {
     const { isAuthenticated } = useAdminStore();
@@ -59,6 +60,8 @@ export default function AdminOrdersPage() {
                         </h1>
                     </div>
                 </div>
+
+                <OrderStatistics orders={orders} />
 
                 {/* Filter Section */}
                 <div className="mb-8">

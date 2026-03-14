@@ -342,10 +342,14 @@
             "minimumText": "Minimum €150 per groep.",
             "locationTitle": "Locatie",
             "breweryText": "Normaal gezien in onze brouwerij in Wilsele, inclusief een rondleiding.",
-            "onLocationText": "Op locatie is ook mogelijk! Gratis binnen 10km van Leuven, daarbuiten prijs op aanvraag."
+            "onLocationText": "Op locatie is ook mogelijk! Gratis binnen 10km van Leuven, daarbuiten prijs op aanvraag.",
+            "tourTitle": "Rondleiding",
+            "tourText": "Onze proeverijen in de brouwerij zijn inclusief een kijkje achter de schermen en verhalen over hoe we onze bieren maken."
         },
         "form": {
             "title": "Boek een proeverij",
+            "subtitle": "Klaar om onze bieren te ontdekken? Vul het formulier in en we maken er een onvergetelijke sessie van.",
+            "questions": "Vragen?",
             "name": "Naam",
             "email": "E-mailadres",
             "date": "Gewenste datum",
@@ -359,7 +363,13 @@
             "otherLocation": "Op mijn eigen locatie",
             "message": "Extra vragen of opmerkingen",
             "submit": "Verzend aanvraag",
-            "success": "Bedankt voor je aanvraag! We nemen zo snel mogelijk contact met je op."
+            "success": "Bedankt voor je aanvraag! We nemen zo snel mogelijk contact met je op.",
+            "successDetail": "We nemen zo snel mogelijk contact met je op om de details te bespreken.",
+            "error": "Oeps! Er ging iets mis.",
+            "namePlaceholder": "Jan Janssens",
+            "emailPlaceholder": "jan@voorbeeld.be",
+            "peoplePlaceholder": "bv. 10",
+            "messagePlaceholder": "Vertel ons over je groep of event..."
         }
     },
     "common": {

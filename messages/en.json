@@ -341,25 +341,35 @@
             "minimumTitle": "Group Size",
             "minimumText": "Minimum €150 per group.",
             "locationTitle": "Location",
-            "breweryText": "Normally in our brewery in Wilsele, including a tour.",
-            "onLocationText": "On location is also possible! Free within 10km of Leuven, otherwise price on request."
+            "breweryText": "Usually held at our brewery in Wilsele, including a tour.",
+            "onLocationText": "On location is also possible! Free within 10km of Leuven, otherwise price on request.",
+            "tourTitle": "Brewery Tour",
+            "tourText": "Our tastings at the brewery include a look behind the scenes and stories about how we brew our beers."
         },
         "form": {
             "title": "Book a tasting",
+            "subtitle": "Ready to discover our beers? Fill out the form and we'll make it an unforgettable session.",
+            "questions": "Questions?",
             "name": "Name",
             "email": "Email address",
             "date": "Preferred date",
             "people": "Number of people",
             "formula": "Choose your formula",
-            "formula4": "Basic (4 beers - €20 p.p.)",
-            "formula6": "Extended (6 beers - €25 p.p.)",
-            "keepGlass": "I want to keep the glass (+€5 p.p.)",
+            "formula4": "Basic (4 beers - €20 pp)",
+            "formula6": "Extended (6 beers - €25 pp)",
+            "keepGlass": "I want to keep the glass (+€5 pp)",
             "location": "Location",
             "atBrewery": "At the brewery (Wilsele)",
             "otherLocation": "At my own location",
             "message": "Extra questions or comments",
             "submit": "Send request",
-            "success": "Thank you for your request! We will contact you as soon as possible."
+            "success": "Thank you for your request! We will contact you as soon as possible.",
+            "successDetail": "We will contact you as soon as possible to discuss the details.",
+            "error": "Oops! Something went wrong.",
+            "namePlaceholder": "John Doe",
+            "emailPlaceholder": "john@example.com",
+            "peoplePlaceholder": "e.g. 10",
+            "messagePlaceholder": "Tell us about your group or event..."
         }
     },
     "common": {

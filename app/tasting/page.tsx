@@ -20,9 +20,13 @@ type TastingMessages = {
         locationTitle: string;
         breweryText: string;
         onLocationText: string;
+        tourTitle: string;
+        tourText: string;
     };
     form: {
         title: string;
+        subtitle: string;
+        questions: string;
         name: string;
         email: string;
         date: string;
@@ -37,6 +41,12 @@ type TastingMessages = {
         message: string;
         submit: string;
         success: string;
+        successDetail: string;
+        error: string;
+        peoplePlaceholder: string;
+        messagePlaceholder: string;
+        namePlaceholder: string;
+        emailPlaceholder: string;
     };
 };
 
@@ -133,8 +143,8 @@ export default function TastingPage() {
                                 <div className="flex gap-6">
                                     <Info className="h-8 w-8 text-brewery-green shrink-0" />
                                     <div>
-                                        <h4 className="font-bold text-xl mb-1">Rondleiding</h4>
-                                        <p className="text-gray-600">Onze proeverijen in de brouwerij zijn inclusief een kijkje achter de schermen en verhalen over hoe we onze bieren maken.</p>
+                                        <h4 className="font-bold text-xl mb-1">{tasting.info.tourTitle}</h4>
+                                        <p className="text-gray-600">{tasting.info.tourText}</p>
                                     </div>
                                 </div>
                             </div>
@@ -150,10 +160,10 @@ export default function TastingPage() {
                                 {tasting.form.title}
                             </h2>
                             <p className="text-gray-600 text-lg mb-8">
-                                Klaar om onze bieren te ontdekken? Vul het formulier in en we maken er een onvergetelijke sessie van.
+                                {tasting.form.subtitle}
                             </p>
                             <div className="border-t-4 border-black pt-6">
-                                <p className="font-bold text-brewery-green">Vragen?</p>
+                                <p className="font-bold text-brewery-green">{tasting.form.questions}</p>
                                 <p className="text-2xl font-bold">info@manenbrouw.be</p>
                             </div>
                         </div>

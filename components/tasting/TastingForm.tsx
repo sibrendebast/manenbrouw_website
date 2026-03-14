@@ -23,6 +23,12 @@ type TastingMessages = {
         message: string;
         submit: string;
         success: string;
+        successDetail: string;
+        error: string;
+        peoplePlaceholder: string;
+        messagePlaceholder: string;
+        namePlaceholder: string;
+        emailPlaceholder: string;
     };
 };
 
@@ -37,6 +43,8 @@ export default function TastingForm() {
     if (!tasting) return null;
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        if (!tasting) return;
+        
         e.preventDefault();
         setIsPending(true);
         setError(null);
@@ -48,7 +56,7 @@ export default function TastingForm() {
             setIsSuccess(true);
             setIsPending(false);
         } else {
-            setError(result.error || "Oeps! Er ging iets mis.");
+            setError(result.error || tasting.form.error);
             setIsPending(false);
         }
     }
@@ -64,7 +72,7 @@ export default function TastingForm() {
                     <CheckCircle2 className="h-16 w-16 text-brewery-green" />
                 </div>
                 <h3 className="text-3xl font-bold mb-4">{tasting.form.success}</h3>
-                <p className="text-gray-600 text-lg">We nemen zo snel mogelijk contact met je op om de details te bespreken.</p>
+                <p className="text-gray-600 text-lg">{tasting.form.successDetail}</p>
                 <button 
                     onClick={() => setIsSuccess(false)}
                     className="mt-8 px-8 py-3 border-2 border-black font-bold hover:bg-black hover:text-white transition-colors"
@@ -84,7 +92,7 @@ export default function TastingForm() {
                         type="text"
                         name="name"
                         required
-                        placeholder="Jan Janssens"
+                        placeholder={tasting.form.namePlaceholder}
                         className="w-full p-4 border-2 border-black focus:bg-brewery-green/5 outline-none transition-colors"
                     />
                 </div>
@@ -94,7 +102,7 @@ export default function TastingForm() {
                         type="email"
                         name="email"
                         required
-                        placeholder="jan@voorbeeld.be"
+                        placeholder={tasting.form.emailPlaceholder}
                         className="w-full p-4 border-2 border-black focus:bg-brewery-green/5 outline-none transition-colors"
                     />
                 </div>
@@ -117,7 +125,7 @@ export default function TastingForm() {
                         name="people"
                         min="1"
                         required
-                        placeholder="bv. 10"
+                        placeholder={tasting.form.peoplePlaceholder}
                         className="w-full p-4 border-2 border-black focus:bg-brewery-green/5 outline-none transition-colors"
                     />
                 </div>
@@ -168,7 +176,7 @@ export default function TastingForm() {
                     name="message"
                     rows={4}
                     className="w-full p-4 border-2 border-black focus:bg-brewery-green/5 outline-none transition-colors"
-                    placeholder="Vertel ons over je groep of event..."
+                    placeholder={tasting.form.messagePlaceholder}
                 />
             </div>
 

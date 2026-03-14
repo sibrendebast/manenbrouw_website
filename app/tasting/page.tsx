@@ -109,7 +109,7 @@ export default function TastingPage() {
                     </div>
 
                     <div className="space-y-8">
-                        <div className="border-2 border-black p-8 h-full flex flex-col justify-center bg-black text-white">
+                        <div className="border-2 border-black p-8 h-full flex flex-col justify-center bg-white text-black">
                             <h2 className="text-3xl font-bold mb-8 text-brewery-green tracking-widest">{tasting.infoTitle}</h2>
                             
                             <div className="space-y-8">
@@ -117,7 +117,7 @@ export default function TastingPage() {
                                     <Users className="h-8 w-8 text-brewery-green shrink-0" />
                                     <div>
                                         <h4 className="font-bold text-xl mb-1">{tasting.info.minimumTitle}</h4>
-                                        <p className="text-gray-400">{tasting.info.minimumText}</p>
+                                        <p className="text-gray-600">{tasting.info.minimumText}</p>
                                     </div>
                                 </div>
 
@@ -125,7 +125,7 @@ export default function TastingPage() {
                                     <MapPin className="h-8 w-8 text-brewery-green shrink-0" />
                                     <div>
                                         <h4 className="font-bold text-xl mb-1">{tasting.info.locationTitle}</h4>
-                                        <p className="text-gray-400 mb-2">{tasting.info.breweryText}</p>
+                                        <p className="text-gray-600 mb-2">{tasting.info.breweryText}</p>
                                         <p className="text-brewery-green text-sm italic">{tasting.info.onLocationText}</p>
                                     </div>
                                 </div>
@@ -134,7 +134,7 @@ export default function TastingPage() {
                                     <Info className="h-8 w-8 text-brewery-green shrink-0" />
                                     <div>
                                         <h4 className="font-bold text-xl mb-1">Rondleiding</h4>
-                                        <p className="text-gray-400">Onze proeverijen in de brouwerij zijn inclusief een kijkje achter de schermen en verhalen over hoe we onze bieren maken.</p>
+                                        <p className="text-gray-600">Onze proeverijen in de brouwerij zijn inclusief een kijkje achter de schermen en verhalen over hoe we onze bieren maken.</p>
                                     </div>
                                 </div>
                             </div>

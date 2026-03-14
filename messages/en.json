@@ -324,17 +324,17 @@
         "formula4": {
             "title": "Basic Tasting",
             "description": "4 beers of 15cl. A perfect introduction to our brewery.",
-            "price": "€20"
+            "price": "€20 pp"
         },
         "formula6": {
             "title": "Extended Tasting",
             "description": "6 beers of 15cl. For the true explorer.",
-            "price": "€25"
+            "price": "€25 pp"
         },
         "addonGlass": {
             "title": "Keep the glass",
             "description": "Take your Man & Brouw tasting glass home as a souvenir.",
-            "price": "+ €5"
+            "price": "+ €5 pp"
         },
         "info": {
             "minimumTitle": "Group Size",

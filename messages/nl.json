@@ -324,17 +324,17 @@
         "formula4": {
             "title": "Basis Degustatie",
             "description": "4 bieren van 15cl. Een perfecte introductie tot onze brouwerij.",
-            "price": "€20"
+            "price": "€20 p.p."
         },
         "formula6": {
             "title": "Uitgebreide Degustatie",
             "description": "6 bieren van 15cl. Voor de echte ontdekkingsreiziger.",
-            "price": "€25"
+            "price": "€25 p.p."
         },
         "addonGlass": {
             "title": "Houd het glas",
             "description": "Neem je Man & Brouw proefglas mee naar huis als aandenken.",
-            "price": "+ €5"
+            "price": "+ €5 p.p."
         },
         "info": {
             "minimumTitle": "Groepsgrootte",

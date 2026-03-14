@@ -14,7 +14,7 @@ export default function PageHeader({
     bgColor = "bg-brewery-green" 
 }: PageHeaderProps) {
     return (
-        <section className={`${bgColor} text-white py-12 border-b-4 border-black`}>
+        <section className={`${bgColor} text-white py-12 border-b-2 border-black`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}

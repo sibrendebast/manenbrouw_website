@@ -132,6 +132,7 @@ model BrouwSequence {
 
 model Recipe {
   id                      String             @id @default(uuid())
+  brouwnummer             String?            @unique
   naam                    String
   stijl                   String?
   notities                String?
@@ -155,6 +156,7 @@ model Recipe {
   maischStappen           MaischStap[]
   fermentatieStappen      FermentatieStap[]
   brouwsels               Brouwsel[]
+  stockAllocations        StockAllocation[]
 }
 
 model Brouwsel {
@@ -194,6 +196,8 @@ model RecipeIngredient {
   doseringGPerL    Float?
   lot              String?
   volgorde         Int            @default(0)
+  materialId       String?
+  material         RawMaterial?   @relation(fields: [materialId], references: [id])
 
   @@index([recipeId])
 }
@@ -263,17 +267,173 @@ model WerkregisterEntry {
 }
 
 model Supplier {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  address     String?
-  contact     String?
-  phone       String?
-  email       String?
-  kboNumber   String?
-  favvNumber  String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String         @id @default(uuid())
+  name          String         @unique
+  address       String?
+  contact       String?
+  phone         String?
+  email         String?
+  kboNumber     String?
+  favvNumber    String?
+  isActive      Boolean        @default(true)
+  stockReceipts StockReceipt[]
+  lots          InventoryLot[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+// ─── Voorraadbeheer Grondstoffen ─────────────────────────────────────────────
+
+model RawMaterial {
+  id                String                @id @default(uuid())
+  name              String                @unique
+  category          RawMaterialCategory
+  unit              String                @default("kg")
+  description       String?
+  isActive          Boolean               @default(true)
+  lots              InventoryLot[]
+  recipeIngredients RecipeIngredient[]
+  allocations       StockAllocationLine[]
+  movements         StockMovement[]
+  receiptLines      StockReceiptLine[]
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+}
+
+model StockReceipt {
+  id              String               @id @default(uuid())
+  receiptNumber   String?
+  invoiceNumber   String?
+  supplierId      String
+  supplier        Supplier             @relation(fields: [supplierId], references: [id])
+  receivedDate    DateTime
+  manufacturer    String?
+  deviationFlag   Boolean              @default(false)
+  deviationAction StockDeviationAction @default(GEEN_AFWIJKING)
+  deviationNotes  String?
+  notes           String?
+  lines           StockReceiptLine[]
+  auditLogs       AuditLog[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([supplierId])
+  @@index([receivedDate])
+}
+
+model StockReceiptLine {
+  id               String       @id @default(uuid())
+  receiptId        String
+  receipt          StockReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  materialId       String
+  material         RawMaterial  @relation(fields: [materialId], references: [id])
+  quantityReceived Decimal      @db.Decimal(10, 3)
+  unitCost         Decimal      @db.Decimal(10, 4)
+  lotId            String?
+  lot              InventoryLot? @relation(fields: [lotId], references: [id])
+  createdAt        DateTime     @default(now())
+
+  @@unique([receiptId, materialId])
+  @@index([materialId])
+}
+
+model InventoryLot {
+  id                String                @id @default(uuid())
+  materialId        String
+  material          RawMaterial           @relation(fields: [materialId], references: [id])
+  lotNumber         String
+  manufacturer      String?
+  supplierId        String?
+  supplier          Supplier?             @relation(fields: [supplierId], references: [id])
+  expiryDate        DateTime
+  quantityTotal     Decimal               @db.Decimal(10, 3)
+  quantityAllocated Decimal               @db.Decimal(10, 3) @default(0)
+  unitCost          Decimal               @db.Decimal(10, 4)
+  isQuarantined     Boolean               @default(false)
+  status            String                @default("active")
+  receiptLines      StockReceiptLine[]
+  allocations       StockAllocationLine[]
+  movements         StockMovement[]
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  @@unique([materialId, lotNumber, supplierId])
+  @@index([materialId])
+  @@index([expiryDate])
+  @@index([status])
+}
+
+model StockAllocation {
+  id             String                @id @default(uuid())
+  brewNumber     String                @unique
+  brew           Recipe                @relation(fields: [brewNumber], references: [brouwnummer])
+  allocationDate DateTime
+  totalCost      Decimal               @db.Decimal(10, 2)
+  notes          String?
+  lines          StockAllocationLine[]
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@index([allocationDate])
+}
+
+model StockAllocationLine {
+  id                   String          @id @default(uuid())
+  allocationId         String
+  allocation           StockAllocation @relation(fields: [allocationId], references: [id], onDelete: Cascade)
+  materialId           String
+  material             RawMaterial     @relation(fields: [materialId], references: [id])
+  lotId                String
+  lot                  InventoryLot    @relation(fields: [lotId], references: [id])
+  quantityAllocated    Decimal         @db.Decimal(10, 3)
+  unitCostAtAllocation Decimal         @db.Decimal(10, 4)
+  lineCost             Decimal         @db.Decimal(10, 2)
+  notes                String?
+
+  @@unique([allocationId, materialId, lotId])
+  @@index([materialId])
+  @@index([lotId])
+}
+
+model StockMovement {
+  id            String      @id @default(uuid())
+  materialId    String
+  material      RawMaterial @relation(fields: [materialId], references: [id])
+  lotId         String
+  lot           InventoryLot @relation(fields: [lotId], references: [id])
+  movementType  String
+  quantity      Decimal     @db.Decimal(10, 3)
+  referenceType String?
+  referenceId   String?
+  movedBy       String?
+  movedAt       DateTime    @default(now())
+  notes         String?
+
+  @@index([materialId])
+  @@index([lotId])
+  @@index([movementType])
+  @@index([movedAt])
+}
+
+model AuditLog {
+  id             String          @id @default(uuid())
+  documentType   String
+  documentId     String
+  action         AuditActionType
+  changedBy      String?
+  changedAt      DateTime        @default(now())
+  oldValue       Json?
+  newValue       Json?
+  context        String?
+  stockReceiptId String?
+  stockReceipt   StockReceipt?   @relation(fields: [stockReceiptId], references: [id], onDelete: SetNull)
+
+  @@index([documentType, documentId])
+  @@index([changedBy])
+  @@index([changedAt])
 }
 
 // ─── Enums ──────────────────────────────────────────────────────────────────
@@ -311,4 +471,32 @@ enum WerkregisterHandeling {
   OVERHEVELEN
   BOTTELEN_KEGGEN
   VERNIETIGING
+}
+
+enum RawMaterialCategory {
+  GRANEN
+  HOP
+  GIST
+  TOEVOEGINGEN
+  VERPAKKING
+}
+
+enum StockDeviationAction {
+  GEWEIGERD
+  RETOUR
+  AFGEPRIJSD
+  VERNIETIGD
+  GEDEELTELIJK
+  QUARANTAINE
+  GEEN_AFWIJKING
+}
+
+enum AuditActionType {
+  CREATE
+  UPDATE
+  DELETE
+  ALLOCATE
+  RECEIVE
+  DEVIATION
+  RECOUNT
 }

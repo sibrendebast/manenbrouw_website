@@ -101,7 +101,7 @@ export async function createBrouwsel(input: BrouwselInput): Promise<{
         const brouwsel = await prisma.brouwsel.create({
             data: {
                 brouwnummer,
-                recipeId: input.recipeId,
+                recipe: { connect: { id: input.recipeId } },
                 datum: new Date(input.datum),
                 aanvraagDatum: input.aanvraagDatum ? new Date(input.aanvraagDatum) : null,
                 volume: input.volume ?? null,
@@ -132,7 +132,7 @@ export async function updateBrouwsel(
             where: { id },
             data: {
                 ...(input.brouwnummer ? { brouwnummer: input.brouwnummer } : {}),
-                recipeId: input.recipeId,
+                recipe: { connect: { id: input.recipeId } },
                 datum: new Date(input.datum),
                 aanvraagDatum: input.aanvraagDatum ? new Date(input.aanvraagDatum) : null,
                 volume: input.volume ?? null,

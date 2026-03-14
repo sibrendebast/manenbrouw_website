@@ -262,6 +262,20 @@ model WerkregisterEntry {
   updatedAt           DateTime              @updatedAt
 }
 
+model Supplier {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  address     String?
+  contact     String?
+  phone       String?
+  email       String?
+  kboNumber   String?
+  favvNumber  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 // ─── Enums ──────────────────────────────────────────────────────────────────
 
 enum ProductType {

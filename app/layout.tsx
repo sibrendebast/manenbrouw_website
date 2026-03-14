@@ -17,20 +17,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#ffffff",
+};
+
 export const metadata: Metadata = {
   title: "Man & Brouw",
   description: "Craft Brewery in Wilsele",
   manifest: "/manifest.json",
-  themeColor: "#ffffff",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "ManEnBrouw",
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
   },
 };
 
@@ -40,8 +41,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <I18nProvider>

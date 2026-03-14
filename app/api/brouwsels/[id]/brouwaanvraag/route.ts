@@ -41,7 +41,20 @@ export async function GET(
         };
 
         const moutIngredients = recipe.ingredients.filter((i: any) => i.type === 'MOUT');
+        const hopIngredients = recipe.ingredients.filter((i: any) => i.type === 'HOP');
+        const gistIngredients = recipe.ingredients.filter((i: any) => i.type === 'GIST');
+        const overigIngredients = recipe.ingredients.filter((i: any) => i.type === 'ANDERE');
+
         const totalMoutWeight = moutIngredients.reduce((acc: number, i: any) => acc + (i.hoeveelheid || 0), 0);
+        const moutPerHl = volumeHl > 0 ? (totalMoutWeight / volumeHl) : 0;
+
+        // Kettle vs Dry Hops
+        const kettleHops = hopIngredients.filter((h: any) => h.stap === 'MAISCHEN' || h.stap === 'KOKEN' || !h.stap);
+        const dryHops = hopIngredients.filter((h: any) => h.stap === 'FERMENTATIE' || h.stap === 'DRY_HOP');
+
+        const totalKettleHopsWeight = kettleHops.reduce((acc: number, i: any) => acc + (i.hoeveelheid || 0), 0);
+        const totalDryHopsWeight = dryHops.reduce((acc: number, i: any) => acc + (i.hoeveelheid || 0), 0);
+        const totalGistWeight = gistIngredients.reduce((acc: number, i: any) => acc + (i.hoeveelheid || 0), 0);
 
         const data = {
             Brewnumber: brouwsel.brouwnummer,
@@ -49,47 +62,61 @@ export async function GET(
             receptnaam: recipe.naam,
             receptNaam: recipe.naam,
             brouwnummer: brouwsel.brouwnummer,
-            datum: formatDate(brouwsel.aanvraagDatum || brouwsel.datum),
+            datum: formatDate(new Date()), // Signing date (today)
             brouwdatum: formatDate(brouwsel.datum),
             aanvraagdatum: brouwsel.aanvraagDatum ? formatDate(brouwsel.aanvraagDatum) : formatDate(brouwsel.datum),
             stijl: recipe.stijl || "",
             volume: totalVolume,
             volume_hl: volumeHl.toFixed(2),
             og: brouwsel.ogGemeten?.toFixed(3) || recipe.ogCalc?.toFixed(3) || "",
-            plato_og: brouwsel.platoGemeten?.toFixed(1) || recipe.platoCalc?.toFixed(1) || "",
+            // Improved plato calculation if measured OG is present
+            plato_og: brouwsel.platoGemeten?.toFixed(1) ||
+                (brouwsel.ogGemeten ? ((brouwsel.ogGemeten - 1) * 256).toFixed(1) :
+                    recipe.platoCalc?.toFixed(1)) || "",
             fg: brouwsel.fgGemeten?.toFixed(3) || recipe.fgCalc?.toFixed(3) || "",
             abv: brouwsel.abvGemeten?.toFixed(1) || recipe.abvCalc?.toFixed(1) || "",
             ebc: recipe.ebcCalc?.toFixed(1) || "",
             ibu: recipe.ibuCalc?.toFixed(0) || "",
             notities: recipe.notities || "",
 
-            // Totals
-            totaal_mout: totalMoutWeight.toFixed(2),
-            mout_per_hl: volumeHl > 0 ? (totalMoutWeight / volumeHl).toFixed(2) : "0.00",
+            // Totals and specialized fields for Basislijst
+            rendement: "95",
+            total_mout_kg_per_hl: moutPerHl.toFixed(2),
+            water_l_per_hl: (100 + moutPerHl).toFixed(2),
+            kettle_hop_per_hl: volumeHl > 0 ? (totalKettleHopsWeight / volumeHl).toFixed(3) : "0.000",
+            dry_hop_per_hl: volumeHl > 0 ? (totalDryHopsWeight / volumeHl).toFixed(3) : "0.000",
+            gist_per_hl: volumeHl > 0 ? (totalGistWeight / volumeHl).toFixed(3) : "0.000",
 
-            // Ingredients
+            totaal_mout: totalMoutWeight.toFixed(2),
+            mout_per_hl: moutPerHl.toFixed(2),
+
+            // Ingredients loops
             mout: moutIngredients.map((i: any) => ({
                 naam: i.naam,
                 hoeveelheid: i.hoeveelheid,
                 per_hl: volumeHl > 0 ? (i.hoeveelheid / volumeHl).toFixed(2) : "0.00",
+                voor_wort: volumeHl > 0 ? (i.hoeveelheid / volumeHl).toFixed(2) : "0.00",
                 eenheid: i.eenheid,
                 lot: i.lot || ""
             })),
-            hop: recipe.ingredients.filter((i: any) => i.type === 'HOP').map((i: any) => ({
+            hop: hopIngredients.map((i: any) => ({
                 naam: i.naam,
                 hoeveelheid: i.hoeveelheid,
                 per_hl: volumeHl > 0 ? (i.hoeveelheid / volumeHl).toFixed(2) : "0.00",
                 eenheid: i.eenheid,
                 tijd: i.tijdMinuten || "",
-                lot: i.lot || ""
+                lot: i.lot || "",
+                voor_wort: (i.stap === 'MAISCHEN' || i.stap === 'KOKEN' || !i.stap) ? (i.hoeveelheid / volumeHl).toFixed(3) : "",
+                na_wort: (i.stap === 'FERMENTATIE' || i.stap === 'DRY_HOP') ? (i.hoeveelheid / volumeHl).toFixed(3) : ""
             })),
-            gist: recipe.ingredients.filter((i: any) => i.type === 'GIST').map((i: any) => ({
+            gist: gistIngredients.map((i: any) => ({
                 naam: i.naam,
                 hoeveelheid: i.hoeveelheid,
                 eenheid: i.eenheid,
-                lot: i.lot || ""
+                lot: i.lot || "",
+                na_wort: volumeHl > 0 ? (i.hoeveelheid / volumeHl).toFixed(3) : "0.000"
             })),
-            overig: recipe.ingredients.filter((i: any) => i.type === 'ANDERE').map((i: any) => ({
+            overig: overigIngredients.map((i: any) => ({
                 naam: i.naam,
                 hoeveelheid: i.hoeveelheid,
                 eenheid: i.eenheid,

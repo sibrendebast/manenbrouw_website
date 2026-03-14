@@ -67,8 +67,8 @@ export default function BrouwselsOverzicht() {
     const [formData, setFormData] = useState({
         brouwnummer: "",
         recipeId: "",
-        datum: new Date().toISOString().split("T")[0],
-        aanvraagDatum: new Date().toISOString().split("T")[0],
+        datum: "",
+        aanvraagDatum: "",
         volume: "",
         ogGemeten: "",
         fgGemeten: "",

@@ -79,7 +79,7 @@ export default function TastingForm() {
         <form onSubmit={handleSubmit} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                    <label className="text-sm font-black uppercase tracking-wider">{tasting.form.name} *</label>
+                    <label className="text-sm font-black tracking-wider">{tasting.form.name} *</label>
                     <input
                         type="text"
                         name="name"
@@ -89,7 +89,7 @@ export default function TastingForm() {
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-black uppercase tracking-wider">{tasting.form.email} *</label>
+                    <label className="text-sm font-black tracking-wider">{tasting.form.email} *</label>
                     <input
                         type="email"
                         name="email"
@@ -102,7 +102,7 @@ export default function TastingForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                    <label className="text-sm font-black uppercase tracking-wider">{tasting.form.date} *</label>
+                    <label className="text-sm font-black tracking-wider">{tasting.form.date} *</label>
                     <input
                         type="date"
                         name="date"
@@ -111,7 +111,7 @@ export default function TastingForm() {
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-black uppercase tracking-wider">{tasting.form.people} *</label>
+                    <label className="text-sm font-black tracking-wider">{tasting.form.people} *</label>
                     <input
                         type="number"
                         name="people"
@@ -124,7 +124,7 @@ export default function TastingForm() {
             </div>
 
             <div className="space-y-4 pt-4">
-                <label className="text-sm font-black uppercase tracking-wider block mb-2">{tasting.form.formula} *</label>
+                <label className="text-sm font-black tracking-wider block mb-2">{tasting.form.formula} *</label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <label className="border-2 border-black p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors has-[:checked]:bg-brewery-green has-[:checked]:text-white group">
                         <input type="radio" name="formula" value="Basis (4 bieren)" required className="accent-black h-5 w-5" />
@@ -138,7 +138,7 @@ export default function TastingForm() {
             </div>
 
             <div className="space-y-4">
-                <label className="text-sm font-black uppercase tracking-wider block mb-2">{tasting.form.location} *</label>
+                <label className="text-sm font-black tracking-wider block mb-2">{tasting.form.location} *</label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <label className="border-2 border-black p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors has-[:checked]:bg-brewery-green has-[:checked]:text-white group">
                         <input type="radio" name="location" value="Brouwerij" required className="accent-black h-5 w-5" />
@@ -163,7 +163,7 @@ export default function TastingForm() {
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-black uppercase tracking-wider">{tasting.form.message}</label>
+                <label className="text-sm font-black tracking-wider">{tasting.form.message}</label>
                 <textarea
                     name="message"
                     rows={4}
@@ -188,7 +188,7 @@ export default function TastingForm() {
             <button
                 type="submit"
                 disabled={isPending}
-                className="w-full py-5 bg-black text-white font-black text-xl uppercase tracking-widest hover:bg-brewery-green transition-all disabled:bg-gray-400 flex items-center justify-center gap-3 relative top-0 hover:-top-1 hover:-left-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:top-0 active:left-0 active:shadow-none"
+                className="w-full py-5 bg-black text-white font-black text-xl tracking-widest hover:bg-brewery-green transition-all disabled:bg-gray-400 flex items-center justify-center gap-3 relative top-0 hover:-top-1 hover:-left-1 active:top-0 active:left-0"
             >
                 {isPending ? (
                     <>

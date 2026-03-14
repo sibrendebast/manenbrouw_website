@@ -50,7 +50,7 @@ export default function TermsPage() {
             />
             <div className="max-w-4xl mx-auto space-y-12 mt-16 px-4">
                 <div className="text-center">
-                    <p className="text-sm text-gray-500 font-bold uppercase tracking-[0.2em]">{terms.lastUpdated}</p>
+                    <p className="text-sm text-gray-500 font-bold tracking-[0.2em]">{terms.lastUpdated}</p>
                 </div>
 
                 <div className="space-y-8">

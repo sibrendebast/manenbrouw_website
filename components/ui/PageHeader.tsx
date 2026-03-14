@@ -19,9 +19,9 @@ export default function PageHeader({
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="inline-block border-2 border-black p-6 md:p-8 bg-white text-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+                    className="inline-block border-2 border-black p-6 md:p-8 bg-white text-black"
                 >
-                    <h1 className="text-3xl md:text-5xl font-black mb-3 uppercase tracking-tighter">
+                    <h1 className="text-3xl md:text-5xl font-black mb-3 tracking-tighter">
                         {title}
                     </h1>
                     {subtitle && (

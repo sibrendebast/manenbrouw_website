@@ -58,7 +58,7 @@
         }
     },
     "shop": {
-        "title": "Our Beers",
+        "title": "Shop",
         "subtitle": "Browse our current selection of small-batch craft beers.",
         "addToCart": "Add to Cart",
         "outOfStock": "Out of Stock",
@@ -149,7 +149,7 @@
         "noEvents": "No Upcoming Events",
         "noEventsMessage": "We don't have any events scheduled at the moment. Check back soon or follow us on social media for announcements!",
         "soldOut": "Sold Out",
-        "free": "FREE",
+        "free": "Free",
         "ticketsSold": "tickets sold",
         "attendees": "attendees",
         "tickets": "Tickets",

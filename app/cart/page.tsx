@@ -52,7 +52,7 @@ export default function CartPage() {
                     </p>
                     <Link
                         href="/shop"
-                        className="bg-brewery-green text-white font-bold py-3 px-8 hover:bg-opacity-90 transition-colors border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1"
+                        className="bg-brewery-green text-white font-bold py-3 px-8 hover:bg-opacity-90 transition-colors border-2 border-black hover:translate-x-1 hover:translate-y-1"
                     >
                         {t("cart.startShopping")}
                     </Link>
@@ -175,7 +175,7 @@ export default function CartPage() {
                             </div>
                             <Link
                                 href="/checkout"
-                                className="block w-full bg-brewery-dark text-white font-bold py-4 text-center hover:bg-opacity-90 transition-colors shadow-lg border-2 border-black"
+                                className="block w-full bg-brewery-dark text-white font-bold py-4 text-center hover:bg-opacity-90 transition-colors border-2 border-black"
                             >
                                 {t("cart.proceedToCheckout")}
                             </Link>

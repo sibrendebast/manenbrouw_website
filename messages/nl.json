@@ -58,7 +58,7 @@
         }
     },
     "shop": {
-        "title": "Onze Bieren",
+        "title": "Shop",
         "subtitle": "Bekijk onze huidige selectie van kleinschalige ambachtelijke bieren.",
         "addToCart": "Toevoegen",
         "outOfStock": "Niet op Voorraad",
@@ -149,7 +149,7 @@
         "noEvents": "Geen Aankomende Evenementen",
         "noEventsMessage": "We hebben momenteel geen evenementen gepland. Kom binnenkort terug of volg ons op sociale media voor aankondigingen!",
         "soldOut": "Uitverkocht",
-        "free": "GRATIS",
+        "free": "Gratis",
         "ticketsSold": "tickets verkocht",
         "attendees": "deelnemers",
         "tickets": "Tickets",
@@ -318,8 +318,8 @@
         "no": "Nee, ik ben jonger dan 18"
     },
     "tasting": {
-        "title": "Degustaties & Rondleidingen",
-        "subtitle": "Duik in de wereld van Man & Brouw. Ontdek onze brouwerij, luister naar onze verhalen en proef onze bieren.",
+        "title": "Proeverij bij Man & Brouw",
+        "subtitle": "Ontdek de verhalen en smaken achter onze ambachtelijke bieren",
         "formulaTitle": "Onze Formules",
         "formula4": {
             "title": "Basis Degustatie",

@@ -109,7 +109,7 @@ export default function TastingPage() {
 
                     <div className="space-y-8">
                         <div className="border-2 border-black p-8 h-full flex flex-col justify-center bg-black text-white">
-                            <h2 className="text-3xl font-bold mb-8 text-brewery-green uppercase tracking-widest">{t("nav.about")}</h2>
+                            <h2 className="text-3xl font-bold mb-8 text-brewery-green tracking-widest">{t("nav.about")}</h2>
                             
                             <div className="space-y-8">
                                 <div className="flex gap-6">
@@ -145,7 +145,7 @@ export default function TastingPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
                     <div className="lg:col-span-4 self-center">
                         <div className="sticky top-32">
-                            <h2 className="text-4xl font-black mb-6 uppercase leading-tight">
+                            <h2 className="text-4xl font-black mb-6 leading-tight">
                                 {tasting.form.title}
                             </h2>
                             <p className="text-gray-600 text-lg mb-8">
@@ -159,7 +159,7 @@ export default function TastingPage() {
                     </div>
                     
                     <div className="lg:col-span-8">
-                        <div className="border-4 border-black p-8 md:p-12 shadow-[12px_12px_0px_0px_rgba(31,54,34,1)]">
+                        <div className="border-4 border-black p-8 md:p-12">
                             <TastingForm />
                         </div>
                     </div>

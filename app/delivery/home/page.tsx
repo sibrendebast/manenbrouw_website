@@ -43,7 +43,7 @@ export default function HomeDeliveryPage() {
                         <h2 className="text-2xl font-semibold text-brewery-dark">{content.guaranteeTitle}</h2>
                         <p className="text-gray-700">{content.guaranteeText}</p>
                     </div>
-                    <div className="w-full md:w-60 border-2 border-black bg-brewery-green text-white px-4 py-3 text-center font-bold uppercase tracking-[0.3em]">
+                    <div className="w-full md:w-60 border-2 border-black bg-brewery-green text-white px-4 py-3 text-center font-bold tracking-[0.3em]">
                         100%
                     </div>
                 </section>

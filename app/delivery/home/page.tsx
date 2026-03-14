@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n-context";
+import PageHeader from "@/components/ui/PageHeader";
 import { Layers, PackageCheck, ShieldCheck, ShoppingCart, Truck } from "lucide-react";
 
 const highlightIcons = [Truck, Layers, ShieldCheck] as const;
@@ -15,13 +16,12 @@ export default function HomeDeliveryPage() {
     }
 
     return (
-        <div className="bg-white py-16 px-4">
-            <div className="max-w-5xl mx-auto space-y-12">
-                <header className="text-center space-y-4">
-                    <p className="text-sm uppercase tracking-[0.3em] text-brewery-green">{content.priceTag}</p>
-                    <h1 className="text-4xl font-bold text-brewery-dark">{content.title}</h1>
-                    <p className="text-lg text-gray-600 max-w-3xl mx-auto">{content.subtitle}</p>
-                </header>
+        <div className="bg-white pb-16">
+            <PageHeader 
+                title={content.title} 
+                subtitle={content.subtitle} 
+            />
+            <div className="max-w-5xl mx-auto space-y-12 mt-16 px-4">
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {content.highlights?.map((item, index) => {

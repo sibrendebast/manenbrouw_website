@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Calendar, MapPin, Users, Clock, ShoppingCart, Check } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useI18n } from "@/lib/i18n-context";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default function EventsPage() {
     const [events, setEvents] = useState<any[]>([]);
@@ -230,14 +231,13 @@ export default function EventsPage() {
     };
 
     return (
-        <div className="bg-white min-h-screen py-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-16">
-                    <h1 className="text-4xl font-bold text-brewery-dark mb-4">{t("events.title")}</h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        {t("events.subtitle")}
-                    </p>
-                </div>
+        <div className="bg-white min-h-screen pb-16">
+            <PageHeader 
+                title={t("events.title")} 
+                subtitle={t("events.subtitle")} 
+            />
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
 
                 {/* Upcoming Events */}
                 {upcomingEvents.length > 0 && (

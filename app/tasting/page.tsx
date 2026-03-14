@@ -3,6 +3,7 @@
 import { Beer, MapPin, Users, GlassWater, Utensils, Info } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
 import TastingForm from "@/components/tasting/TastingForm";
+import PageHeader from "@/components/ui/PageHeader";
 import { motion } from "framer-motion";
 
 type TastingMessages = {
@@ -46,23 +47,10 @@ export default function TastingPage() {
 
     return (
         <div className="bg-white min-h-screen">
-            {/* Title Section */}
-            <section className="bg-brewery-green text-white py-20 border-b-4 border-black">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="inline-block border-4 border-black p-8 md:p-12 bg-white text-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]"
-                    >
-                        <h1 className="text-5xl md:text-7xl font-black mb-6 uppercase tracking-tighter">
-                            {tasting.title}
-                        </h1>
-                        <p className="text-xl md:text-2xl max-w-2xl mx-auto font-bold text-gray-700">
-                            {tasting.subtitle}
-                        </p>
-                    </motion.div>
-                </div>
-            </section>
+            <PageHeader 
+                title={tasting.title} 
+                subtitle={tasting.subtitle} 
+            />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                 {/* Information Grid */}

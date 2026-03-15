@@ -66,11 +66,11 @@ export async function sendOrderConfirmationEmail(order: OrderWithItems, invoiceP
             ? `Bestelling Bevestigd #${order.orderNumber || order.id.slice(0, 8)}`
             : `Order Confirmation #${order.orderNumber || order.id.slice(0, 8)}`;
 
-        // Send email to customer with BCC to admin
+        // Send email to customer with BCC to bookkeeping (Accountable)
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
             to: [order.customerEmail],
-            // bcc: [ADMIN_EMAIL], // Removed BCC to avoid cluttering admin with customer emails, admin gets separate notif
+            bcc: ['revenue@accountable.eu'],
             subject,
             react: OrderInvoice({ order }),
             attachments,

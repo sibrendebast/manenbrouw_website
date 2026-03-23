@@ -85,7 +85,15 @@ model Event {
   earlyBirdEndDate     DateTime?
   earlyBirdPrice       Float?
   ticketSalesStartDate DateTime?
+  ticketType           TicketType    @default(INTERNAL)
+  externalTicketUrl    String?
   tickets              EventTicket[]
+}
+
+enum TicketType {
+  INTERNAL
+  EXTERNAL
+  AT_DOOR
 }
 
 model EventTicket {

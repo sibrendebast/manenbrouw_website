@@ -10,3 +10,4 @@ export const prisma =
     }).$extends(withAccelerate())
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+// Trigger refresh after schema update

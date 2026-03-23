@@ -41,6 +41,8 @@ export async function createEvent(data: {
     ticketSalesStartDate?: Date;
     earlyBirdPrice?: number;
     earlyBirdEndDate?: Date;
+    ticketType?: "INTERNAL" | "EXTERNAL" | "AT_DOOR";
+    externalTicketUrl?: string;
 }) {
     try {
         const event = await prisma.event.create({
@@ -56,6 +58,8 @@ export async function createEvent(data: {
                 ticketSalesStartDate: data.ticketSalesStartDate,
                 earlyBirdPrice: data.earlyBirdPrice,
                 earlyBirdEndDate: data.earlyBirdEndDate,
+                ticketType: (data.ticketType as any) || "INTERNAL",
+                externalTicketUrl: data.externalTicketUrl,
             }
         });
         revalidatePath("/admin/events");
@@ -79,11 +83,27 @@ export async function updateEvent(id: string, data: {
     ticketSalesStartDate?: Date;
     earlyBirdPrice?: number;
     earlyBirdEndDate?: Date;
+    ticketType?: "INTERNAL" | "EXTERNAL" | "AT_DOOR";
+    externalTicketUrl?: string;
 }) {
     try {
         const event = await prisma.event.update({
             where: { id },
-            data
+            data: {
+                title: data.title,
+                description: data.description,
+                date: data.date,
+                location: data.location,
+                isPaid: data.isPaid,
+                ticketPrice: data.ticketPrice,
+                capacity: data.capacity,
+                image: data.image,
+                ticketSalesStartDate: data.ticketSalesStartDate,
+                earlyBirdPrice: data.earlyBirdPrice,
+                earlyBirdEndDate: data.earlyBirdEndDate,
+                ticketType: (data.ticketType as any),
+                externalTicketUrl: data.externalTicketUrl,
+            }
         });
         revalidatePath("/admin/events");
         revalidatePath("/events");

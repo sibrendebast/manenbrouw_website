@@ -104,7 +104,7 @@ export default function EventsPage() {
                             <h3 className="text-2xl font-bold text-brewery-dark">
                                 {event.title}
                             </h3>
-                            {event.isPaid && !isPast && (
+                            {event.isPaid && !isPast && event.ticketType === "INTERNAL" && (
                                 <div className="flex flex-col items-end ml-4">
                                     <span className="text-2xl font-bold text-brewery-green whitespace-nowrap">
                                         €{currentPrice?.toFixed(2)}
@@ -169,52 +169,61 @@ export default function EventsPage() {
                         )}
                         {!isPast && event.isPaid && !ticketsNotYetAvailable && !isSoldOut && (
                             <div className="space-y-3">
-                                <div className="flex items-center gap-2">
-                                    <label className="text-sm font-bold text-black">Tickets:</label>
-                                    <div className="flex items-center border-2 border-black">
+                                {event.ticketType === "INTERNAL" ? (
+                                    <>
+                                        <div className="flex items-center gap-2">
+                                            <label className="text-sm font-bold text-black">Tickets:</label>
+                                            <div className="flex items-center border-2 border-black">
+                                                <button
+                                                    onClick={() => setTicketQuantity(Math.max(1, ticketQuantity - 1))}
+                                                    className="px-3 py-1 hover:bg-gray-100 transition-colors"
+                                                >
+                                                    -
+                                                </button>
+                                                <span className="px-4 font-bold">{ticketQuantity}</span>
+                                                <button
+                                                    onClick={() => setTicketQuantity(Math.min(ticketsAvailable, ticketQuantity + 1))}
+                                                    className="px-3 py-1 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    disabled={ticketQuantity >= ticketsAvailable}
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                        </div>
                                         <button
-                                            onClick={() => setTicketQuantity(Math.max(1, ticketQuantity - 1))}
-                                            className="px-3 py-1 hover:bg-gray-100 transition-colors"
+                                            onClick={handleAddTickets}
+                                            disabled={isAdded}
+                                            className={`w-full flex items-center justify-center font-bold py-3 px-6 transition-colors border-2 border-black ${isAdded
+                                                ? 'bg-green-500 text-white'
+                                                : 'bg-brewery-dark text-white hover:bg-opacity-90'
+                                                }`}
                                         >
-                                            -
+                                            {isAdded ? (
+                                                <>
+                                                    <Check className="h-5 w-5 mr-2" /> {t("common.success")}!
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <ShoppingCart className="h-5 w-5 mr-2" /> {t("shop.addToCart")}
+                                                </>
+                                            )}
                                         </button>
-                                        <span className="px-4 font-bold">{ticketQuantity}</span>
-                                        <button
-                                            onClick={() => setTicketQuantity(Math.min(ticketsAvailable, ticketQuantity + 1))}
-                                            className="px-3 py-1 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                            disabled={ticketQuantity >= ticketsAvailable}
-                                        >
-                                            +
-                                        </button>
+                                    </>
+                                ) : event.ticketType === "EXTERNAL" ? (
+                                    <a
+                                        href={event.externalTicketUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full flex items-center justify-center bg-brewery-green text-white font-bold py-3 px-6 hover:bg-opacity-90 transition-colors border-2 border-black text-center"
+                                    >
+                                        {t("events.buyTickets")}
+                                    </a>
+                                ) : (
+                                    <div className="w-full bg-gray-50 border-2 border-black p-4 text-center">
+                                        <p className="font-bold text-brewery-dark">{t("events.atDoor")}</p>
                                     </div>
-                                </div>
-                                <button
-                                    onClick={handleAddTickets}
-                                    disabled={isAdded}
-                                    className={`w-full flex items-center justify-center font-bold py-3 px-6 transition-colors border-2 border-black ${isAdded
-                                        ? 'bg-green-500 text-white'
-                                        : 'bg-brewery-dark text-white hover:bg-opacity-90'
-                                        }`}
-                                >
-                                    {isAdded ? (
-                                        <>
-                                            <Check className="h-5 w-5 mr-2" /> {t("common.success")}!
-                                        </>
-                                    ) : (
-                                        <>
-                                            <ShoppingCart className="h-5 w-5 mr-2" /> {t("shop.addToCart")}
-                                        </>
-                                    )}
-                                </button>
+                                )}
                             </div>
-                        )}
-                        {!isPast && !event.isPaid && !isSoldOut && (
-                            <button
-                                className="w-full bg-brewery-green text-white font-bold py-3 px-6 hover:bg-opacity-90 transition-colors border-2 border-black"
-                                disabled
-                            >
-                                {t("events.register")}
-                            </button>
                         )}
                         {!isPast && isSoldOut && (
                             <button

@@ -155,7 +155,9 @@
         "tickets": "Tickets",
         "ticketsAvailable": "Tickets beschikbaar",
         "almostSoldOut": "Bijna uitverkocht!",
-        "register": "Registreren (Binnenkort)"
+        "register": "Registreren (Binnenkort)",
+        "buyTickets": "Tickets Kopen",
+        "atDoor": "Tickets aan de deur"
     },
     "footer": {
         "about": "Over Ons",

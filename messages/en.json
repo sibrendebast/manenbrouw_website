@@ -155,7 +155,9 @@
         "tickets": "Tickets",
         "ticketsAvailable": "Tickets available",
         "almostSoldOut": "Almost sold out!",
-        "register": "Register (Coming Soon)"
+        "register": "Register (Coming Soon)",
+        "buyTickets": "Buy Tickets",
+        "atDoor": "Tickets at the door"
     },
     "footer": {
         "about": "About Us",

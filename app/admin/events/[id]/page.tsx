@@ -29,6 +29,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         ticketSalesStartDate: "",
         earlyBirdPrice: "",
         earlyBirdEndDate: "",
+        ticketType: "INTERNAL" as "INTERNAL" | "EXTERNAL" | "AT_DOOR",
+        externalTicketUrl: "",
     });
 
     useEffect(() => {
@@ -69,6 +71,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         ticketSalesStartDate: formatDatetime(data.ticketSalesStartDate),
                         earlyBirdPrice: data.earlyBirdPrice?.toString() || "",
                         earlyBirdEndDate: formatDatetime(data.earlyBirdEndDate),
+                        ticketType: (data.ticketType as any) || "INTERNAL",
+                        externalTicketUrl: data.externalTicketUrl || "",
                     });
                 } else {
                     alert("Event not found");
@@ -132,12 +136,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 date: new Date(event.date),
                 location: event.location,
                 isPaid: event.isPaid,
-                ticketPrice: event.isPaid ? parseFloat(event.ticketPrice) : undefined,
+                ticketPrice: event.isPaid && event.ticketType === "INTERNAL" ? parseFloat(event.ticketPrice) : undefined,
                 capacity: event.capacity ? parseInt(event.capacity) : undefined,
                 image: event.image || undefined,
                 ticketSalesStartDate: event.ticketSalesStartDate ? new Date(event.ticketSalesStartDate) : undefined,
                 earlyBirdPrice: event.earlyBirdPrice ? parseFloat(event.earlyBirdPrice) : undefined,
                 earlyBirdEndDate: event.earlyBirdEndDate ? new Date(event.earlyBirdEndDate) : undefined,
+                ticketType: event.ticketType,
+                externalTicketUrl: event.externalTicketUrl || undefined,
             });
 
             if (result.success) {
@@ -272,98 +278,128 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                                 className="h-5 w-5 text-brewery-green focus:ring-brewery-green border-gray-300 rounded cursor-pointer"
                             />
                             <label htmlFor="isPaid" className="ml-3 block font-bold text-black cursor-pointer">
-                                This is a paid event (Requires tickets)
+                                This is a paid event
                             </label>
                         </div>
 
                         {event.isPaid && (
                             <div className="space-y-6 p-4 bg-gray-50 border border-t-0 border-gray-200 -mt-2">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-bold mb-1 text-black">
-                                            Ticket Price (€)
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                required={event.isPaid}
-                                                type="number"
-                                                step="0.01"
-                                                value={event.ticketPrice}
-                                                onChange={(e) =>
-                                                    setEvent({ ...event, ticketPrice: e.target.value })
-                                                }
-                                                className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
-                                            />
-                                            <Euro className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-bold mb-1 text-black">
-                                            Capacity Limit (Optional)
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                type="number"
-                                                value={event.capacity}
-                                                onChange={(e) =>
-                                                    setEvent({ ...event, capacity: e.target.value })
-                                                }
-                                                className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
-                                            />
-                                            <Users className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-bold mb-1 text-black">
-                                            Tickets Available From (Optional)
-                                        </label>
-                                        <input
-                                            type="datetime-local"
-                                            value={event.ticketSalesStartDate}
-                                            onChange={(e) =>
-                                                setEvent({ ...event, ticketSalesStartDate: e.target.value })
-                                            }
-                                            className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
-                                        />
-                                        <p className="text-xs text-gray-500 mt-1">When tickets become available for purchase</p>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-bold mb-1 text-black">
-                                            Early-Bird Price (€, Optional)
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                value={event.earlyBirdPrice}
-                                                onChange={(e) =>
-                                                    setEvent({ ...event, earlyBirdPrice: e.target.value })
-                                                }
-                                                className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
-                                            />
-                                            <Euro className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <p className="text-xs text-gray-500 mt-1">Discounted price for early purchasers</p>
-                                    </div>
-                                </div>
-
                                 <div>
-                                    <label className="block text-sm font-bold mb-1 text-black">
-                                        Early-Bird Deadline (Optional)
-                                    </label>
-                                    <input
-                                        type="datetime-local"
-                                        value={event.earlyBirdEndDate}
-                                        onChange={(e) =>
-                                            setEvent({ ...event, earlyBirdEndDate: e.target.value })
-                                        }
+                                    <label className="block text-sm font-bold mb-1 text-black">Ticket Type</label>
+                                    <select
+                                        value={event.ticketType}
+                                        onChange={(e) => setEvent({ ...event, ticketType: e.target.value as any })}
                                         className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">Deadline for early-bird discount</p>
+                                    >
+                                        <option value="INTERNAL">Sold on This Website</option>
+                                        <option value="EXTERNAL">Sold on External Website</option>
+                                        <option value="AT_DOOR">Tickets at the Door</option>
+                                    </select>
                                 </div>
+
+                                {event.ticketType === "EXTERNAL" && (
+                                    <div>
+                                        <label className="block text-sm font-bold mb-1 text-black">External Ticket URL</label>
+                                        <div className="relative">
+                                            <input
+                                                required
+                                                type="url"
+                                                placeholder="https://..."
+                                                value={event.externalTicketUrl}
+                                                onChange={(e) => setEvent({ ...event, externalTicketUrl: e.target.value })}
+                                                className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {event.ticketType === "INTERNAL" && (
+                                    <>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="block text-sm font-bold mb-1 text-black">
+                                                    Ticket Price (€)
+                                                </label>
+                                                <div className="relative">
+                                                    <input
+                                                        required={event.isPaid && event.ticketType === "INTERNAL"}
+                                                        type="number"
+                                                        step="0.01"
+                                                        value={event.ticketPrice}
+                                                        onChange={(e) =>
+                                                            setEvent({ ...event, ticketPrice: e.target.value })
+                                                        }
+                                                        className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                                    />
+                                                    <Euro className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-bold mb-1 text-black">
+                                                    Capacity Limit (Optional)
+                                                </label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="number"
+                                                        value={event.capacity}
+                                                        onChange={(e) =>
+                                                            setEvent({ ...event, capacity: e.target.value })
+                                                        }
+                                                        className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                                    />
+                                                    <Users className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="block text-sm font-bold mb-1 text-black">
+                                                    Tickets Available From (Optional)
+                                                </label>
+                                                <input
+                                                    type="datetime-local"
+                                                    value={event.ticketSalesStartDate}
+                                                    onChange={(e) =>
+                                                        setEvent({ ...event, ticketSalesStartDate: e.target.value })
+                                                    }
+                                                    className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-bold mb-1 text-black">
+                                                    Early-Bird Price (€, Optional)
+                                                </label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        value={event.earlyBirdPrice}
+                                                        onChange={(e) =>
+                                                            setEvent({ ...event, earlyBirdPrice: e.target.value })
+                                                        }
+                                                        className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                                    />
+                                                    <Euro className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-bold mb-1 text-black">
+                                                Early-Bird Deadline (Optional)
+                                            </label>
+                                            <input
+                                                type="datetime-local"
+                                                value={event.earlyBirdEndDate}
+                                                onChange={(e) =>
+                                                    setEvent({ ...event, earlyBirdEndDate: e.target.value })
+                                                }
+                                                className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                            />
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         )}
 

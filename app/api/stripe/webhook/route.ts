@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { sendOrderConfirmationEmail, sendAdminOrderNotification } from "@/lib/email";
 import { generateInvoice } from "@/lib/invoice";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { sendTelegramOrderNotification } from "@/lib/telegram";
 
 export async function POST(req: NextRequest) {
     const body = await req.text();
@@ -155,6 +156,16 @@ export async function POST(req: NextRequest) {
                     const adminEmailResult = await sendAdminOrderNotification(updatedOrder);
                     if (!adminEmailResult?.success) {
                         console.error("Failed to send admin notification email, but order was processed successfully");
+                    }
+
+                    // Send Telegram notification
+                    try {
+                        const telegramResult = await sendTelegramOrderNotification(updatedOrder);
+                        if (!telegramResult.success) {
+                            console.error("Failed to send Telegram notification:", telegramResult.error);
+                        }
+                    } catch (telegramError) {
+                        console.error("Telegram notification error:", telegramError);
                     }
                 } catch (error) {
                     console.error(`Failed to update order ${orderId}:`, error);

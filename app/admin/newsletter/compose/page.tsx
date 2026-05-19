@@ -133,7 +133,7 @@ export default function ComposeNewsletterPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 text-black">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-4rem)] flex flex-col">
+            <div className="max-w-[98%] mx-auto px-4 h-[calc(100vh-4rem)] flex flex-col">
                 
                 {/* Header Actions */}
                 <div className="flex justify-between items-center mb-6">
@@ -173,7 +173,7 @@ export default function ComposeNewsletterPage() {
                 <div className="flex-1 flex gap-6 min-h-0">
                     
                     {/* Left Pane: Editor */}
-                    <div className="w-1/2 bg-white border-2 border-black p-6 overflow-y-auto">
+                    <div className="w-[35%] bg-white border-2 border-black p-6 overflow-y-auto">
                         
                         <div className="space-y-8">
                             {/* General Settings */}
@@ -383,7 +383,7 @@ export default function ComposeNewsletterPage() {
                     </div>
 
                     {/* Right Pane: Preview */}
-                    <div className="w-1/2 border-2 border-black bg-gray-200 overflow-hidden flex flex-col">
+                    <div className="w-[65%] border-2 border-black bg-gray-200 overflow-hidden flex flex-col">
                         <div className="bg-gray-800 text-white text-xs py-1 px-3 flex justify-between">
                             <span>Preview</span>
                             <span>{payload.title}</span>

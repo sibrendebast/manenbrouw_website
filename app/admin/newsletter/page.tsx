@@ -32,6 +32,13 @@ export default async function AdminNewsletterPage() {
                             Newsletter Subscribers
                         </h1>
                         <div className="flex items-center gap-4">
+                            <Link 
+                                href="/admin/newsletter/compose"
+                                className="bg-brewery-dark text-white px-4 py-2 font-bold hover:bg-brewery-green transition-colors flex items-center"
+                            >
+                                <Mail className="h-4 w-4 mr-2" />
+                                Nieuwsbrief Opstellen
+                            </Link>
                             <CopyEmailsButton emails={emails} />
                             <div className="bg-white px-4 py-2 border-2 border-black font-bold">
                                 Total: {subscribers.length}

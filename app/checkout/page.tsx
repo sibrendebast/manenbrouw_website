@@ -42,6 +42,10 @@ export default function CheckoutPage() {
     const [formValues, setFormValues] = useState<CheckoutFormValues>(DEFAULT_FORM_VALUES);
     const { t, locale } = useI18n();
 
+    // Stash the pending order ID in sessionStorage so re-renders don't create a
+    // new order row. Cleared when the user is redirected to Stripe.
+    const PENDING_ORDER_KEY = "pendingCheckoutOrderId";
+
     // Helper function to safely get images array
     const getProductImages = (item: any): string[] => {
         if (!item.images) return [];
@@ -146,6 +150,7 @@ export default function CheckoutPage() {
     }
 
     const handleSubmit = async (formData: FormData) => {
+        if (isSubmitting) return; // prevent double-submits
         setIsSubmitting(true);
         setError("");
 
@@ -163,6 +168,8 @@ export default function CheckoutPage() {
                 return;
             }
 
+            const orderId = result.orderId!;
+
             // Create Stripe checkout session
             const response = await fetch("/api/stripe/create-checkout-session", {
                 method: "POST",
@@ -170,7 +177,7 @@ export default function CheckoutPage() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    orderId: result.orderId,
+                    orderId,
                     cartItems: items,
                     shippingMethod,
                     totalAmount: total,
@@ -188,7 +195,8 @@ export default function CheckoutPage() {
                 return;
             }
 
-            // Redirect to Stripe Checkout
+            // Redirect to Stripe Checkout — keep isSubmitting=true until we
+            // actually leave the page to prevent any further submissions.
             if (data.url) {
                 window.location.href = data.url;
             }

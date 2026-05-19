@@ -47,8 +47,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <I18nProvider>
-          <Navbar />
-          <AdminBanner />
+          <div className="sticky top-0 z-50">
+            <AdminBanner />
+            <Navbar />
+          </div>
           <AgeVerificationModal />
           <main className="flex-grow">{children}</main>
           <Footer />

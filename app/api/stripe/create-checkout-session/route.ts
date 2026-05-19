@@ -104,6 +104,32 @@ export async function POST(req: NextRequest) {
             });
         }
 
+        // Create or reuse a Stripe Customer so name + email are prefilled
+        // on the Stripe hosted checkout page.
+        let stripeCustomerId: string | undefined;
+        try {
+            // Look up an existing customer by email to avoid duplicates
+            const existingCustomers = await stripe.customers.list({
+                email: customerEmail,
+                limit: 1,
+            });
+
+            if (existingCustomers.data.length > 0) {
+                stripeCustomerId = existingCustomers.data[0].id;
+                // Update name in case it changed
+                await stripe.customers.update(stripeCustomerId, { name: customerName });
+            } else {
+                const newCustomer = await stripe.customers.create({
+                    email: customerEmail,
+                    name: customerName,
+                });
+                stripeCustomerId = newCustomer.id;
+            }
+        } catch (customerError) {
+            // Non-fatal: fall back to customer_email only
+            console.error("Failed to create/retrieve Stripe customer:", customerError);
+        }
+
         // Create Stripe Checkout Session
         const session = await stripe.checkout.sessions.create({
             payment_method_types: paymentMethodTypes,
@@ -111,7 +137,9 @@ export async function POST(req: NextRequest) {
             mode: "payment",
             success_url: `${req.nextUrl.origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${req.nextUrl.origin}/checkout/cancel?order_id=${orderId}`,
-            customer_email: customerEmail,
+            ...(stripeCustomerId
+                ? { customer: stripeCustomerId }
+                : { customer_email: customerEmail }),
             metadata: {
                 orderId,
                 paymentMethod,

@@ -3,7 +3,7 @@
 import { useAdminStore } from "@/store/adminStore";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Calendar, ShoppingCart, Mail, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, Calendar, ShoppingCart, Mail, LogOut, Users, FlaskConical } from "lucide-react";
 
 export default function AdminBanner() {
     const { isAuthenticated, logout } = useAdminStore();
@@ -20,23 +20,33 @@ export default function AdminBanner() {
         { href: "/admin/events", label: "Events", icon: Calendar },
         { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
         { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
+        { href: "/admin/brouwadministratie", label: "Brouwadmin", icon: FlaskConical },
+        { href: "/admin/users", label: "Users", icon: Users },
     ];
 
     return (
         <div className="bg-brewery-dark text-white py-2 px-4 shadow-lg border-b-2 border-brewery-green">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 flex-wrap">
                     <span className="text-sm font-bold mr-3 hidden sm:inline">Admin:</span>
                     {adminLinks.map((link) => {
                         const Icon = link.icon;
+                        const isActive = link.href === "/admin/dashboard" 
+                            ? pathname === "/admin/dashboard" 
+                            : pathname.startsWith(link.href);
+
                         return (
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className="flex items-center gap-1 px-3 py-1 text-sm font-medium hover:bg-brewery-green transition-colors rounded"
+                                className={`flex items-center gap-1 px-3 py-1 text-sm font-medium transition-colors rounded ${
+                                    isActive 
+                                        ? "bg-brewery-green text-white font-bold" 
+                                        : "hover:bg-brewery-green/50 hover:text-white"
+                                }`}
                             >
                                 <Icon className="h-4 w-4" />
-                                <span className="hidden sm:inline">{link.label}</span>
+                                <span className="hidden md:inline">{link.label}</span>
                             </Link>
                         );
                     })}

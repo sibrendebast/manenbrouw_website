@@ -281,6 +281,7 @@ type StockReceiptLineInput = {
   unitCost: number;
   lotNumber: string;
   expiryDate: Date;
+  manufacturer?: string;
 };
 
 export async function createStockReceipt(
@@ -348,17 +349,19 @@ export async function createStockReceipt(
                     expiryDate: new Date(line.expiryDate),
                     quantityTotal: new Decimal(line.quantityReceived),
                     unitCost: new Decimal(line.unitCost),
+                    manufacturer: line.manufacturer,
                     status: 'active',
                   },
                 });
               } else {
-                // Update existing lot: add to quantity
+                // Update existing lot: add to quantity and update manufacturer
                 lot = await prisma.inventoryLot.update({
                   where: { id: lot.id },
                   data: {
                     quantityTotal: lot.quantityTotal.plus(
                       new Decimal(line.quantityReceived)
                     ),
+                    manufacturer: line.manufacturer || lot.manufacturer,
                   },
                 });
               }
@@ -430,6 +433,182 @@ export async function getStockReceipts(limit = 50) {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Onbekende fout',
+    };
+  }
+}
+
+export async function updateStockReceipt(
+  id: string,
+  data: {
+    supplierId: string;
+    invoiceNumber?: string;
+    receivedDate: Date;
+    manufacturer?: string;
+    deviationFlag?: boolean;
+    deviationAction?: StockDeviationAction;
+    deviationNotes?: string;
+    notes?: string;
+    lines: StockReceiptLineInput[];
+  }
+) {
+  try {
+    // 1. Fetch existing receipt and lines with lots
+    const existingReceipt = await prisma.stockReceipt.findUnique({
+      where: { id },
+      include: {
+        lines: { include: { lot: true, material: true } },
+      },
+    });
+
+    if (!existingReceipt) {
+      throw new Error('Inslag niet gevonden');
+    }
+
+    // 2. Validate if reverting would cause a lot's total to drop below its allocated quantity
+    for (const line of existingReceipt.lines) {
+      if (line.lot) {
+        const newTotal = Number(line.lot.quantityTotal) - Number(line.quantityReceived);
+        if (newTotal < Number(line.lot.quantityAllocated)) {
+          throw new Error(`Kan inslag niet aanpassen: Lot ${line.lot.lotNumber} heeft al uitslagen/allocaties (${line.lot.quantityAllocated} ${line.material.unit}) die de nieuwe beschikbare hoeveelheid overschrijden.`);
+        }
+      }
+    }
+
+    // 3. Execute everything in a transaction to guarantee consistency
+    const receipt = await prisma.$transaction(async (tx: any) => {
+      // Revert previous lot quantities
+      for (const line of existingReceipt.lines) {
+        if (line.lotId) {
+          await tx.inventoryLot.update({
+            where: { id: line.lotId },
+            data: {
+              quantityTotal: {
+                decrement: line.quantityReceived,
+              },
+            },
+          });
+        }
+      }
+
+      // Delete existing movements
+      await tx.stockMovement.deleteMany({
+        where: {
+          referenceType: 'StockReceipt',
+          referenceId: id,
+        },
+      });
+
+      // Delete existing lines
+      await tx.stockReceiptLine.deleteMany({
+        where: { receiptId: id },
+      });
+
+      // Create or update lots and create new lines
+      const updatedLines = await Promise.all(
+        data.lines.map(async (line) => {
+          let lot = await tx.inventoryLot.findFirst({
+            where: {
+              materialId: line.materialId,
+              lotNumber: line.lotNumber,
+              supplierId: data.supplierId,
+            },
+          });
+
+          if (!lot) {
+            lot = await tx.inventoryLot.create({
+              data: {
+                materialId: line.materialId,
+                lotNumber: line.lotNumber,
+                supplierId: data.supplierId,
+                expiryDate: new Date(line.expiryDate),
+                quantityTotal: new Decimal(line.quantityReceived),
+                unitCost: new Decimal(line.unitCost),
+                manufacturer: line.manufacturer,
+                status: 'active',
+              },
+            });
+          } else {
+            lot = await tx.inventoryLot.update({
+              where: { id: lot.id },
+              data: {
+                quantityTotal: {
+                  increment: new Decimal(line.quantityReceived),
+                },
+                unitCost: new Decimal(line.unitCost),
+                expiryDate: new Date(line.expiryDate),
+                manufacturer: line.manufacturer || lot.manufacturer,
+              },
+            });
+          }
+
+          return {
+            materialId: line.materialId,
+            quantityReceived: new Decimal(line.quantityReceived),
+            unitCost: new Decimal(line.unitCost),
+            lotId: lot.id,
+          };
+        })
+      );
+
+      // Update receipt metadata and lines
+      const updatedReceipt = await tx.stockReceipt.update({
+        where: { id },
+        data: {
+          supplierId: data.supplierId,
+          invoiceNumber: data.invoiceNumber,
+          receivedDate: data.receivedDate,
+          manufacturer: data.manufacturer,
+          deviationFlag: data.deviationFlag || false,
+          deviationAction: data.deviationAction || 'GEEN_AFWIJKING',
+          deviationNotes: data.deviationNotes,
+          notes: data.notes,
+          lines: {
+            create: updatedLines,
+          },
+        },
+        include: {
+          lines: { include: { material: true, lot: true } },
+          supplier: true,
+        },
+      });
+
+      // Create new movements
+      for (const line of updatedReceipt.lines) {
+        await tx.stockMovement.create({
+          data: {
+            materialId: line.materialId,
+            lotId: line.lotId!,
+            movementType: 'receipt',
+            quantity: new Decimal(Number(line.quantityReceived)),
+            referenceType: 'StockReceipt',
+            referenceId: updatedReceipt.id,
+          },
+        });
+      }
+
+      return updatedReceipt;
+    });
+
+    // 4. Log the audit event
+    await createAuditLog({
+      documentType: 'StockReceipt',
+      documentId: receipt.id,
+      action: 'UPDATE',
+      stockReceiptId: receipt.id,
+      context: `Bewerken van inslag van ${receipt.supplier.name}`,
+      oldValue: convertDecimalToNumber(existingReceipt) as Record<string, unknown>,
+      newValue: {
+        invoiceNumber: receipt.invoiceNumber,
+        lineCount: receipt.lines.length,
+      },
+    });
+
+    return { success: true, data: convertDecimalToNumber(receipt) };
+  } catch (error) {
+    console.error('updateStockReceipt error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Onbekende fout bij bijwerken van inslag',
     };
   }
 }

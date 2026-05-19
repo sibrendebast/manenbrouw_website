@@ -53,6 +53,28 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
     }
 
     try {
+        // ── Deduplication ─────────────────────────────────────────────────────
+        // If the customer already has a pending_payment order created within the
+        // last 30 minutes (same email + phone), reuse it instead of creating a
+        // new one. This prevents duplicate rows caused by double-clicks, going
+        // back from Stripe, or retrying after a cancelled session.
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+        const existingOrder = await prisma.order.findFirst({
+            where: {
+                customerEmail,
+                customerPhone,
+                status: "pending_payment",
+                createdAt: { gte: thirtyMinutesAgo },
+            },
+            orderBy: { createdAt: "desc" },
+        });
+
+        if (existingOrder) {
+            console.log(`Reusing existing pending_payment order ${existingOrder.id} for ${customerEmail}`);
+            return { success: true, orderId: existingOrder.id };
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         // Recalculate total to prevent tampering
         let totalAmount = 0;
         const orderItemsData = [];

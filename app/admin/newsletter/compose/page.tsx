@@ -111,10 +111,13 @@ export default function ComposeNewsletterPage() {
                 }
             }
 
+            const abvString = product.abv ? (product.abv.includes('%') ? product.abv : `${product.abv}%`) : '';
+            const descriptionParts = [product.style, abvString].filter(Boolean);
+
             const newRow: NewsletterStockRow = {
                 id: product.id,
                 name: product.name,
-                description: `${product.style || ''}, ${product.abv || ''}%`,
+                description: descriptionParts.join(', '),
                 imageUrl: firstImage,
                 bottlePrice: product.inStock ? `€${product.price.toFixed(2)}` : 'SOLD OUT'
             };

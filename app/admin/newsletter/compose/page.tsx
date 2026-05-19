@@ -7,7 +7,9 @@ import {
     NewsletterPayload, 
     NewsletterStory, 
     NewsletterStockRow, 
+    NewsletterAgendaRow,
     getProductsForNewsletter, 
+    getEventsForNewsletter,
     generateNewsletterHtml, 
     sendNewsletterPreview, 
     sendNewsletterToAll 
@@ -22,12 +24,15 @@ export default function ComposeNewsletterPage() {
         stories: [],
         stockHeading: "🍺 Onze Huidige Stock 🍺",
         stockRows: [],
+        agendaHeading: "📅 Agenda / Evenementen 📅",
+        agendaRows: [],
         outroHeading: "🍺 Cheers 🍺",
         outroBody: "Bestellen kan eenvoudig rechtstreeks via onze webshop op https://manenbrouw.be/shop. Kies je favoriete bieren en reken veilig en snel online af!\n\nCheers,\nSibren & Tom\nHet Man & Brouw team\n\nAarschotsesteenweg 179\n3012 Wilsele"
     });
 
     const [htmlPreview, setHtmlPreview] = useState("");
     const [products, setProducts] = useState<any[]>([]);
+    const [events, setEvents] = useState<any[]>([]);
     const [isSendingPreview, setIsSendingPreview] = useState(false);
     const [isSendingAll, setIsSendingAll] = useState(false);
     const [message, setMessage] = useState<{type: 'success'|'error', text: string} | null>(null);
@@ -35,11 +40,15 @@ export default function ComposeNewsletterPage() {
 
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
-    // Fetch products on mount
+    // Fetch products and events on mount
     useEffect(() => {
         getProductsForNewsletter().then(data => {
             setProducts(data);
         }).catch(err => console.error("Failed to load products:", err));
+
+        getEventsForNewsletter().then(data => {
+            setEvents(data);
+        }).catch(err => console.error("Failed to load events:", err));
     }, []);
 
     // Update preview HTML when payload changes
@@ -158,6 +167,40 @@ export default function ComposeNewsletterPage() {
 
     const updateStockRow = (id: string, field: keyof NewsletterStockRow, value: string) => {
         handlePayloadChange("stockRows", payload.stockRows.map(r => r.id === id ? { ...r, [field]: value } : r));
+    };
+
+    const toggleEventAgenda = (event: any) => {
+        const agendaRows = payload.agendaRows || [];
+        const exists = agendaRows.find(r => r.id === event.id);
+        if (exists) {
+            handlePayloadChange("agendaRows", agendaRows.filter(r => r.id !== event.id));
+        } else {
+            const dateStr = event.date 
+                ? new Date(event.date).toLocaleDateString('nl-BE', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) 
+                : '';
+            
+            const newRow: NewsletterAgendaRow = {
+                id: event.id,
+                title: event.title,
+                date: dateStr,
+                location: event.location || 'Brouwerij Man & Brouw',
+                description: event.description || '',
+                linkUrl: event.ticketType === 'EXTERNAL' ? event.externalTicketUrl : `https://www.manenbrouw.be/events`
+            };
+            handlePayloadChange("agendaRows", [...agendaRows, newRow]);
+        }
+    };
+
+    const updateAgendaRow = (id: string, field: keyof NewsletterAgendaRow, value: string) => {
+        const agendaRows = payload.agendaRows || [];
+        handlePayloadChange("agendaRows", agendaRows.map(r => r.id === id ? { ...r, [field]: value } : r));
     };
 
     const onSendPreview = async () => {
@@ -438,6 +481,118 @@ export default function ComposeNewsletterPage() {
                                                             className="border p-1 text-sm w-24 text-right"
                                                             placeholder="Prijs (Fles)"
                                                         />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+
+                            {/* Agenda Section */}
+                            <section>
+                                <h2 className="text-xl font-bold border-b pb-2 mb-4">Agenda / Evenementen</h2>
+                                
+                                <div className="mb-4">
+                                    <label className="block text-sm font-semibold mb-1">Agenda Heading</label>
+                                    <input 
+                                        type="text" 
+                                        value={payload.agendaHeading || ''} 
+                                        onChange={e => handlePayloadChange('agendaHeading', e.target.value)}
+                                        className="w-full border p-2"
+                                    />
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <p className="text-sm font-semibold mb-2">Selecteer Evenementen:</p>
+                                        {events.length === 0 ? (
+                                            <p className="text-sm text-gray-500 italic">Geen aankomende evenementen gevonden in de database.</p>
+                                        ) : (
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {events.map(event => {
+                                                    const isSelected = (payload.agendaRows || []).some(r => r.id === event.id);
+                                                    return (
+                                                        <label key={event.id} className="flex items-center gap-2 cursor-pointer p-2 border hover:bg-gray-50">
+                                                            <input 
+                                                                type="checkbox" 
+                                                                checked={isSelected}
+                                                                onChange={() => toggleEventAgenda(event)}
+                                                                className="w-4 h-4 text-brewery-dark border-gray-300 rounded focus:ring-brewery-dark"
+                                                            />
+                                                            <span className="text-sm truncate">{event.title}</span>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {(payload.agendaRows || []).length > 0 && (
+                                        <div className="mt-6">
+                                            <p className="text-sm font-semibold mb-2">Geselecteerde Evenementen (Aanpassen):</p>
+                                            <div className="space-y-4">
+                                                {(payload.agendaRows || []).map(row => (
+                                                    <div key={row.id} className="p-3 border bg-gray-50 space-y-2">
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="font-bold text-sm text-brewery-dark truncate">{row.title}</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handlePayloadChange("agendaRows", (payload.agendaRows || []).filter(r => r.id !== row.id))}
+                                                                className="text-red-500 hover:text-red-700 text-xs font-semibold"
+                                                            >
+                                                                Verwijder
+                                                            </button>
+                                                        </div>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                            <div>
+                                                                <label className="block text-xs font-semibold text-gray-600">Titel</label>
+                                                                <input 
+                                                                    type="text"
+                                                                    value={row.title}
+                                                                    onChange={e => updateAgendaRow(row.id, 'title', e.target.value)}
+                                                                    className="border p-1 text-sm w-full"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs font-semibold text-gray-600">Datum & Tijd</label>
+                                                                <input 
+                                                                    type="text"
+                                                                    value={row.date}
+                                                                    onChange={e => updateAgendaRow(row.id, 'date', e.target.value)}
+                                                                    className="border p-1 text-sm w-full"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                            <div>
+                                                                <label className="block text-xs font-semibold text-gray-600">Locatie</label>
+                                                                <input 
+                                                                    type="text"
+                                                                    value={row.location}
+                                                                    onChange={e => updateAgendaRow(row.id, 'location', e.target.value)}
+                                                                    className="border p-1 text-sm w-full"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs font-semibold text-gray-600">Link URL (optioneel)</label>
+                                                                <input 
+                                                                    type="text"
+                                                                    value={row.linkUrl || ''}
+                                                                    onChange={e => updateAgendaRow(row.id, 'linkUrl', e.target.value)}
+                                                                    className="border p-1 text-sm w-full"
+                                                                    placeholder="Bijv. ticketshop link"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-xs font-semibold text-gray-600">Beschrijving</label>
+                                                            <textarea 
+                                                                value={row.description}
+                                                                onChange={e => updateAgendaRow(row.id, 'description', e.target.value)}
+                                                                className="border p-1 text-sm w-full h-16"
+                                                            />
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>

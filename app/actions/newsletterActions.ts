@@ -21,6 +21,15 @@ export type NewsletterStockRow = {
     bottlePrice: string;
 };
 
+export type NewsletterAgendaRow = {
+    id: string;
+    title: string;
+    date: string;
+    location: string;
+    description: string;
+    linkUrl?: string;
+};
+
 export type NewsletterPayload = {
     title: string;
     introHeading: string;
@@ -29,6 +38,8 @@ export type NewsletterPayload = {
     stories: NewsletterStory[];
     stockHeading: string;
     stockRows: NewsletterStockRow[];
+    agendaHeading?: string;
+    agendaRows?: NewsletterAgendaRow[];
     outroHeading: string;
     outroBody: string;
 };
@@ -50,6 +61,30 @@ export async function getProductsForNewsletter() {
             images: true,
             price: true,
             inStock: true,
+        }
+    });
+}
+
+export async function getEventsForNewsletter() {
+    return await prisma.event.findMany({
+        where: {
+            isHidden: false,
+            date: {
+                gte: new Date(), // Only upcoming events
+            }
+        },
+        orderBy: {
+            date: 'asc',
+        },
+        select: {
+            id: true,
+            title: true,
+            description: true,
+            date: true,
+            location: true,
+            isPaid: true,
+            ticketPrice: true,
+            image: true,
         }
     });
 }
@@ -276,6 +311,24 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
                     ${stockRowsHtml}
                 </tbody>
             </table>
+        </section>
+        ` : ''}
+
+        ${payload.agendaRows && payload.agendaRows.length > 0 ? `
+        <section>
+            ${payload.agendaHeading ? `<h2>${payload.agendaHeading}</h2>` : ''}
+            ${payload.agendaRows.map(row => `
+                <div class="agenda-item" style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                    <h3 style="margin: 0 0 5px 0; color: #56c99b;">${row.title}</h3>
+                    <p style="margin: 0 0 5px 0; font-size: 0.9em; font-weight: bold; color: #333;">
+                        📅 ${row.date} | 📍 ${row.location}
+                    </p>
+                    <p style="margin: 0 0 10px 0; font-size: 0.95em; color: #555;">${row.description}</p>
+                    ${row.linkUrl ? `
+                        <a href="${row.linkUrl}" style="display: inline-block; background-color: #56c99b; color: white; padding: 6px 12px; text-decoration: none; font-weight: bold; font-size: 0.85em; border: 2px solid black;">Tickets / Meer info</a>
+                    ` : ''}
+                </div>
+            `).join('')}
         </section>
         ` : ''}
 

@@ -142,7 +142,7 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
             margin: 0 5px;
         }
         .container {
-            max-width: 600px;
+            max-width: 660px;
             margin: 20px auto;
             background-color: #56c99b;
             padding: 30px;

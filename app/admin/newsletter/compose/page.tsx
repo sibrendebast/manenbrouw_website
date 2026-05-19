@@ -27,7 +27,7 @@ export default function ComposeNewsletterPage() {
         agendaHeading: "📅 Agenda / Evenementen 📅",
         agendaRows: [],
         outroHeading: "🍺 Cheers 🍺",
-        outroBody: "Bestellen kan eenvoudig rechtstreeks via onze webshop op https://manenbrouw.be/shop. Kies je favoriete bieren en reken veilig en snel online af!\n\nCheers,\nSibren & Tom\nHet Man & Brouw team\n\nAarschotsesteenweg 179\n3012 Wilsele"
+        outroBody: "Bestellen kan eenvoudig rechtstreeks via onze webshop op https://manenbrouw.be/shop. Kies je favoriete bieren en reken veilig en snel online af!\n\nCheers,\nSibren & Tom\nHet Man & Brouw team"
     });
 
     const [htmlPreview, setHtmlPreview] = useState("");
@@ -603,23 +603,45 @@ export default function ComposeNewsletterPage() {
 
                             {/* Outro Section */}
                             <section>
-                                <h2 className="text-xl font-bold border-b pb-2 mb-4">Afsluiting</h2>
+                                <div className="flex justify-between items-center border-b pb-2 mb-4">
+                                    <h2 className="text-xl font-bold">Afsluiting (Optioneel)</h2>
+                                    {(payload.outroHeading || payload.outroBody) && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                handlePayloadChange('outroHeading', '');
+                                                handlePayloadChange('outroBody', '');
+                                            }}
+                                            className="text-red-500 hover:text-red-700 text-xs font-semibold"
+                                        >
+                                            Sectie leegmaken
+                                        </button>
+                                    )}
+                                </div>
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-semibold mb-1">Outro Heading</label>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <label className="block text-sm font-semibold">Outro Heading</label>
+                                            <span className="text-xs text-gray-400">Optioneel</span>
+                                        </div>
                                         <input 
                                             type="text" 
-                                            value={payload.outroHeading} 
+                                            value={payload.outroHeading || ''} 
                                             onChange={e => handlePayloadChange('outroHeading', e.target.value)}
                                             className="w-full border p-2"
+                                            placeholder="Bijv. Proost!"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-semibold mb-1">Outro Tekst</label>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <label className="block text-sm font-semibold">Outro Tekst</label>
+                                            <span className="text-xs text-gray-400">Optioneel</span>
+                                        </div>
                                         <textarea 
-                                            value={payload.outroBody} 
+                                            value={payload.outroBody || ''} 
                                             onChange={e => handlePayloadChange('outroBody', e.target.value)}
-                                            className="w-full border p-2 h-48"
+                                            className="w-full border p-2 h-32"
+                                            placeholder="Voer hier je slotwoord in. Laat leeg om over te slaan."
                                         />
                                     </div>
                                 </div>

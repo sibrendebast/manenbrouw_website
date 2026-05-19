@@ -344,6 +344,7 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
     <div class="bottom-banner">
         <p>Contacteer ons: <a href="mailto:info@manenbrouw.be">info@manenbrouw.be</a> | Bel ons: <a href="tel:0032472766499">+32 4 72 766 499</a></p>
         <p>Bezoek onze website: <a href="https://manenbrouw.be">manenbrouw.be</a></p>
+        <p style="font-size: 0.85em; color: #666; margin-top: 8px; margin-bottom: 8px;">Aarschotsesteenweg 179, 3012 Wilsele</p>
         <div class="social-buttons">
             <a href="https://www.facebook.com/profile.php?id=61559618724445">Facebook</a>
             <a href="https://www.instagram.com/man_en_brouw/">Instagram</a>

@@ -23,7 +23,7 @@ export default function ComposeNewsletterPage() {
         stockHeading: "🍺 Onze Huidige Stock 🍺",
         stockRows: [],
         outroHeading: "🍺 Cheers 🍺",
-        outroBody: "Om te bestellen, beantwoord gewoon deze email met welke bieren je zou willen en hoeveel. Daarna bevestigen we en sturen we de offerte op.\n\nCheers,\nSibren & Tom\nHet Man & Brouw team\n\nAarschotsesteenweg 179\n3012 Wilsele\n\nWil je deze nieuwsbrief niet meer ontvangen? Antwoord dan \"unsubscribe\" op deze mail."
+        outroBody: "Bestellen kan eenvoudig rechtstreeks via onze webshop op https://manenbrouw.be/shop. Kies je favoriete bieren en reken veilig en snel online af!\n\nCheers,\nSibren & Tom\nHet Man & Brouw team\n\nAarschotsesteenweg 179\n3012 Wilsele"
     });
 
     const [htmlPreview, setHtmlPreview] = useState("");

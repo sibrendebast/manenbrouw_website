@@ -295,6 +295,10 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
             <a href="https://www.facebook.com/profile.php?id=61559618724445">Facebook</a>
             <a href="https://www.instagram.com/man_en_brouw/">Instagram</a>
         </div>
+        <p style="margin-top: 15px; font-size: 0.8em; color: #666;">
+            Wil je deze nieuwsbrief niet meer ontvangen? 
+            <a href="*|UNSUBSCRIBE_LINK|*" style="color: #da3737; text-decoration: underline; margin-left: 5px;">Uitschrijven</a>
+        </p>
         <p>&copy; ${new Date().getFullYear()} Man & Brouw. All rights reserved.</p>
     </div>
 </body>
@@ -309,6 +313,8 @@ export async function sendNewsletterPreview(payload: NewsletterPayload) {
     let html = buildNewsletterHtml(payload);
     // Automatically translate local URLs to production for email readability
     html = html.replace(/http:\/\/localhost:\d+/g, 'https://www.manenbrouw.be');
+    // Replace placeholder with admin test unsubscribe URL
+    html = html.replace(/\*\|UNSUBSCRIBE_LINK\|\*/g, `https://www.manenbrouw.be/newsletter/unsubscribe?email=${encodeURIComponent(ADMIN_EMAIL)}`);
     
     if (!process.env.RESEND_API_KEY) {
         return { success: false, error: "RESEND_API_KEY is missing" };
@@ -362,7 +368,7 @@ export async function sendNewsletterToAll(payload: NewsletterPayload) {
                 from: FROM_EMAIL,
                 to: s.email,
                 subject: payload.title,
-                html: html,
+                html: html.replace(/\*\|UNSUBSCRIBE_LINK\|\*/g, `https://www.manenbrouw.be/newsletter/unsubscribe?email=${encodeURIComponent(s.email)}`),
             }));
 
             const { data, error } = await resend.batch.send(emails);
@@ -421,5 +427,18 @@ export async function subscribeToNewsletter(formData: FormData) {
         }
         console.error('Failed to subscribe:', error);
         return { success: false, error: 'Failed to subscribe' };
+    }
+}
+
+export async function unsubscribeByEmail(email: string) {
+    try {
+        await prisma.newsletterSubscriber.delete({
+            where: { email }
+        });
+        revalidatePath('/admin/newsletter');
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to unsubscribe by email:', error);
+        return { success: false, error: 'E-mailadres niet gevonden of al uitgeschreven.' };
     }
 }

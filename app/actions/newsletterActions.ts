@@ -311,6 +311,9 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
                     ${stockRowsHtml}
                 </tbody>
             </table>
+            <div style="text-align: center; margin-top: 25px; margin-bottom: 10px;">
+                <a href="https://manenbrouw.be/shop" style="display: inline-block; background-color: #56c99b; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; font-size: 1em; border: 2px solid black; box-shadow: 4px 4px 0px 0px #000;">Bestel in onze webshop</a>
+            </div>
         </section>
         ` : ''}
 

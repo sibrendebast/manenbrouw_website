@@ -22,7 +22,7 @@ export default function ComposeNewsletterPage() {
         introBody: "Welkom bij onze nieuwsbrief! Via deze weg willen we jullie op de hoogte houden van onze nieuwste brouwsels en onze huidige voorraad.\n\nWil je iets bestellen? Antwoord dan gewoon op deze mail!",
         storiesHeading: "🎉 Nieuwtjes! 🎉",
         stories: [],
-        stockHeading: "🍺 Onze Huidige Stock 🍺",
+        stockHeading: "Bieren in voorraad",
         stockRows: [],
         agendaHeading: "📅 Agenda / Evenementen 📅",
         agendaRows: [],

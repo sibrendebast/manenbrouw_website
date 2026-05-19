@@ -90,11 +90,32 @@ export default function ComposeNewsletterPage() {
         if (exists) {
             handlePayloadChange("stockRows", payload.stockRows.filter(r => r.id !== product.id));
         } else {
+            let firstImage = '';
+            if (product.images) {
+                try {
+                    const parsed = JSON.parse(product.images);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        firstImage = parsed[0];
+                    }
+                } catch (e) {
+                    firstImage = product.images.split(',')[0] || '';
+                }
+            }
+
+            // Remove square brackets or quotes if they remained
+            firstImage = firstImage.replace(/[\[\]"]/g, '');
+
+            if (firstImage && !firstImage.startsWith('http://') && !firstImage.startsWith('https://')) {
+                if (typeof window !== 'undefined') {
+                    firstImage = `${window.location.origin}${firstImage.startsWith('/') ? '' : '/'}${firstImage}`;
+                }
+            }
+
             const newRow: NewsletterStockRow = {
                 id: product.id,
                 name: product.name,
                 description: `${product.style || ''}, ${product.abv || ''}%`,
-                imageUrl: product.images ? product.images.split(',')[0] : '', // Take first image
+                imageUrl: firstImage,
                 bottlePrice: product.inStock ? `€${product.price.toFixed(2)}` : 'SOLD OUT'
             };
             handlePayloadChange("stockRows", [...payload.stockRows, newRow]);

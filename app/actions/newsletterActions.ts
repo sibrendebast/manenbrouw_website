@@ -307,7 +307,9 @@ export async function generateNewsletterHtml(payload: NewsletterPayload) {
 }
 
 export async function sendNewsletterPreview(payload: NewsletterPayload) {
-    const html = buildNewsletterHtml(payload);
+    let html = buildNewsletterHtml(payload);
+    // Automatically translate local URLs to production for email readability
+    html = html.replace(/http:\/\/localhost:\d+/g, 'https://www.manenbrouw.be');
     
     if (!process.env.RESEND_API_KEY) {
         return { success: false, error: "RESEND_API_KEY is missing" };
@@ -334,7 +336,9 @@ export async function sendNewsletterPreview(payload: NewsletterPayload) {
 }
 
 export async function sendNewsletterToAll(payload: NewsletterPayload) {
-    const html = buildNewsletterHtml(payload);
+    let html = buildNewsletterHtml(payload);
+    // Automatically translate local URLs to production for email readability
+    html = html.replace(/http:\/\/localhost:\d+/g, 'https://www.manenbrouw.be');
     
     if (!process.env.RESEND_API_KEY) {
         return { success: false, error: "RESEND_API_KEY is missing" };

@@ -106,6 +106,19 @@ function formatDate(isoStr: string | null): string {
     });
 }
 
+function formatDateForInput(d: any): string {
+    if (!d) return "";
+    try {
+        if (typeof d === "string") return d.split("T")[0];
+        if (d instanceof Date) return d.toISOString().split("T")[0];
+        if (typeof d.toISOString === "function") return d.toISOString().split("T")[0];
+        return new Date(d).toISOString().split("T")[0];
+    } catch (e) {
+        console.error("Error formatting date for input:", d, e);
+        return "";
+    }
+}
+
 function SortIcon<T extends string>({ col, sortKey, sortDir }: { col: T; sortKey: T; sortDir: SortDir }) {
     if (col !== sortKey) return <ChevronsUpDown className="h-3.5 w-3.5 text-gray-400 inline ml-1" />;
     return sortDir === "asc"
@@ -130,9 +143,9 @@ function WerkregisterModal({ editEntry, onClose, onSaved }: { editEntry?: WerkEn
     const [brouwselLijst, setBrouwselLijst] = useState<{ brouwnummer: string; recipeName: string }[]>([]);
 
     const today = new Date().toISOString().split("T")[0];
-    const [datum, setDatum] = useState(editEntry ? editEntry.datum.split("T")[0] : today);
+    const [datum, setDatum] = useState(editEntry ? formatDateForInput(editEntry.datum) : today);
     const [handeling, setHandeling] = useState<Handeling>(editEntry?.handeling ?? "BROUWEN");
-    const [brouwaanvraagDatum, setBrouwaanvraagDatum] = useState(editEntry?.brouwaanvraagDatum ? editEntry.brouwaanvraagDatum.split("T")[0] : "");
+    const [brouwaanvraagDatum, setBrouwaanvraagDatum] = useState(formatDateForInput(editEntry?.brouwaanvraagDatum));
     const [brouwaanvraagNummer, setBrouwaanvraagNummer] = useState(editEntry?.brouwaanvraagNummer ?? "");
     const [brouwnummer, setBrouwnummer] = useState(editEntry?.brouwnummer ?? "");
     const [volume, setVolume] = useState(editEntry?.volume?.toString() ?? "");
@@ -263,7 +276,7 @@ function OngedierteModal({ editEntry, onClose, onSaved }: { editEntry?: Ongedier
     const [error, setError] = useState<string | null>(null);
 
     const today = new Date().toISOString().split("T")[0];
-    const [datum, setDatum] = useState(editEntry ? editEntry.datum.split("T")[0] : today);
+    const [datum, setDatum] = useState(editEntry ? formatDateForInput(editEntry.datum) : today);
     const [verantwoordelijke, setVerantwoordelijke] = useState(editEntry?.verantwoordelijke ?? "Sibren");
     const [customVerantwoordelijke, setCustomVerantwoordelijke] = useState("");
     const isCustom = (verantwoordelijke !== "Sibren" && verantwoordelijke !== "Tom" && !editEntry) || (editEntry && verantwoordelijke !== "Sibren" && verantwoordelijke !== "Tom");
@@ -389,7 +402,7 @@ function CcpModal({ editEntry, ccpType, label, onClose, onSaved }: { editEntry?:
     const [error, setError] = useState<string | null>(null);
 
     const today = new Date().toISOString().split("T")[0];
-    const [datum, setDatum] = useState(editEntry ? editEntry.datum.split("T")[0] : today);
+    const [datum, setDatum] = useState(editEntry ? formatDateForInput(editEntry.datum) : today);
     const [lotnummer, setLotnummer] = useState(editEntry?.lotnummer ?? "");
     const [uitgevoerd, setUitgevoerd] = useState(editEntry?.uitgevoerd ?? true);
     const [uitvoerder, setUitvoerder] = useState(editEntry?.uitvoerder ?? "Sibren");

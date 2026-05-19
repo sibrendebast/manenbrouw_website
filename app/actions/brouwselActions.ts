@@ -24,23 +24,37 @@ export interface BrouwselInput {
 async function genereerBrouwnummer(): Promise<string> {
     const jaar = new Date().getFullYear()
 
-    const seq = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-        await tx.$executeRaw`
-      INSERT INTO "BrouwSequence" (jaar, teller)
-      VALUES (${jaar}, 0)
-      ON CONFLICT (jaar) DO NOTHING
-    `
-        const result = await tx.$queryRaw<{ teller: number }[]>`
-      UPDATE "BrouwSequence"
-      SET teller = teller + 1
-      WHERE jaar = ${jaar}
-      RETURNING teller
-    `
-        return result[0].teller
-    })
+    let nextNumStr = ""
+    let exists = true
 
-    const numStr = String(seq).padStart(3, '0')
-    return `${jaar}/${numStr}`
+    while (exists) {
+        const seq = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+            await tx.$executeRaw`
+                INSERT INTO "BrouwSequence" (jaar, teller)
+                VALUES (${jaar}, 0)
+                ON CONFLICT (jaar) DO NOTHING
+            `
+            const result = await tx.$queryRaw<{ teller: number }[]>`
+                UPDATE "BrouwSequence"
+                SET teller = teller + 1
+                WHERE jaar = ${jaar}
+                RETURNING teller
+            `
+            return result[0].teller
+        })
+
+        const numStr = String(seq).padStart(3, '0')
+        nextNumStr = `${jaar}/${numStr}`
+
+        const existing = await prisma.brouwsel.findUnique({
+            where: { brouwnummer: nextNumStr }
+        })
+        if (!existing) {
+            exists = false
+        }
+    }
+
+    return nextNumStr
 }
 
 export async function getVolgendBrouwnummer(): Promise<string> {
@@ -48,9 +62,27 @@ export async function getVolgendBrouwnummer(): Promise<string> {
     const seq = await prisma.brouwSequence.findUnique({
         where: { jaar }
     })
-    const nextNum = (seq?.teller || 0) + 1
-    const numStr = String(nextNum).padStart(3, '0')
-    return `${jaar}/${numStr}`
+    
+    let nextNum = (seq?.teller || 0) + 1
+    let nextNumStr = ""
+    let exists = true
+
+    while (exists) {
+        const numStr = String(nextNum).padStart(3, '0')
+        nextNumStr = `${jaar}/${numStr}`
+        
+        const existing = await prisma.brouwsel.findUnique({
+            where: { brouwnummer: nextNumStr }
+        })
+        
+        if (!existing) {
+            exists = false
+        } else {
+            nextNum++
+        }
+    }
+    
+    return nextNumStr
 }
 
 // ─── Read ─────────────────────────────────────────────────────────────────────

@@ -16,6 +16,7 @@ interface FormLine {
   totalCost: number;
   lotNumber: string;
   expiryDate: string;
+  manufacturer: string;
 }
 
 export default function InslagPage() {
@@ -32,7 +33,6 @@ export default function InslagPage() {
     supplierId: '',
     invoiceNumber: '',
     receivedDate: new Date().toISOString().split('T')[0],
-    manufacturer: '',
     deviationFlag: false,
     deviationAction: 'GEEN_AFWIJKING' as const,
     deviationNotes: '',
@@ -46,6 +46,7 @@ export default function InslagPage() {
       totalCost: 0,
       lotNumber: '',
       expiryDate: '',
+      manufacturer: '',
     },
   ]);
 
@@ -95,6 +96,7 @@ export default function InslagPage() {
         totalCost: 0,
         lotNumber: '',
         expiryDate: '',
+        manufacturer: '',
       },
     ]);
   };
@@ -140,7 +142,6 @@ export default function InslagPage() {
         supplierId: form.supplierId,
         invoiceNumber: form.invoiceNumber || undefined,
         receivedDate: new Date(form.receivedDate),
-        manufacturer: form.manufacturer || undefined,
         deviationFlag: form.deviationFlag,
         deviationAction: form.deviationAction,
         deviationNotes: form.deviationNotes || undefined,
@@ -151,6 +152,7 @@ export default function InslagPage() {
           unitCost: l.quantityReceived > 0 ? l.totalCost / l.quantityReceived : 0,
           lotNumber: l.lotNumber,
           expiryDate: new Date(l.expiryDate),
+          manufacturer: l.manufacturer || undefined,
         })),
       });
 
@@ -171,7 +173,7 @@ export default function InslagPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 text-black">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm mb-8 text-gray-500">
           <Link href="/admin/dashboard" className="hover:text-brewery-dark">Dashboard</Link>
@@ -243,18 +245,6 @@ export default function InslagPage() {
                   type="date"
                   name="receivedDate"
                   value={form.receivedDate}
-                  onChange={handleFormChange}
-                  className="w-full border-2 border-gray-200 px-3 py-2 focus:border-brewery-dark focus:outline-none bg-white text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Fabricant
-                </label>
-                <input
-                  type="text"
-                  name="manufacturer"
-                  value={form.manufacturer}
                   onChange={handleFormChange}
                   className="w-full border-2 border-gray-200 px-3 py-2 focus:border-brewery-dark focus:outline-none bg-white text-sm"
                 />
@@ -338,6 +328,7 @@ export default function InslagPage() {
                   <th className="px-4 py-3 text-right font-bold">Prijs/eenheid</th>
                   <th className="px-4 py-3 text-left font-bold">Lotnummer *</th>
                   <th className="px-4 py-3 text-left font-bold">Houdbaar tot *</th>
+                  <th className="px-4 py-3 text-left font-bold">Fabricant</th>
                   <th className="px-4 py-3 text-center font-bold">Acties</th>
                 </tr>
               </thead>
@@ -350,7 +341,7 @@ export default function InslagPage() {
                         onChange={(e) =>
                           handleLineChange(idx, 'materialId', e.target.value)
                         }
-                        className="w-full border-2 border-gray-200 px-2 py-1.5 text-sm focus:border-brewery-dark focus:outline-none bg-white"
+                        className="w-full min-w-[280px] border-2 border-gray-200 px-2 py-1.5 text-sm focus:border-brewery-dark focus:outline-none bg-white whitespace-normal"
                       >
                         <option value="">-- Selecteer --</option>
                         {materials.map((m) => (
@@ -416,6 +407,17 @@ export default function InslagPage() {
                           handleLineChange(idx, 'expiryDate', e.target.value)
                         }
                         className="w-full border-2 border-gray-200 px-2 py-1.5 text-sm focus:border-brewery-dark focus:outline-none bg-white"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="text"
+                        value={line.manufacturer}
+                        onChange={(e) =>
+                          handleLineChange(idx, 'manufacturer', e.target.value)
+                        }
+                        className="w-full border-2 border-gray-200 px-2 py-1.5 text-sm focus:border-brewery-dark focus:outline-none bg-white"
+                        placeholder="bv. Weyermann"
                       />
                     </td>
                     <td className="px-4 py-3 text-center">

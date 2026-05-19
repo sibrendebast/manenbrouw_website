@@ -41,7 +41,7 @@ export default function Navbar() {
     }, [totalItems, mounted, prevTotalItems]);
 
     return (
-        <nav className="bg-white text-brewery-dark sticky top-0 z-50 border-b-2 border-black">
+        <nav className="bg-white text-brewery-dark border-b-2 border-black">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-24">
                     <div className="flex items-center">

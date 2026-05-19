@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, Send, Eye, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, Eye, Plus, Trash2, Upload, X } from "lucide-react";
 import { 
     NewsletterPayload, 
     NewsletterStory, 
@@ -31,6 +31,7 @@ export default function ComposeNewsletterPage() {
     const [isSendingPreview, setIsSendingPreview] = useState(false);
     const [isSendingAll, setIsSendingAll] = useState(false);
     const [message, setMessage] = useState<{type: 'success'|'error', text: string} | null>(null);
+    const [uploadingStoryIds, setUploadingStoryIds] = useState<Record<string, boolean>>({});
 
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -83,6 +84,36 @@ export default function ComposeNewsletterPage() {
 
     const removeStory = (id: string) => {
         handlePayloadChange("stories", payload.stories.filter(s => s.id !== id));
+    };
+
+    const handleStoryImageUpload = async (storyId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.length) return;
+
+        setUploadingStoryIds(prev => ({ ...prev, [storyId]: true }));
+        const formData = new FormData();
+        formData.append("files", e.target.files[0]);
+
+        try {
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+            });
+            const data = await res.json();
+            if (data.success && data.urls && data.urls.length > 0) {
+                let uploadedUrl = data.urls[0];
+                if (uploadedUrl && !uploadedUrl.startsWith('http://') && !uploadedUrl.startsWith('https://')) {
+                    uploadedUrl = `${window.location.origin}${uploadedUrl.startsWith('/') ? '' : '/'}${uploadedUrl}`;
+                }
+                updateStory(storyId, 'imageUrl', uploadedUrl);
+            } else {
+                alert("Uploaden mislukt");
+            }
+        } catch (error) {
+            console.error("Upload error:", error);
+            alert("Uploaden mislukt");
+        } finally {
+            setUploadingStoryIds(prev => ({ ...prev, [storyId]: false }));
+        }
     };
 
     const toggleProductStock = (product: any) => {
@@ -279,13 +310,49 @@ export default function ComposeNewsletterPage() {
                                                     onChange={e => updateStory(story.id, 'body', e.target.value)}
                                                     className="w-full border p-2 h-24"
                                                 />
-                                                <input 
-                                                    type="text" 
-                                                    placeholder="Afbeelding URL (optioneel)"
-                                                    value={story.imageUrl} 
-                                                    onChange={e => updateStory(story.id, 'imageUrl', e.target.value)}
-                                                    className="w-full border p-2"
-                                                />
+                                                <div className="space-y-2">
+                                                    <label className="block text-xs font-bold text-black uppercase">Afbeelding (optioneel)</label>
+                                                    <div className="flex gap-4 items-center">
+                                                        {story.imageUrl && (
+                                                            <div className="relative h-16 w-16 border-2 border-black bg-white shrink-0">
+                                                                <img
+                                                                    src={story.imageUrl}
+                                                                    alt="Story Preview"
+                                                                    className="h-full w-full object-cover"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => updateStory(story.id, 'imageUrl', '')}
+                                                                    className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5"
+                                                                >
+                                                                    <X className="h-3 w-3" />
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                        <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-black bg-white p-3 cursor-pointer hover:bg-gray-50 min-h-[64px]">
+                                                            <div className="flex items-center gap-2">
+                                                                <Upload className="h-4 w-4 text-black" />
+                                                                <span className="text-sm font-semibold text-black">
+                                                                    {uploadingStoryIds[story.id] ? "Uploaden..." : "Kies afbeelding"}
+                                                                </span>
+                                                            </div>
+                                                            <input
+                                                                type="file"
+                                                                className="hidden"
+                                                                accept="image/*"
+                                                                onChange={(e) => handleStoryImageUpload(story.id, e)}
+                                                                disabled={uploadingStoryIds[story.id]}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="Of voer handmatig een Afbeelding URL in"
+                                                        value={story.imageUrl} 
+                                                        onChange={e => updateStory(story.id, 'imageUrl', e.target.value)}
+                                                        className="w-full border p-2 text-sm"
+                                                    />
+                                                </div>
                                                 <div className="flex gap-2">
                                                     <input 
                                                         type="text" 

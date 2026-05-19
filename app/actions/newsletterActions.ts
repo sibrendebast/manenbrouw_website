@@ -239,7 +239,7 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
 <body>
     <div class="top-banner">
         <div class="top-banner-content">
-            <img src="https://www.manenbrouw.be/wp-content/uploads/2022/01/cropped-logo_tekst_black_small.png" alt="Man & Brouw Logo" class="logo">
+            <img src="https://www.manenbrouw.be/logo.png" alt="Man & Brouw Logo" class="logo">
             <h1>${payload.title}</h1>
         </div>
     </div>

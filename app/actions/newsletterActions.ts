@@ -276,7 +276,6 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
                     ${stockRowsHtml}
                 </tbody>
             </table>
-            <p style="margin-top: 10px;">*Prijzen zijn exclusief BTW.</p>
         </section>
         ` : ''}
 

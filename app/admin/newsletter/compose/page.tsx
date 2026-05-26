@@ -284,7 +284,7 @@ function ComposeNewsletterContent() {
         if (res.success) {
             setMessage({ type: 'success', text: `Nieuwsbrief succesvol verzonden naar ${res.sentCount} abonnees!` });
         } else {
-            setMessage({ type: 'error', text: `Fout bij verzenden: ${res.error}` });
+            setMessage({ type: 'error', text: `Fout bij verzenden: ${(res as any).error}` });
         }
         setIsSendingAll(false);
     };

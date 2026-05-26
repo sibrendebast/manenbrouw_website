@@ -258,8 +258,8 @@ export default function OrderCard({ order, onUpdateStatus, onDelete }: OrderCard
                                             )}
                                         </div>
 
-                                        {/* Quantity — large & prominent */}
-                                        <span className={`text-3xl font-black tabular-nums shrink-0 ${
+                                        {/* Quantity — prominent */}
+                                        <span className={`text-xl font-black tabular-nums shrink-0 ${
                                             isChecked ? "text-green-500" : "text-brewery-dark"
                                         }`}>
                                             ×{line.quantity}

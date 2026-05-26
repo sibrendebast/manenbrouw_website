@@ -92,29 +92,27 @@ export async function getEventsForNewsletter() {
 
 function buildNewsletterHtml(payload: NewsletterPayload): string {
     const storiesHtml = payload.stories.map(story => `
-            <div class="news-item">
-                <table class="news-item-table">
-                    <tr>
-                        ${story.imageUrl ? `
-                        <td class="news-item-image-cell">
-                            <img src="${story.imageUrl}" alt="${story.heading}" class="news-item-image">
-                        </td>
-                        ` : ''}
-                        <td class="news-item-content" ${!story.imageUrl ? 'style="width: 100%"' : ''}>
-                            <h3>${story.heading}</h3>
-                            <p>${story.body.replace(/\n/g, '<br>')}</p>
-                            ${story.linkUrl ? `<a href="${story.linkUrl}" class="button">${story.linkLabel || 'Meer info'}</a>` : ''}
-                        </td>
-                    </tr>
-                </table>
-            </div>
+            <table class="story-card" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                    ${story.imageUrl ? `
+                    <td class="story-image-cell">
+                        <img src="${story.imageUrl}" alt="${story.heading}" class="story-image">
+                    </td>
+                    ` : ''}
+                    <td class="story-content-cell" ${!story.imageUrl ? 'style="width: 100%;"' : ''}>
+                        <h3 class="story-heading">${story.heading}</h3>
+                        <p class="story-body">${story.body.replace(/\n/g, '<br>')}</p>
+                        ${story.linkUrl ? `<a href="${story.linkUrl}" class="button">${story.linkLabel || 'Meer info'}</a>` : ''}
+                    </td>
+                </tr>
+            </table>
     `).join('');
 
     const stockRowsHtml = payload.stockRows.map(row => `
                     <tr>
-                        <td>${row.imageUrl ? `<img src="${row.imageUrl}" alt="${row.name}" class="beer-image">` : ''}</td>
-                        <td>${row.name}</td>
-                        <td>${row.description}</td>
+                        <td class="beer-img-cell">${row.imageUrl ? `<img src="${row.imageUrl}" alt="${row.name}" class="beer-image">` : ''}</td>
+                        <td class="beer-name-cell">${row.name}</td>
+                        <td class="beer-desc-cell">${row.description}</td>
                     </tr>
     `).join('');
 
@@ -209,29 +207,39 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
          .news-item:last-child {
              border-bottom: none;
         }
-        .news-item-table {
-            width: 100%;
+        /* Per-story card */
+        .story-card {
             border-collapse: collapse;
+            border: 3px solid black;
+            margin-bottom: 16px;
+            overflow: hidden;
+            background-color: #fff;
         }
-        .news-item-table td {
-             padding-left: 0;
-             vertical-align: top;
+        .story-image-cell {
+            width: 40%;
+            padding: 0;
+            vertical-align: top;
         }
-        .news-item-image-cell {
-             width: 33.33%;
-             padding-right: 20px;
-        }
-         .news-item-content {
-             width: 66.67%;
-             padding: 0 0 20px 0;
-         }
-         .news-item-content h3 {
-             margin-top: 0;
-         }
-        .news-item-image {
-            max-width: 100%;
-            height: auto;
+        .story-image {
             display: block;
+            width: 100%;
+            height: auto;
+        }
+        .story-content-cell {
+            width: 60%;
+            padding: 20px;
+            vertical-align: top;
+        }
+        .story-heading {
+            margin: 0 0 10px 0;
+            color: #56c99b;
+            font-size: 1.1em;
+        }
+        .story-body {
+            margin: 0 0 12px 0;
+            font-size: 0.95em;
+            color: #333;
+            line-height: 1.5;
         }
         table {
             width: 100%;
@@ -253,6 +261,10 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
         td {
              border-bottom: 1px solid #eee;
         }
+        .beer-img-cell {
+            padding: 0;
+            border-bottom: none;
+        }
         tr:last-child td {
             border-bottom: none;
         }
@@ -263,10 +275,26 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
             text-align: left;
         }
         .beer-image {
-            max-width: 60px;
-            height: auto;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
             display: block;
-            margin: 0;
+        }
+        .beer-img-cell {
+            padding: 0 !important;
+            width: 100px;
+            vertical-align: top;
+        }
+        .beer-name-cell {
+            padding: 8px 12px !important;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+        .beer-desc-cell {
+            padding: 8px 12px !important;
+            color: #555;
+            font-size: 0.9em;
+            vertical-align: middle;
         }
         .button {
             display: inline-block;
@@ -298,12 +326,7 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
         </section>
         ` : ''}
 
-        ${payload.stories.length > 0 ? `
-        <section>
-            ${payload.storiesHeading ? `<h2>${payload.storiesHeading}</h2>` : ''}
-            ${storiesHtml}
-        </section>
-        ` : ''}
+        ${storiesHtml}
 
         ${payload.stockRows.length > 0 ? `
         <section>

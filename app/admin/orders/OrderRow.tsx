@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
     ChevronDown,
     ChevronUp,
@@ -31,6 +31,39 @@ const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }>
 export default function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
+
+    // Build a flat list of all pickable line items with a stable unique key
+    const pickList = useMemo(() => {
+        const lines: { id: string; name: string; quantity: number; subtitle?: string }[] = [];
+        order.items?.forEach((item: any) => {
+            lines.push({
+                id: `product-${item.id}`,
+                name: item.product.name,
+                quantity: item.quantity,
+            });
+        });
+        order.tickets?.forEach((ticket: any) => {
+            lines.push({
+                id: `ticket-${ticket.id}`,
+                name: ticket.event.title,
+                quantity: ticket.quantity,
+                subtitle: new Date(ticket.event.date).toLocaleDateString("nl-BE"),
+            });
+        });
+        return lines;
+    }, [order]);
+
+    const allItemsChecked = pickList.length > 0 && checkedItems.size === pickList.length;
+
+    const toggleCheck = (id: string, e: React.MouseEvent | React.ChangeEvent) => {
+        e.stopPropagation();
+        setCheckedItems(prev => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+        });
+    };
 
     const handleStatusChange = async (newStatus: string) => {
         setIsUpdating(true);
@@ -113,16 +146,15 @@ export default function OrderCard({ order, onUpdateStatus, onDelete }: OrderCard
                 </div>
             </div>
 
-            {/* Quick-action: Mark as Completed (only when status is "paid") */}
+            {/* Collapsed quick-action for paid orders: prompt to open and pick */}
             {isPaid && !isExpanded && (
                 <div className="px-4 pb-4 -mt-1">
                     <button
-                        onClick={(e) => { e.stopPropagation(); handleStatusChange("completed"); }}
-                        disabled={isUpdating}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 bg-brewery-dark text-white font-bold text-sm border-2 border-black hover:bg-brewery-green transition-colors disabled:opacity-50"
+                        onClick={(e) => { e.stopPropagation(); setIsExpanded(true); }}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 bg-brewery-dark text-white font-bold text-sm border-2 border-black hover:bg-brewery-green transition-colors"
                     >
-                        <CheckCircle className="h-4 w-4" />
-                        {isUpdating ? "Updating..." : "Mark as Completed"}
+                        <Package className="h-4 w-4" />
+                        Pick Order
                     </button>
                 </div>
             )}
@@ -177,39 +209,75 @@ export default function OrderCard({ order, onUpdateStatus, onDelete }: OrderCard
                         </div>
                     )}
 
-                    {/* Order items */}
+                    {/* Pick list — checkboxes with large quantities */}
                     <div>
-                        <h4 className="text-xs font-black uppercase tracking-wider text-gray-400 mb-2">
-                            Items ({itemCount})
-                        </h4>
+                        <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-gray-400">
+                                Pick List ({checkedItems.size}/{pickList.length})
+                            </h4>
+                            {checkedItems.size > 0 && (
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setCheckedItems(new Set()); }}
+                                    className="text-xs text-gray-400 underline"
+                                >
+                                    Reset
+                                </button>
+                            )}
+                        </div>
+
                         <div className="space-y-2">
-                            {order.items?.map((item: any) => (
-                                <div key={item.id} className="flex items-center gap-2 text-sm">
-                                    <span className="flex-1 font-medium text-gray-900">{item.product.name}</span>
-                                    <span className="text-gray-400 text-xs">×{item.quantity}</span>
-                                    <span className="font-bold w-16 text-right">€{(item.price * item.quantity).toFixed(2)}</span>
-                                </div>
-                            ))}
-                            {order.tickets?.map((ticket: any) => (
-                                <div key={ticket.id} className="flex items-start gap-2 text-sm">
-                                    <Ticket className="h-3.5 w-3.5 mt-0.5 text-brewery-green shrink-0" />
-                                    <span className="flex-1 font-medium text-gray-900">
-                                        {ticket.event.title}
-                                        <span className="block text-xs text-gray-400">
-                                            {new Date(ticket.event.date).toLocaleDateString("nl-BE")}
+                            {pickList.map((line) => {
+                                const isChecked = checkedItems.has(line.id);
+                                const isTicket = line.id.startsWith("ticket-");
+                                return (
+                                    <label
+                                        key={line.id}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className={`flex items-center gap-4 p-3 border-2 cursor-pointer transition-all select-none ${
+                                            isChecked
+                                                ? "border-green-500 bg-green-50"
+                                                : "border-gray-200 bg-white"
+                                        }`}
+                                    >
+                                        {/* Checkbox */}
+                                        <input
+                                            type="checkbox"
+                                            checked={isChecked}
+                                            onChange={(e) => toggleCheck(line.id, e)}
+                                            className="h-6 w-6 rounded border-2 border-gray-400 text-green-600 accent-green-600 shrink-0 cursor-pointer"
+                                        />
+
+                                        {/* Name + subtitle */}
+                                        <div className="flex-1 min-w-0">
+                                            <p className={`font-bold leading-tight ${isChecked ? "line-through text-gray-400" : "text-gray-900"}`}>
+                                                {isTicket && <Ticket className="inline h-3.5 w-3.5 mr-1 text-brewery-green" />}
+                                                {line.name}
+                                            </p>
+                                            {line.subtitle && (
+                                                <p className="text-xs text-gray-400 mt-0.5">{line.subtitle}</p>
+                                            )}
+                                        </div>
+
+                                        {/* Quantity — large & prominent */}
+                                        <span className={`text-3xl font-black tabular-nums shrink-0 ${
+                                            isChecked ? "text-green-500" : "text-brewery-dark"
+                                        }`}>
+                                            ×{line.quantity}
                                         </span>
-                                    </span>
-                                    <span className="text-gray-400 text-xs">×{ticket.quantity}</span>
-                                    <span className="font-bold w-16 text-right">€{ticket.totalPrice.toFixed(2)}</span>
-                                </div>
-                            ))}
+                                    </label>
+                                );
+                            })}
+
+                            {/* Shipping line (informational, no checkbox) */}
                             {isDelivery && (
-                                <div className="flex items-center gap-2 text-sm text-gray-500 border-t border-gray-200 pt-2 mt-1">
-                                    <Truck className="h-3.5 w-3.5" />
+                                <div className="flex items-center gap-4 p-3 border-2 border-dashed border-gray-200 bg-white text-sm text-gray-500">
+                                    <Truck className="h-4 w-4 shrink-0" />
                                     <span className="flex-1">Shipping</span>
-                                    <span className="font-bold w-16 text-right">€10.00</span>
+                                    <span className="font-bold">€10.00</span>
                                 </div>
                             )}
+
+                            {/* Total */}
                             <div className="flex items-center gap-2 text-base font-black text-brewery-dark border-t-2 border-black pt-2 mt-2">
                                 <span className="flex-1">Total</span>
                                 <span>€{order.totalAmount.toFixed(2)}</span>
@@ -217,11 +285,30 @@ export default function OrderCard({ order, onUpdateStatus, onDelete }: OrderCard
                         </div>
                     </div>
 
+                    {/* Mark as Completed — only active when all items ticked */}
+                    {isPaid && (
+                        <div>
+                            {!allItemsChecked && (
+                                <p className="text-xs text-gray-400 text-center mb-2">
+                                    ✓ Tick all items above to enable completion
+                                </p>
+                            )}
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleStatusChange("completed"); }}
+                                disabled={!allItemsChecked || isUpdating}
+                                className="w-full flex items-center justify-center gap-2 py-3 font-black text-base border-2 border-black transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-brewery-dark text-white hover:bg-brewery-green disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300"
+                            >
+                                <CheckCircle className="h-5 w-5" />
+                                {isUpdating ? "Updating..." : "Mark as Completed"}
+                            </button>
+                        </div>
+                    )}
+
                     {/* Actions */}
                     <div>
-                        <h4 className="text-xs font-black uppercase tracking-wider text-gray-400 mb-3">Actions</h4>
+                        <h4 className="text-xs font-black uppercase tracking-wider text-gray-400 mb-3">Other Actions</h4>
                         <div className="space-y-2">
-                            {/* Status selector */}
+                            {/* Status selector — for non-paid status changes */}
                             <select
                                 value={order.status}
                                 onChange={(e) => { e.stopPropagation(); handleStatusChange(e.target.value); }}

@@ -48,6 +48,7 @@ export async function getProductsForNewsletter() {
     return await prisma.product.findMany({
         where: {
             isHidden: false,
+            category: 'BEER',
         },
         orderBy: {
             createdAt: 'desc',
@@ -114,7 +115,6 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
                         <td>${row.imageUrl ? `<img src="${row.imageUrl}" alt="${row.name}" class="beer-image">` : ''}</td>
                         <td>${row.name}</td>
                         <td>${row.description}</td>
-                        <td>${row.bottlePrice}</td>
                     </tr>
     `).join('');
 
@@ -136,14 +136,18 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
         .top-banner {
             background-color: #56c99b;
             color: white;
-            text-align: center;
+            text-align: left;
             padding: 25px 0;
         }
         .top-banner-content {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             gap: 20px;
+            max-width: 660px;
+            margin: 0 auto;
+            padding: 0 30px;
+            box-sizing: border-box;
         }
         .top-banner .logo {
             max-height: 60px;
@@ -158,8 +162,11 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
             background-color: #f2f2f2;
             color: #333;
             text-align: center;
-            padding: 20px 0;
+            padding: 20px;
             font-size: 0.9em;
+            max-width: 660px;
+            margin: 0 auto;
+            box-sizing: border-box;
         }
         .bottom-banner a {
             color: #56c99b;
@@ -216,7 +223,10 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
         }
          .news-item-content {
              width: 66.67%;
-             padding: 20px;
+             padding: 0 0 20px 0;
+         }
+         .news-item-content h3 {
+             margin-top: 0;
          }
         .news-item-image {
             max-width: 100%;
@@ -237,7 +247,7 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
         th {
             background-color: #f2f2f2;
             font-weight: bold;
-            text-align: center;
+            text-align: left;
             border-bottom: 1px solid #ddd;
         }
         td {
@@ -247,16 +257,16 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
             border-bottom: none;
         }
         td:nth-child(1) {
-            text-align: center;
+            text-align: left;
         }
         td:nth-child(4) {
-            text-align: right;
+            text-align: left;
         }
         .beer-image {
             max-width: 60px;
             height: auto;
             display: block;
-            margin: 0 auto;
+            margin: 0;
         }
         .button {
             display: inline-block;
@@ -299,19 +309,11 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
         <section>
             ${payload.stockHeading ? `<h2>${payload.stockHeading}</h2>` : ''}
             <table>
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Bier</th>
-                        <th>Beschrijving</th>
-                        <th>33cl fles</th>
-                    </tr>
-                </thead>
                 <tbody>
                     ${stockRowsHtml}
                 </tbody>
             </table>
-            <div style="text-align: center; margin-top: 25px; margin-bottom: 10px;">
+            <div style="text-align: left; margin-top: 25px; margin-bottom: 10px;">
                 <a href="https://manenbrouw.be/shop" style="display: inline-block; background-color: #56c99b; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; font-size: 1em; border: 2px solid black; box-shadow: 4px 4px 0px 0px #000;">Bestel in onze webshop</a>
             </div>
         </section>
@@ -497,5 +499,117 @@ export async function unsubscribeByEmail(email: string) {
     } catch (error) {
         console.error('Failed to unsubscribe by email:', error);
         return { success: false, error: 'E-mailadres niet gevonden of al uitgeschreven.' };
+    }
+}
+
+export async function getNewsletters() {
+    try {
+        return await prisma.newsletter.findMany({
+            orderBy: {
+                updatedAt: 'desc'
+            }
+        });
+    } catch (error) {
+        console.error('Failed to get newsletters:', error);
+        return [];
+    }
+}
+
+export async function getNewsletterById(id: string) {
+    try {
+        const newsletter = await prisma.newsletter.findUnique({
+            where: { id }
+        });
+        if (newsletter) {
+            return {
+                ...newsletter,
+                payload: newsletter.payload as any as NewsletterPayload
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Failed to get newsletter by id:', error);
+        return null;
+    }
+}
+
+export async function saveNewsletterDraft(id: string | null, title: string, payload: NewsletterPayload) {
+    try {
+        if (id) {
+            const updated = await prisma.newsletter.update({
+                where: { id },
+                data: {
+                    title,
+                    payload: payload as any,
+                    status: 'DRAFT',
+                }
+            });
+            revalidatePath('/admin/newsletter');
+            return { success: true, newsletter: updated };
+        } else {
+            const created = await prisma.newsletter.create({
+                data: {
+                    title,
+                    payload: payload as any,
+                    status: 'DRAFT',
+                }
+            });
+            revalidatePath('/admin/newsletter');
+            return { success: true, newsletter: created };
+        }
+    } catch (error: any) {
+        console.error('Failed to save newsletter draft:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function sendNewsletterToAllWithSave(id: string | null, payload: NewsletterPayload) {
+    const sendResult = await sendNewsletterToAll(payload);
+    if (!sendResult.success) {
+        return sendResult;
+    }
+
+    try {
+        const sentCount = sendResult.sentCount || 0;
+        if (id) {
+            await prisma.newsletter.update({
+                where: { id },
+                data: {
+                    title: payload.title,
+                    payload: payload as any,
+                    status: 'SENT',
+                    sentAt: new Date(),
+                    sentCount: sentCount
+                }
+            });
+        } else {
+            await prisma.newsletter.create({
+                data: {
+                    title: payload.title,
+                    payload: payload as any,
+                    status: 'SENT',
+                    sentAt: new Date(),
+                    sentCount: sentCount
+                }
+            });
+        }
+        revalidatePath('/admin/newsletter');
+        return { success: true, sentCount };
+    } catch (error: any) {
+        console.error('Failed to save sent newsletter history:', error);
+        return { success: true, sentCount: sendResult.sentCount, warning: "Emails sent, but failed to save log: " + error.message };
+    }
+}
+
+export async function deleteNewsletter(id: string) {
+    try {
+        await prisma.newsletter.delete({
+            where: { id }
+        });
+        revalidatePath('/admin/newsletter');
+        return { success: true };
+    } catch (error: any) {
+        console.error('Failed to delete newsletter:', error);
+        return { success: false, error: error.message };
     }
 }

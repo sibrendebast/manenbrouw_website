@@ -1,32 +1,82 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import Link from "next/link";
-import { ArrowLeft, Send, Eye, Plus, Trash2, Upload, X } from "lucide-react";
-import { 
-    NewsletterPayload, 
-    NewsletterStory, 
-    NewsletterStockRow, 
+import { useSearchParams, useRouter } from "next/navigation";
+import { ArrowLeft, Send, Eye, Plus, Trash2, Upload, X, Save } from "lucide-react";
+import {
+    NewsletterPayload,
+    NewsletterStory,
+    NewsletterStockRow,
     NewsletterAgendaRow,
-    getProductsForNewsletter, 
+    getProductsForNewsletter,
     getEventsForNewsletter,
-    generateNewsletterHtml, 
-    sendNewsletterPreview, 
-    sendNewsletterToAll 
+    generateNewsletterHtml,
+    sendNewsletterPreview,
+    saveNewsletterDraft,
+    sendNewsletterToAllWithSave,
+    getNewsletterById
 } from "@/app/actions/newsletterActions";
 
+const convertProductToStockRow = (product: any): NewsletterStockRow => {
+    let firstImage = '';
+    if (product.images) {
+        try {
+            const parsed = JSON.parse(product.images);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                firstImage = parsed[0];
+            }
+        } catch (e) {
+            firstImage = product.images.split(',')[0] || '';
+        }
+    }
+
+    // Remove square brackets or quotes if they remained
+    firstImage = firstImage.replace(/[\[\]"]/g, '');
+
+    if (firstImage && !firstImage.startsWith('http://') && !firstImage.startsWith('https://')) {
+        if (typeof window !== 'undefined') {
+            firstImage = `${window.location.origin}${firstImage.startsWith('/') ? '' : '/'}${firstImage}`;
+        }
+    }
+
+    const abvString = product.abv ? (product.abv.includes('%') ? product.abv : `${product.abv}%`) : '';
+    const descriptionParts = [product.style, abvString].filter(Boolean);
+
+    return {
+        id: product.id,
+        name: product.name,
+        description: descriptionParts.join(', '),
+        imageUrl: firstImage,
+        bottlePrice: product.inStock ? `€${product.price.toFixed(2)}` : 'SOLD OUT'
+    };
+};
+
 export default function ComposeNewsletterPage() {
+    return (
+        <Suspense fallback={<div>Laden...</div>}>
+            <ComposeNewsletterContent />
+        </Suspense>
+    );
+}
+
+function ComposeNewsletterContent() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const newsletterIdParam = searchParams.get('id');
+
+    const [newsletterId, setNewsletterId] = useState<string | null>(newsletterIdParam);
     const [payload, setPayload] = useState<NewsletterPayload>({
         title: `Nieuwsbrief ${new Date().toLocaleString('nl-BE', { month: 'long', year: 'numeric' })}`,
         introHeading: "Hello World!",
-        introBody: "Welkom bij onze nieuwsbrief! Via deze weg willen we jullie op de hoogte houden van onze nieuwste brouwsels en onze huidige voorraad.\n\nWil je iets bestellen? Antwoord dan gewoon op deze mail!",
-        storiesHeading: "🎉 Nieuwtjes! 🎉",
+        introBody: "Welkom bij onze nieuwsbrief! Via deze weg willen we jullie op de hoogte houden van onze nieuwste brouwsels en onze huidige voorraad.\n\n",
+        storiesHeading: "Nieuwtjes!",
         stories: [],
         stockHeading: "Bieren in voorraad",
         stockRows: [],
-        agendaHeading: "📅 Agenda / Evenementen 📅",
+        agendaHeading: "Agenda / Evenementen",
         agendaRows: [],
-        outroHeading: "🍺 Cheers 🍺",
+        outroHeading: "Cheers",
         outroBody: "Bestellen kan eenvoudig rechtstreeks via onze webshop op https://manenbrouw.be/shop. Kies je favoriete bieren en reken veilig en snel online af!\n\nCheers,\nSibren & Tom\nHet Man & Brouw team"
     });
 
@@ -35,21 +85,43 @@ export default function ComposeNewsletterPage() {
     const [events, setEvents] = useState<any[]>([]);
     const [isSendingPreview, setIsSendingPreview] = useState(false);
     const [isSendingAll, setIsSendingAll] = useState(false);
-    const [message, setMessage] = useState<{type: 'success'|'error', text: string} | null>(null);
+    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [uploadingStoryIds, setUploadingStoryIds] = useState<Record<string, boolean>>({});
 
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
-    // Fetch products and events on mount
+    // Fetch products, events and potential draft on mount
     useEffect(() => {
-        getProductsForNewsletter().then(data => {
-            setProducts(data);
-        }).catch(err => console.error("Failed to load products:", err));
+        const loadInitialData = async () => {
+            let loadedDraft = null;
+            if (newsletterIdParam) {
+                loadedDraft = await getNewsletterById(newsletterIdParam);
+                if (loadedDraft && loadedDraft.payload) {
+                    setPayload(loadedDraft.payload);
+                }
+            }
 
-        getEventsForNewsletter().then(data => {
-            setEvents(data);
-        }).catch(err => console.error("Failed to load events:", err));
-    }, []);
+            getProductsForNewsletter().then(data => {
+                setProducts(data);
+                if (!loadedDraft) {
+                    // Automatically add only the beers that are in stock by default
+                    const inStockRows = data
+                        .filter((product: any) => product.inStock)
+                        .map((product: any) => convertProductToStockRow(product));
+                    setPayload(prev => ({
+                        ...prev,
+                        stockRows: inStockRows
+                    }));
+                }
+            }).catch(err => console.error("Failed to load products:", err));
+
+            getEventsForNewsletter().then(data => {
+                setEvents(data);
+            }).catch(err => console.error("Failed to load events:", err));
+        };
+        
+        loadInitialData();
+    }, [newsletterIdParam]);
 
     // Update preview HTML when payload changes
     useEffect(() => {
@@ -130,37 +202,7 @@ export default function ComposeNewsletterPage() {
         if (exists) {
             handlePayloadChange("stockRows", payload.stockRows.filter(r => r.id !== product.id));
         } else {
-            let firstImage = '';
-            if (product.images) {
-                try {
-                    const parsed = JSON.parse(product.images);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        firstImage = parsed[0];
-                    }
-                } catch (e) {
-                    firstImage = product.images.split(',')[0] || '';
-                }
-            }
-
-            // Remove square brackets or quotes if they remained
-            firstImage = firstImage.replace(/[\[\]"]/g, '');
-
-            if (firstImage && !firstImage.startsWith('http://') && !firstImage.startsWith('https://')) {
-                if (typeof window !== 'undefined') {
-                    firstImage = `${window.location.origin}${firstImage.startsWith('/') ? '' : '/'}${firstImage}`;
-                }
-            }
-
-            const abvString = product.abv ? (product.abv.includes('%') ? product.abv : `${product.abv}%`) : '';
-            const descriptionParts = [product.style, abvString].filter(Boolean);
-
-            const newRow: NewsletterStockRow = {
-                id: product.id,
-                name: product.name,
-                description: descriptionParts.join(', '),
-                imageUrl: firstImage,
-                bottlePrice: product.inStock ? `€${product.price.toFixed(2)}` : 'SOLD OUT'
-            };
+            const newRow = convertProductToStockRow(product);
             handlePayloadChange("stockRows", [...payload.stockRows, newRow]);
         }
     };
@@ -175,17 +217,17 @@ export default function ComposeNewsletterPage() {
         if (exists) {
             handlePayloadChange("agendaRows", agendaRows.filter(r => r.id !== event.id));
         } else {
-            const dateStr = event.date 
-                ? new Date(event.date).toLocaleDateString('nl-BE', { 
-                    weekday: 'long', 
-                    day: 'numeric', 
-                    month: 'long', 
+            const dateStr = event.date
+                ? new Date(event.date).toLocaleDateString('nl-BE', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
                     year: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit'
-                  }) 
+                })
                 : '';
-            
+
             const newRow: NewsletterAgendaRow = {
                 id: event.id,
                 title: event.title,
@@ -215,12 +257,30 @@ export default function ComposeNewsletterPage() {
         setIsSendingPreview(false);
     };
 
+    const [isSaving, setIsSaving] = useState(false);
+
+    const onSaveDraft = async () => {
+        setIsSaving(true);
+        setMessage(null);
+        const res = await saveNewsletterDraft(newsletterId, payload.title, payload);
+        if (res.success && res.newsletter) {
+            setMessage({ type: 'success', text: 'Concept succesvol opgeslagen!' });
+            setNewsletterId(res.newsletter.id);
+            if (!newsletterId) {
+                router.replace(`/admin/newsletter/compose?id=${res.newsletter.id}`);
+            }
+        } else {
+            setMessage({ type: 'error', text: `Fout bij opslaan: ${res.error}` });
+        }
+        setIsSaving(false);
+    };
+
     const onSendAll = async () => {
         if (!confirm("Weet je zeker dat je deze nieuwsbrief naar ALLE abonnees wilt sturen?")) return;
-        
+
         setIsSendingAll(true);
         setMessage(null);
-        const res = await sendNewsletterToAll(payload);
+        const res = await sendNewsletterToAllWithSave(newsletterId, payload);
         if (res.success) {
             setMessage({ type: 'success', text: `Nieuwsbrief succesvol verzonden naar ${res.sentCount} abonnees!` });
         } else {
@@ -232,7 +292,7 @@ export default function ComposeNewsletterPage() {
     return (
         <div className="min-h-screen bg-gray-50 py-8 text-black">
             <div className="max-w-[98%] mx-auto px-4 h-[calc(100vh-4rem)] flex flex-col">
-                
+
                 {/* Header Actions */}
                 <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center gap-4">
@@ -242,21 +302,29 @@ export default function ComposeNewsletterPage() {
                         <h1 className="text-3xl font-bold text-brewery-dark">Nieuwsbrief Ontwerper</h1>
                     </div>
                     <div className="flex gap-4">
-                        <button 
+                        <button
+                            onClick={onSaveDraft}
+                            disabled={isSaving || isSendingPreview || isSendingAll}
+                            className="flex items-center gap-2 bg-white text-brewery-dark border-2 border-brewery-dark px-4 py-2 font-bold hover:bg-gray-50 disabled:opacity-50"
+                        >
+                            <Save className="h-4 w-4" />
+                            {isSaving ? 'Opslaan...' : 'Opslaan als Concept'}
+                        </button>
+                        <button
                             onClick={onSendPreview}
-                            disabled={isSendingPreview || isSendingAll}
+                            disabled={isSaving || isSendingPreview || isSendingAll}
                             className="flex items-center gap-2 bg-white text-brewery-dark border-2 border-brewery-dark px-4 py-2 font-bold hover:bg-gray-50 disabled:opacity-50"
                         >
                             <Eye className="h-4 w-4" />
                             {isSendingPreview ? 'Verzenden...' : 'Testmail'}
                         </button>
-                        <button 
+                        <button
                             onClick={onSendAll}
-                            disabled={isSendingPreview || isSendingAll}
+                            disabled={isSaving || isSendingPreview || isSendingAll}
                             className="flex items-center gap-2 bg-brewery-dark text-white px-4 py-2 font-bold hover:bg-brewery-green disabled:opacity-50"
                         >
                             <Send className="h-4 w-4" />
-                            {isSendingAll ? 'Verzenden...' : 'Verstuur naar alle abonnees'}
+                            {isSendingAll ? 'Verzenden...' : 'Verstuur naar alle'}
                         </button>
                     </div>
                 </div>
@@ -269,10 +337,10 @@ export default function ComposeNewsletterPage() {
 
                 {/* Split Pane */}
                 <div className="flex-1 flex gap-6 min-h-0">
-                    
+
                     {/* Left Pane: Editor */}
                     <div className="w-[35%] bg-white border-2 border-black p-6 overflow-y-auto">
-                        
+
                         <div className="space-y-8">
                             {/* General Settings */}
                             <section>
@@ -280,9 +348,9 @@ export default function ComposeNewsletterPage() {
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-semibold mb-1">E-mail Onderwerp / Titel</label>
-                                        <input 
-                                            type="text" 
-                                            value={payload.title} 
+                                        <input
+                                            type="text"
+                                            value={payload.title}
                                             onChange={e => handlePayloadChange('title', e.target.value)}
                                             className="w-full border p-2"
                                         />
@@ -296,17 +364,17 @@ export default function ComposeNewsletterPage() {
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-semibold mb-1">Intro Heading</label>
-                                        <input 
-                                            type="text" 
-                                            value={payload.introHeading} 
+                                        <input
+                                            type="text"
+                                            value={payload.introHeading}
                                             onChange={e => handlePayloadChange('introHeading', e.target.value)}
                                             className="w-full border p-2"
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-semibold mb-1">Intro Tekst</label>
-                                        <textarea 
-                                            value={payload.introBody} 
+                                        <textarea
+                                            value={payload.introBody}
                                             onChange={e => handlePayloadChange('introBody', e.target.value)}
                                             className="w-full border p-2 h-32"
                                         />
@@ -317,12 +385,12 @@ export default function ComposeNewsletterPage() {
                             {/* Stories Section */}
                             <section>
                                 <h2 className="text-xl font-bold border-b pb-2 mb-4">Verhalen / Nieuwtjes</h2>
-                                
+
                                 <div className="mb-4">
                                     <label className="block text-sm font-semibold mb-1">Verhalen Heading</label>
-                                    <input 
-                                        type="text" 
-                                        value={payload.storiesHeading} 
+                                    <input
+                                        type="text"
+                                        value={payload.storiesHeading}
                                         onChange={e => handlePayloadChange('storiesHeading', e.target.value)}
                                         className="w-full border p-2"
                                     />
@@ -331,25 +399,25 @@ export default function ComposeNewsletterPage() {
                                 <div className="space-y-6">
                                     {payload.stories.map((story, index) => (
                                         <div key={story.id} className="border p-4 bg-gray-50 relative">
-                                            <button 
+                                            <button
                                                 onClick={() => removeStory(story.id)}
                                                 className="absolute top-4 right-4 text-red-500 hover:text-red-700"
                                             >
                                                 <Trash2 className="h-5 w-5" />
                                             </button>
                                             <h3 className="font-bold mb-4">Verhaal {index + 1}</h3>
-                                            
+
                                             <div className="space-y-3">
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     placeholder="Titel"
-                                                    value={story.heading} 
+                                                    value={story.heading}
                                                     onChange={e => updateStory(story.id, 'heading', e.target.value)}
                                                     className="w-full border p-2"
                                                 />
-                                                <textarea 
+                                                <textarea
                                                     placeholder="Tekst..."
-                                                    value={story.body} 
+                                                    value={story.body}
                                                     onChange={e => updateStory(story.id, 'body', e.target.value)}
                                                     className="w-full border p-2 h-24"
                                                 />
@@ -388,26 +456,26 @@ export default function ComposeNewsletterPage() {
                                                             />
                                                         </label>
                                                     </div>
-                                                    <input 
-                                                        type="text" 
+                                                    <input
+                                                        type="text"
                                                         placeholder="Of voer handmatig een Afbeelding URL in"
-                                                        value={story.imageUrl} 
+                                                        value={story.imageUrl}
                                                         onChange={e => updateStory(story.id, 'imageUrl', e.target.value)}
                                                         className="w-full border p-2 text-sm"
                                                     />
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <input 
-                                                        type="text" 
+                                                    <input
+                                                        type="text"
                                                         placeholder="Link URL (optioneel)"
-                                                        value={story.linkUrl} 
+                                                        value={story.linkUrl}
                                                         onChange={e => updateStory(story.id, 'linkUrl', e.target.value)}
                                                         className="w-full border p-2 flex-1"
                                                     />
-                                                    <input 
-                                                        type="text" 
+                                                    <input
+                                                        type="text"
                                                         placeholder="Link Label"
-                                                        value={story.linkLabel} 
+                                                        value={story.linkLabel}
                                                         onChange={e => updateStory(story.id, 'linkLabel', e.target.value)}
                                                         className="w-full border p-2 w-32"
                                                     />
@@ -417,7 +485,7 @@ export default function ComposeNewsletterPage() {
                                     ))}
                                 </div>
 
-                                <button 
+                                <button
                                     onClick={addStory}
                                     className="mt-4 flex items-center gap-2 text-brewery-dark font-bold hover:underline"
                                 >
@@ -428,12 +496,12 @@ export default function ComposeNewsletterPage() {
                             {/* Stock Section */}
                             <section>
                                 <h2 className="text-xl font-bold border-b pb-2 mb-4">Stock Lijst</h2>
-                                
+
                                 <div className="mb-4">
                                     <label className="block text-sm font-semibold mb-1">Stock Heading</label>
-                                    <input 
-                                        type="text" 
-                                        value={payload.stockHeading} 
+                                    <input
+                                        type="text"
+                                        value={payload.stockHeading}
                                         onChange={e => handlePayloadChange('stockHeading', e.target.value)}
                                         className="w-full border p-2"
                                     />
@@ -447,8 +515,8 @@ export default function ComposeNewsletterPage() {
                                                 const isSelected = payload.stockRows.some(r => r.id === product.id);
                                                 return (
                                                     <label key={product.id} className="flex items-center gap-2 cursor-pointer p-2 border hover:bg-gray-50">
-                                                        <input 
-                                                            type="checkbox" 
+                                                        <input
+                                                            type="checkbox"
                                                             checked={isSelected}
                                                             onChange={() => toggleProductStock(product)}
                                                             className="w-4 h-4 text-brewery-dark border-gray-300 rounded focus:ring-brewery-dark"
@@ -467,19 +535,12 @@ export default function ComposeNewsletterPage() {
                                                 {payload.stockRows.map(row => (
                                                     <div key={row.id} className="flex items-center gap-2 p-2 border bg-gray-50">
                                                         <span className="font-semibold text-sm w-1/3 truncate">{row.name}</span>
-                                                        <input 
+                                                        <input
                                                             type="text"
                                                             value={row.description}
                                                             onChange={e => updateStockRow(row.id, 'description', e.target.value)}
                                                             className="border p-1 text-sm flex-1"
                                                             placeholder="Beschrijving"
-                                                        />
-                                                        <input 
-                                                            type="text"
-                                                            value={row.bottlePrice}
-                                                            onChange={e => updateStockRow(row.id, 'bottlePrice', e.target.value)}
-                                                            className="border p-1 text-sm w-24 text-right"
-                                                            placeholder="Prijs (Fles)"
                                                         />
                                                     </div>
                                                 ))}
@@ -492,12 +553,12 @@ export default function ComposeNewsletterPage() {
                             {/* Agenda Section */}
                             <section>
                                 <h2 className="text-xl font-bold border-b pb-2 mb-4">Agenda / Evenementen</h2>
-                                
+
                                 <div className="mb-4">
                                     <label className="block text-sm font-semibold mb-1">Agenda Heading</label>
-                                    <input 
-                                        type="text" 
-                                        value={payload.agendaHeading || ''} 
+                                    <input
+                                        type="text"
+                                        value={payload.agendaHeading || ''}
                                         onChange={e => handlePayloadChange('agendaHeading', e.target.value)}
                                         className="w-full border p-2"
                                     />
@@ -514,8 +575,8 @@ export default function ComposeNewsletterPage() {
                                                     const isSelected = (payload.agendaRows || []).some(r => r.id === event.id);
                                                     return (
                                                         <label key={event.id} className="flex items-center gap-2 cursor-pointer p-2 border hover:bg-gray-50">
-                                                            <input 
-                                                                type="checkbox" 
+                                                            <input
+                                                                type="checkbox"
                                                                 checked={isSelected}
                                                                 onChange={() => toggleEventAgenda(event)}
                                                                 className="w-4 h-4 text-brewery-dark border-gray-300 rounded focus:ring-brewery-dark"
@@ -547,7 +608,7 @@ export default function ComposeNewsletterPage() {
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                             <div>
                                                                 <label className="block text-xs font-semibold text-gray-600">Titel</label>
-                                                                <input 
+                                                                <input
                                                                     type="text"
                                                                     value={row.title}
                                                                     onChange={e => updateAgendaRow(row.id, 'title', e.target.value)}
@@ -556,7 +617,7 @@ export default function ComposeNewsletterPage() {
                                                             </div>
                                                             <div>
                                                                 <label className="block text-xs font-semibold text-gray-600">Datum & Tijd</label>
-                                                                <input 
+                                                                <input
                                                                     type="text"
                                                                     value={row.date}
                                                                     onChange={e => updateAgendaRow(row.id, 'date', e.target.value)}
@@ -567,7 +628,7 @@ export default function ComposeNewsletterPage() {
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                             <div>
                                                                 <label className="block text-xs font-semibold text-gray-600">Locatie</label>
-                                                                <input 
+                                                                <input
                                                                     type="text"
                                                                     value={row.location}
                                                                     onChange={e => updateAgendaRow(row.id, 'location', e.target.value)}
@@ -576,7 +637,7 @@ export default function ComposeNewsletterPage() {
                                                             </div>
                                                             <div>
                                                                 <label className="block text-xs font-semibold text-gray-600">Link URL (optioneel)</label>
-                                                                <input 
+                                                                <input
                                                                     type="text"
                                                                     value={row.linkUrl || ''}
                                                                     onChange={e => updateAgendaRow(row.id, 'linkUrl', e.target.value)}
@@ -587,7 +648,7 @@ export default function ComposeNewsletterPage() {
                                                         </div>
                                                         <div>
                                                             <label className="block text-xs font-semibold text-gray-600">Beschrijving</label>
-                                                            <textarea 
+                                                            <textarea
                                                                 value={row.description}
                                                                 onChange={e => updateAgendaRow(row.id, 'description', e.target.value)}
                                                                 className="border p-1 text-sm w-full h-16"
@@ -624,9 +685,9 @@ export default function ComposeNewsletterPage() {
                                             <label className="block text-sm font-semibold">Outro Heading</label>
                                             <span className="text-xs text-gray-400">Optioneel</span>
                                         </div>
-                                        <input 
-                                            type="text" 
-                                            value={payload.outroHeading || ''} 
+                                        <input
+                                            type="text"
+                                            value={payload.outroHeading || ''}
                                             onChange={e => handlePayloadChange('outroHeading', e.target.value)}
                                             className="w-full border p-2"
                                             placeholder="Bijv. Proost!"
@@ -637,8 +698,8 @@ export default function ComposeNewsletterPage() {
                                             <label className="block text-sm font-semibold">Outro Tekst</label>
                                             <span className="text-xs text-gray-400">Optioneel</span>
                                         </div>
-                                        <textarea 
-                                            value={payload.outroBody || ''} 
+                                        <textarea
+                                            value={payload.outroBody || ''}
                                             onChange={e => handlePayloadChange('outroBody', e.target.value)}
                                             className="w-full border p-2 h-32"
                                             placeholder="Voer hier je slotwoord in. Laat leeg om over te slaan."
@@ -656,7 +717,7 @@ export default function ComposeNewsletterPage() {
                             <span>Preview</span>
                             <span>{payload.title}</span>
                         </div>
-                        <iframe 
+                        <iframe
                             ref={iframeRef}
                             className="w-full flex-1 bg-white"
                             title="Newsletter Preview"

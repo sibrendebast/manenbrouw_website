@@ -161,8 +161,8 @@ export default function AdminProductsPage() {
                                 key={product.id}
                                 className={`bg-white border-2 border-black flex overflow-hidden ${product.isHidden ? "opacity-60" : ""}`}
                             >
-                                {/* Product image */}
-                                <div className="relative w-20 h-20 shrink-0 bg-gray-100">
+                                {/* Product image — fills card height */}
+                                <div className="relative w-28 self-stretch shrink-0 bg-gray-100">
                                     <Image src={imgSrc} alt={product.name} fill className="object-cover" />
                                 </div>
 

@@ -91,6 +91,20 @@ export default function NewsletterForm({ variant = 'default', className }: Newsl
                 required
                 disabled={isSubmitting || isSuccess}
             />
+
+            <label className={cn(
+                "flex items-center gap-2.5 cursor-pointer text-sm select-none py-1 text-left font-medium",
+                variant === 'footer' ? "text-gray-200 hover:text-white" : "text-white/95 hover:text-white"
+            )}>
+                <input
+                    type="checkbox"
+                    name="isCommercial"
+                    className="h-4 w-4 rounded cursor-pointer accent-brewery-dark shrink-0"
+                    disabled={isSubmitting || isSuccess}
+                />
+                <span>{t("footer.isCommercial")}</span>
+            </label>
+
             <button
                 type="submit"
                 disabled={isSubmitting || isSuccess}

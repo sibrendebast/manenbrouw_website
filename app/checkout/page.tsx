@@ -16,6 +16,7 @@ type CheckoutFormValues = {
     zip: string;
     city: string;
     newsletter: boolean;
+    newsletterCommercial: boolean;
     comment: string;
 };
 
@@ -27,6 +28,7 @@ const DEFAULT_FORM_VALUES: CheckoutFormValues = {
     zip: "",
     city: "",
     newsletter: false,
+    newsletterCommercial: false,
     comment: "",
 };
 
@@ -411,6 +413,21 @@ export default function CheckoutPage() {
                                                 <p className="text-brewery-dark/90 text-sm mt-1">
                                                     {t("home.newsletter.subtitle")}
                                                 </p>
+                                                {formValues.newsletter && (
+                                                    <div className="mt-3 flex items-center gap-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            id="newsletterCommercial"
+                                                            name="newsletterCommercial"
+                                                            className="h-4 w-4 text-brewery-green border-2 border-black rounded cursor-pointer accent-[#56c99b]"
+                                                            checked={formValues.newsletterCommercial}
+                                                            onChange={handleInputChange}
+                                                        />
+                                                        <label htmlFor="newsletterCommercial" className="text-sm font-semibold text-brewery-dark cursor-pointer">
+                                                            {t("checkout.newsletterCommercial")}
+                                                        </label>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

@@ -61,11 +61,12 @@ model OrderItem {
 }
 
 model NewsletterSubscriber {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  createdAt DateTime @default(now())
-  firstName String?
-  lastName  String?
+  id           String   @id @default(uuid())
+  email        String   @unique
+  createdAt    DateTime @default(now())
+  firstName    String?
+  lastName     String?
+  isCommercial Boolean  @default(false)
 }
 
 model Event {
@@ -510,12 +511,13 @@ enum AuditActionType {
 }
 
 model Newsletter {
-  id        String    @id @default(uuid())
-  title     String
-  payload   Json      // Stores the structured NewsletterPayload
-  status    String    @default("DRAFT") // "DRAFT" or "SENT"
-  sentAt    DateTime?
-  sentCount Int?      @default(0)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id             String    @id @default(uuid())
+  title          String
+  payload        Json      // Stores the structured NewsletterPayload
+  status         String    @default("DRAFT") // "DRAFT" or "SENT"
+  targetAudience String    @default("ALL") // "ALL", "COMMERCIAL", "NON_COMMERCIAL"
+  sentAt         DateTime?
+  sentCount      Int?      @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }

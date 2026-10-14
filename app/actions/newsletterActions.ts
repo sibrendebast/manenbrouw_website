@@ -30,6 +30,8 @@ export type NewsletterAgendaRow = {
     linkUrl?: string;
 };
 
+export type NewsletterTargetAudience = 'ALL' | 'COMMERCIAL' | 'NON_COMMERCIAL';
+
 export type NewsletterPayload = {
     title: string;
     introHeading: string;
@@ -42,6 +44,7 @@ export type NewsletterPayload = {
     agendaRows?: NewsletterAgendaRow[];
     outroHeading: string;
     outroBody: string;
+    targetAudience?: NewsletterTargetAudience;
 };
 
 export async function getProductsForNewsletter() {
@@ -422,7 +425,7 @@ export async function sendNewsletterPreview(payload: NewsletterPayload) {
     }
 }
 
-export async function sendNewsletterToAll(payload: NewsletterPayload) {
+export async function sendNewsletterToTarget(payload: NewsletterPayload, targetAudience: NewsletterTargetAudience = 'ALL') {
     let html = buildNewsletterHtml(payload);
     // Automatically translate local URLs to production for email readability
     html = html.replace(/http:\/\/localhost:\d+/g, 'https://www.manenbrouw.be');
@@ -432,15 +435,29 @@ export async function sendNewsletterToAll(payload: NewsletterPayload) {
     }
 
     try {
-        const subscribers = await prisma.newsletterSubscriber.findMany();
+        const whereClause = 
+            targetAudience === 'COMMERCIAL'
+                ? { isCommercial: true }
+                : targetAudience === 'NON_COMMERCIAL'
+                ? { isCommercial: false }
+                : {};
+
+        const subscribers = await prisma.newsletterSubscriber.findMany({
+            where: whereClause
+        });
+
         if (subscribers.length === 0) {
-            return { success: false, error: "No subscribers found." };
+            return { 
+                success: false, 
+                error: targetAudience === 'COMMERCIAL' 
+                    ? "Geen commerciële abonnees gevonden." 
+                    : targetAudience === 'NON_COMMERCIAL'
+                    ? "Geen particuliere abonnees gevonden."
+                    : "Geen abonnees gevonden." 
+            };
         }
 
-        // Resend batch sending allows up to 100 emails per request, but we can also just loop.
-        // Let's use the individual send in a loop for simplicity, or resend.batch.send if available.
-        // We'll use individual sends with a small delay or Promise.all.
-        // For larger lists, consider batching:
+        // Resend batch sending allows up to 100 emails per request
         const BATCH_SIZE = 50;
         let sentCount = 0;
 
@@ -457,7 +474,6 @@ export async function sendNewsletterToAll(payload: NewsletterPayload) {
 
             if (error) {
                 console.error("Error sending batch email:", error);
-                // We'll return early on first batch error, though in production you might want to continue
                 return { success: false, error: error.message, sentCount };
             }
             sentCount += batch.length;
@@ -465,9 +481,13 @@ export async function sendNewsletterToAll(payload: NewsletterPayload) {
 
         return { success: true, sentCount };
     } catch (error: any) {
-        console.error("Failed to send newsletter to all:", error);
+        console.error("Failed to send newsletter to target:", error);
         return { success: false, error: error.message };
     }
+}
+
+export async function sendNewsletterToAll(payload: NewsletterPayload) {
+    return sendNewsletterToTarget(payload, payload.targetAudience || 'ALL');
 }
 
 export async function deleteSubscriber(id: string) {
@@ -483,32 +503,109 @@ export async function deleteSubscriber(id: string) {
     }
 }
 
+export async function updateSubscriberCommercial(id: string, isCommercial: boolean) {
+    try {
+        const updated = await prisma.newsletterSubscriber.update({
+            where: { id },
+            data: { isCommercial }
+        });
+        revalidatePath('/admin/newsletter');
+        return { success: true, subscriber: updated };
+    } catch (error: any) {
+        console.error('Failed to update subscriber commercial status:', error);
+        return { success: false, error: error.message || 'Failed to update subscriber' };
+    }
+}
+
+export async function getSubscriberCounts() {
+    try {
+        const [total, commercial] = await Promise.all([
+            prisma.newsletterSubscriber.count(),
+            prisma.newsletterSubscriber.count({ where: { isCommercial: true } })
+        ]);
+        return {
+            total,
+            commercial,
+            regular: total - commercial
+        };
+    } catch (error) {
+        console.error('Failed to get subscriber counts:', error);
+        return { total: 0, commercial: 0, regular: 0 };
+    }
+}
+
 export async function subscribeToNewsletter(formData: FormData) {
     const email = formData.get('email') as string;
     const firstName = formData.get('firstName') as string | null;
     const lastName = formData.get('lastName') as string | null;
+    const isCommercial = formData.get('isCommercial') === 'on' || formData.get('isCommercial') === 'true';
 
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
         return { success: false, error: 'Invalid email address' };
     }
 
     try {
-        await prisma.newsletterSubscriber.create({
-            data: {
+        await prisma.newsletterSubscriber.upsert({
+            where: { email },
+            update: {
+                firstName: firstName || undefined,
+                lastName: lastName || undefined,
+                isCommercial: isCommercial,
+            },
+            create: {
                 email,
                 firstName: firstName || undefined,
-                lastName: lastName || undefined
+                lastName: lastName || undefined,
+                isCommercial: isCommercial,
             }
         });
         revalidatePath('/admin/newsletter');
         return { success: true };
     } catch (error) {
-        // Check for unique constraint violation (P2002)
-        if ((error as any).code === 'P2002') {
-            return { success: true }; // Treat duplicate as success to avoid leaking info/errors
-        }
         console.error('Failed to subscribe:', error);
         return { success: false, error: 'Failed to subscribe' };
+    }
+}
+
+export async function addSubscriberManual(formData: FormData) {
+    const email = (formData.get('email') as string || '').trim().toLowerCase();
+    const firstName = (formData.get('firstName') as string || '').trim() || null;
+    const lastName = (formData.get('lastName') as string || '').trim() || null;
+    const isCommercial = formData.get('isCommercial') === 'on' || formData.get('isCommercial') === 'true';
+
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+        return { success: false, error: 'Vul een geldig e-mailadres in.' };
+    }
+
+    try {
+        const existing = await prisma.newsletterSubscriber.findUnique({
+            where: { email }
+        });
+
+        const subscriber = await prisma.newsletterSubscriber.upsert({
+            where: { email },
+            update: {
+                firstName: firstName || undefined,
+                lastName: lastName || undefined,
+                isCommercial: isCommercial,
+            },
+            create: {
+                email,
+                firstName: firstName || undefined,
+                lastName: lastName || undefined,
+                isCommercial: isCommercial,
+            }
+        });
+
+        revalidatePath('/admin/newsletter');
+        return { 
+            success: true, 
+            isNew: !existing,
+            email: subscriber.email 
+        };
+    } catch (error: any) {
+        console.error('Failed to manually add subscriber:', error);
+        return { success: false, error: error.message || 'Kon abonnee niet toevoegen.' };
     }
 }
 
@@ -546,6 +643,7 @@ export async function getNewsletterById(id: string) {
         if (newsletter) {
             return {
                 ...newsletter,
+                targetAudience: (newsletter.targetAudience as NewsletterTargetAudience) || 'ALL',
                 payload: newsletter.payload as any as NewsletterPayload
             };
         }
@@ -556,26 +654,26 @@ export async function getNewsletterById(id: string) {
     }
 }
 
-export async function saveNewsletterDraft(id: string | null, title: string, payload: NewsletterPayload) {
+export async function saveNewsletterDraft(id: string | null, title: string, payload: NewsletterPayload, targetAudience: NewsletterTargetAudience = 'ALL') {
     try {
+        const audience = targetAudience || payload.targetAudience || 'ALL';
+        const dataToSave = {
+            title,
+            payload: { ...payload, targetAudience: audience } as any,
+            status: 'DRAFT',
+            targetAudience: audience,
+        };
+
         if (id) {
             const updated = await prisma.newsletter.update({
                 where: { id },
-                data: {
-                    title,
-                    payload: payload as any,
-                    status: 'DRAFT',
-                }
+                data: dataToSave
             });
             revalidatePath('/admin/newsletter');
             return { success: true, newsletter: updated };
         } else {
             const created = await prisma.newsletter.create({
-                data: {
-                    title,
-                    payload: payload as any,
-                    status: 'DRAFT',
-                }
+                data: dataToSave
             });
             revalidatePath('/admin/newsletter');
             return { success: true, newsletter: created };
@@ -586,34 +684,32 @@ export async function saveNewsletterDraft(id: string | null, title: string, payl
     }
 }
 
-export async function sendNewsletterToAllWithSave(id: string | null, payload: NewsletterPayload) {
-    const sendResult = await sendNewsletterToAll(payload);
+export async function sendNewsletterToTargetWithSave(id: string | null, payload: NewsletterPayload, targetAudience: NewsletterTargetAudience = 'ALL') {
+    const audience = targetAudience || payload.targetAudience || 'ALL';
+    const sendResult = await sendNewsletterToTarget(payload, audience);
     if (!sendResult.success) {
         return sendResult;
     }
 
     try {
         const sentCount = sendResult.sentCount || 0;
+        const dataToSave = {
+            title: payload.title,
+            payload: { ...payload, targetAudience: audience } as any,
+            status: 'SENT',
+            targetAudience: audience,
+            sentAt: new Date(),
+            sentCount: sentCount
+        };
+
         if (id) {
             await prisma.newsletter.update({
                 where: { id },
-                data: {
-                    title: payload.title,
-                    payload: payload as any,
-                    status: 'SENT',
-                    sentAt: new Date(),
-                    sentCount: sentCount
-                }
+                data: dataToSave
             });
         } else {
             await prisma.newsletter.create({
-                data: {
-                    title: payload.title,
-                    payload: payload as any,
-                    status: 'SENT',
-                    sentAt: new Date(),
-                    sentCount: sentCount
-                }
+                data: dataToSave
             });
         }
         revalidatePath('/admin/newsletter');
@@ -622,6 +718,10 @@ export async function sendNewsletterToAllWithSave(id: string | null, payload: Ne
         console.error('Failed to save sent newsletter history:', error);
         return { success: true, sentCount: sendResult.sentCount, warning: "Emails sent, but failed to save log: " + error.message };
     }
+}
+
+export async function sendNewsletterToAllWithSave(id: string | null, payload: NewsletterPayload) {
+    return sendNewsletterToTargetWithSave(id, payload, payload.targetAudience || 'ALL');
 }
 
 export async function deleteNewsletter(id: string) {

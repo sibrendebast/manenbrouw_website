@@ -35,6 +35,7 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
     const zip = formData.get("zip") as string;
     const country = formData.get("country") as string;
     const newsletter = formData.get("newsletter") === "on";
+    const newsletterCommercial = formData.get("newsletterCommercial") === "on";
     const locale = (formData.get("locale") as string) || "nl";
 
     if (!customerName || !customerEmail || !customerPhone || !shippingMethod) {
@@ -208,12 +209,14 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                     where: { email: customerEmail },
                     update: {
                         firstName: firstName || undefined,
-                        lastName: lastName || undefined
+                        lastName: lastName || undefined,
+                        isCommercial: newsletterCommercial,
                     },
                     create: {
                         email: customerEmail,
                         firstName: firstName || undefined,
-                        lastName: lastName || undefined
+                        lastName: lastName || undefined,
+                        isCommercial: newsletterCommercial,
                     },
                 });
             } catch (error) {

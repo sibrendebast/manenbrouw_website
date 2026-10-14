@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ArrowLeft, Send, Eye, Plus, Trash2, Upload, X, Save } from "lucide-react";
+import { ArrowLeft, Send, Eye, Plus, Trash2, Upload, X, Save, Building2, Users, User } from "lucide-react";
 import {
     NewsletterPayload,
+    NewsletterTargetAudience,
     NewsletterStory,
     NewsletterStockRow,
     NewsletterAgendaRow,
@@ -14,8 +15,9 @@ import {
     generateNewsletterHtml,
     sendNewsletterPreview,
     saveNewsletterDraft,
-    sendNewsletterToAllWithSave,
-    getNewsletterById
+    sendNewsletterToTargetWithSave,
+    getNewsletterById,
+    getSubscriberCounts
 } from "@/app/actions/newsletterActions";
 
 const convertProductToStockRow = (product: any): NewsletterStockRow => {
@@ -77,9 +79,15 @@ function ComposeNewsletterContent() {
         agendaHeading: "Agenda / Evenementen",
         agendaRows: [],
         outroHeading: "Cheers",
-        outroBody: "Bestellen kan eenvoudig rechtstreeks via onze webshop op https://manenbrouw.be/shop. Kies je favoriete bieren en reken veilig en snel online af!\n\nCheers,\nSibren & Tom\nHet Man & Brouw team"
+        outroBody: "Bestellen kan eenvoudig rechtstreeks via onze webshop op https://manenbrouw.be/shop. Kies je favoriete bieren en reken veilig en snel online af!\n\nCheers,\nSibren & Tom\nHet Man & Brouw team",
+        targetAudience: 'ALL'
     });
 
+    const [subscriberCounts, setSubscriberCounts] = useState<{ total: number; commercial: number; regular: number }>({
+        total: 0,
+        commercial: 0,
+        regular: 0
+    });
     const [htmlPreview, setHtmlPreview] = useState("");
     const [products, setProducts] = useState<any[]>([]);
     const [events, setEvents] = useState<any[]>([]);
@@ -90,14 +98,21 @@ function ComposeNewsletterContent() {
 
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
-    // Fetch products, events and potential draft on mount
+    // Fetch products, events, subscriber counts and potential draft on mount
     useEffect(() => {
         const loadInitialData = async () => {
+            getSubscriberCounts()
+                .then(counts => setSubscriberCounts(counts))
+                .catch(err => console.error("Failed to load subscriber counts:", err));
+
             let loadedDraft = null;
             if (newsletterIdParam) {
                 loadedDraft = await getNewsletterById(newsletterIdParam);
                 if (loadedDraft && loadedDraft.payload) {
-                    setPayload(loadedDraft.payload);
+                    setPayload({
+                        ...loadedDraft.payload,
+                        targetAudience: loadedDraft.targetAudience || loadedDraft.payload.targetAudience || 'ALL'
+                    });
                 }
             }
 
@@ -259,10 +274,25 @@ function ComposeNewsletterContent() {
 
     const [isSaving, setIsSaving] = useState(false);
 
+    const targetAudience: NewsletterTargetAudience = payload.targetAudience || 'ALL';
+    const targetCount = 
+        targetAudience === 'COMMERCIAL' 
+            ? subscriberCounts.commercial 
+            : targetAudience === 'NON_COMMERCIAL'
+            ? subscriberCounts.regular
+            : subscriberCounts.total;
+
+    const sendButtonLabel = 
+        targetAudience === 'COMMERCIAL'
+            ? `Verstuur naar zakelijk (${targetCount})`
+            : targetAudience === 'NON_COMMERCIAL'
+            ? `Verstuur naar particulier (${targetCount})`
+            : `Verstuur naar alle (${targetCount})`;
+
     const onSaveDraft = async () => {
         setIsSaving(true);
         setMessage(null);
-        const res = await saveNewsletterDraft(newsletterId, payload.title, payload);
+        const res = await saveNewsletterDraft(newsletterId, payload.title, payload, targetAudience);
         if (res.success && res.newsletter) {
             setMessage({ type: 'success', text: 'Concept succesvol opgeslagen!' });
             setNewsletterId(res.newsletter.id);
@@ -276,11 +306,18 @@ function ComposeNewsletterContent() {
     };
 
     const onSendAll = async () => {
-        if (!confirm("Weet je zeker dat je deze nieuwsbrief naar ALLE abonnees wilt sturen?")) return;
+        const targetDesc = 
+            targetAudience === 'COMMERCIAL'
+                ? `alleen de ${targetCount} COMMERCIËLE klanten (bars, restaurants, winkels)`
+                : targetAudience === 'NON_COMMERCIAL'
+                ? `alleen de ${targetCount} PARTICULIERE abonnees`
+                : `ALLE ${targetCount} abonnees`;
+
+        if (!confirm(`Weet je zeker dat je deze nieuwsbrief wilt sturen naar ${targetDesc}?`)) return;
 
         setIsSendingAll(true);
         setMessage(null);
-        const res = await sendNewsletterToAllWithSave(newsletterId, payload);
+        const res = await sendNewsletterToTargetWithSave(newsletterId, payload, targetAudience);
         if (res.success) {
             setMessage({ type: 'success', text: `Nieuwsbrief succesvol verzonden naar ${res.sentCount} abonnees!` });
         } else {
@@ -305,7 +342,7 @@ function ComposeNewsletterContent() {
                         <button
                             onClick={onSaveDraft}
                             disabled={isSaving || isSendingPreview || isSendingAll}
-                            className="flex items-center gap-2 bg-white text-brewery-dark border-2 border-brewery-dark px-4 py-2 font-bold hover:bg-gray-50 disabled:opacity-50"
+                            className="flex items-center gap-2 bg-white text-brewery-dark border-2 border-brewery-dark px-4 py-2 font-bold hover:bg-gray-50 disabled:opacity-50 cursor-pointer"
                         >
                             <Save className="h-4 w-4" />
                             {isSaving ? 'Opslaan...' : 'Opslaan als Concept'}
@@ -313,18 +350,18 @@ function ComposeNewsletterContent() {
                         <button
                             onClick={onSendPreview}
                             disabled={isSaving || isSendingPreview || isSendingAll}
-                            className="flex items-center gap-2 bg-white text-brewery-dark border-2 border-brewery-dark px-4 py-2 font-bold hover:bg-gray-50 disabled:opacity-50"
+                            className="flex items-center gap-2 bg-white text-brewery-dark border-2 border-brewery-dark px-4 py-2 font-bold hover:bg-gray-50 disabled:opacity-50 cursor-pointer"
                         >
                             <Eye className="h-4 w-4" />
                             {isSendingPreview ? 'Verzenden...' : 'Testmail'}
                         </button>
                         <button
                             onClick={onSendAll}
-                            disabled={isSaving || isSendingPreview || isSendingAll}
-                            className="flex items-center gap-2 bg-brewery-dark text-white px-4 py-2 font-bold hover:bg-brewery-green disabled:opacity-50"
+                            disabled={isSaving || isSendingPreview || isSendingAll || targetCount === 0}
+                            className="flex items-center gap-2 bg-brewery-dark text-white px-4 py-2 font-bold hover:bg-brewery-green disabled:opacity-50 cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                         >
                             <Send className="h-4 w-4" />
-                            {isSendingAll ? 'Verzenden...' : 'Verstuur naar alle'}
+                            {isSendingAll ? 'Verzenden...' : sendButtonLabel}
                         </button>
                     </div>
                 </div>
@@ -339,9 +376,108 @@ function ComposeNewsletterContent() {
                 <div className="flex-1 flex gap-6 min-h-0">
 
                     {/* Left Pane: Editor */}
-                    <div className="w-[35%] bg-white border-2 border-black p-6 overflow-y-auto">
+                    <div className="w-[35%] bg-white border-2 border-black p-6 overflow-y-auto shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
 
                         <div className="space-y-8">
+                            {/* Doelgroep / Audience Selector */}
+                            <section>
+                                <h2 className="text-xl font-bold border-b pb-2 mb-4 flex items-center justify-between">
+                                    <span>Doelgroep</span>
+                                    <span className="text-xs font-normal text-gray-500">Ontvangers selecteren</span>
+                                </h2>
+                                <div className="space-y-2.5">
+                                    {/* All */}
+                                    <label className={`flex items-start gap-3 p-3 border-2 cursor-pointer transition-all ${
+                                        targetAudience === 'ALL'
+                                            ? 'border-black bg-gray-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                                            : 'border-gray-200 hover:border-gray-400 bg-white'
+                                    }`}>
+                                        <input
+                                            type="radio"
+                                            name="targetAudience"
+                                            value="ALL"
+                                            checked={targetAudience === 'ALL'}
+                                            onChange={() => handlePayloadChange('targetAudience', 'ALL')}
+                                            className="mt-1 accent-brewery-dark cursor-pointer"
+                                        />
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-center">
+                                                <span className="font-bold text-sm text-brewery-dark flex items-center gap-1.5">
+                                                    <Users className="h-4 w-4 text-gray-700" />
+                                                    Alle abonnees
+                                                </span>
+                                                <span className="text-xs bg-gray-200 text-gray-800 px-2 py-0.5 font-bold rounded">
+                                                    {subscriberCounts.total}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-0.5">
+                                                Stuur naar zowel particulieren als zakelijke klanten.
+                                            </p>
+                                        </div>
+                                    </label>
+
+                                    {/* Commercial only */}
+                                    <label className={`flex items-start gap-3 p-3 border-2 cursor-pointer transition-all ${
+                                        targetAudience === 'COMMERCIAL'
+                                            ? 'border-emerald-800 bg-emerald-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                                            : 'border-gray-200 hover:border-gray-400 bg-white'
+                                    }`}>
+                                        <input
+                                            type="radio"
+                                            name="targetAudience"
+                                            value="COMMERCIAL"
+                                            checked={targetAudience === 'COMMERCIAL'}
+                                            onChange={() => handlePayloadChange('targetAudience', 'COMMERCIAL')}
+                                            className="mt-1 accent-emerald-700 cursor-pointer"
+                                        />
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-center">
+                                                <span className="font-bold text-sm text-emerald-900 flex items-center gap-1.5">
+                                                    <Building2 className="h-4 w-4 text-emerald-700" />
+                                                    Commerciële klanten (B2B)
+                                                </span>
+                                                <span className="text-xs bg-emerald-200 text-emerald-900 px-2 py-0.5 font-bold rounded">
+                                                    {subscriberCounts.commercial}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-emerald-800/80 mt-0.5">
+                                                Speciaal voor bars, cafés, restaurants en winkels.
+                                            </p>
+                                        </div>
+                                    </label>
+
+                                    {/* Regular consumers only */}
+                                    <label className={`flex items-start gap-3 p-3 border-2 cursor-pointer transition-all ${
+                                        targetAudience === 'NON_COMMERCIAL'
+                                            ? 'border-blue-800 bg-blue-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                                            : 'border-gray-200 hover:border-gray-400 bg-white'
+                                    }`}>
+                                        <input
+                                            type="radio"
+                                            name="targetAudience"
+                                            value="NON_COMMERCIAL"
+                                            checked={targetAudience === 'NON_COMMERCIAL'}
+                                            onChange={() => handlePayloadChange('targetAudience', 'NON_COMMERCIAL')}
+                                            className="mt-1 accent-blue-700 cursor-pointer"
+                                        />
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-center">
+                                                <span className="font-bold text-sm text-blue-900 flex items-center gap-1.5">
+                                                    <User className="h-4 w-4 text-blue-700" />
+                                                    Particulieren
+                                                </span>
+                                                <span className="text-xs bg-blue-200 text-blue-900 px-2 py-0.5 font-bold rounded">
+                                                    {subscriberCounts.regular}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-blue-800/80 mt-0.5">
+                                                Stuur enkel naar consumenten (geen zakelijke klanten).
+                                            </p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </section>
+
                             {/* General Settings */}
                             <section>
                                 <h2 className="text-xl font-bold border-b pb-2 mb-4">Algemeen</h2>

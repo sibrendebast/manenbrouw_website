@@ -24,9 +24,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         abv: "",
         volume: "33cl",
         price: "",
+        b2bPrice: "",
+        kegPrice: "",
+        stockCount: 0,
+        kegStockCount: 0,
         description: "",
         images: [] as string[],
-        stockCount: 0,
         btwCategory: 21,
         inStock: false
     });
@@ -49,9 +52,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                         abv: data.abv || "",
                         volume: data.volume || "",
                         price: data.price.toString(),
+                        b2bPrice: data.b2bPrice !== null && data.b2bPrice !== undefined ? data.b2bPrice.toString() : "",
+                        kegPrice: data.kegPrice !== null && data.kegPrice !== undefined ? data.kegPrice.toString() : "",
+                        stockCount: data.stockCount ?? 0,
+                        kegStockCount: data.kegStockCount ?? 0,
                         description: data.description,
                         images: data.images,
-                        stockCount: data.stockCount,
                         btwCategory: data.btwCategory || 21,
                         inStock: data.inStock
                     });
@@ -135,9 +141,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 abv: product.abv,
                 volume: product.volume,
                 price: parseFloat(product.price),
+                b2bPrice: product.b2bPrice ? parseFloat(product.b2bPrice) : null,
+                kegPrice: product.kegPrice ? parseFloat(product.kegPrice) : null,
+                stockCount: Number(product.stockCount),
+                kegStockCount: Number(product.kegStockCount),
                 description: product.description,
                 images: product.images,
-                stockCount: Number(product.stockCount),
                 btwCategory: Number(product.btwCategory),
                 inStock: product.inStock
             });
@@ -278,7 +287,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                             )}
                             <div className={['BEER', 'GLASS', 'GIFTBOX'].includes(product.category) ? "" : "col-span-2"}>
                                 <label className="block text-sm font-bold mb-1 text-black">
-                                    Price (€)
+                                    Price (€) <span className="text-xs text-gray-500 font-normal">(Consument incl. BTW)</span>
                                 </label>
                                 <input
                                     required
@@ -293,18 +302,19 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-6">
+                        <div className="grid grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-bold mb-1 text-black">
-                                    Stock Count
+                                    B2B Flesprijs (€) <span className="text-xs text-gray-500 font-normal">(optioneel)</span>
                                 </label>
                                 <input
-                                    required
                                     type="number"
-                                    value={product.stockCount}
+                                    step="0.01"
+                                    value={product.b2bPrice}
                                     onChange={(e) =>
-                                        setProduct({ ...product, stockCount: parseInt(e.target.value) })
+                                        setProduct({ ...product, b2bPrice: e.target.value })
                                     }
+                                    placeholder="bijv. 2.10"
                                     className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
                                 />
                             </div>
@@ -325,6 +335,37 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                     <option value={12}>12%</option>
                                     <option value={21}>21%</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-6">
+                            <div>
+                                <label className="block text-sm font-bold mb-1 text-black">
+                                    Flesvoorraad (stuks)
+                                </label>
+                                <input
+                                    required
+                                    type="number"
+                                    value={product.stockCount}
+                                    onChange={(e) =>
+                                        setProduct({ ...product, stockCount: parseInt(e.target.value) || 0 })
+                                    }
+                                    className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold mb-1 text-black">
+                                    Vatvoorraad (vaten)
+                                </label>
+                                <input
+                                    type="number"
+                                    value={product.kegStockCount}
+                                    onChange={(e) =>
+                                        setProduct({ ...product, kegStockCount: parseInt(e.target.value) || 0 })
+                                    }
+                                    placeholder="0"
+                                    className="w-full px-4 py-2 border-2 border-black focus:outline-none focus:border-brewery-green"
+                                />
                             </div>
                             <div className="flex items-end">
                                 <label className="flex items-center cursor-pointer mb-2">
@@ -352,6 +393,24 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                 </label>
                             </div>
                         </div>
+
+                        {product.category === 'BEER' && (
+                            <div className="p-4 border-2 border-dashed border-amber-400 bg-amber-50/60 rounded">
+                                <label className="block text-sm font-bold text-amber-950 mb-1">
+                                    Vatprijs / Keg price (€) <span className="text-xs text-amber-800 font-normal">(voor horeca/B2B)</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={product.kegPrice}
+                                    onChange={(e) =>
+                                        setProduct({ ...product, kegPrice: e.target.value })
+                                    }
+                                    placeholder="bijv. 85.00"
+                                    className="w-full px-4 py-2 border-2 border-black bg-white focus:outline-none focus:border-brewery-green"
+                                />
+                            </div>
+                        )}
 
                         <div>
                             <label className="block text-sm font-bold mb-1 text-black">

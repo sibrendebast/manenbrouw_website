@@ -19,6 +19,10 @@ export type NewsletterStockRow = {
     description: string;
     imageUrl: string;
     bottlePrice: string;
+    b2bPrice?: string;
+    stockCount?: number | string;
+    kegPrice?: string;
+    kegStockCount?: number | string;
 };
 
 export type NewsletterAgendaRow = {
@@ -64,6 +68,10 @@ export async function getProductsForNewsletter() {
             description: true,
             images: true,
             price: true,
+            b2bPrice: true,
+            stockCount: true,
+            kegPrice: true,
+            kegStockCount: true,
             inStock: true,
         }
     });
@@ -111,13 +119,76 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
             </table>
     `).join('');
 
-    const stockRowsHtml = payload.stockRows.map(row => `
+    const isCommercial = payload.targetAudience === 'COMMERCIAL';
+
+    const stockRowsHtml = payload.stockRows.map(row => {
+        if (isCommercial) {
+            const b2bPriceVal = row.b2bPrice ? row.b2bPrice : (row.bottlePrice || 'Op aanvraag');
+            const hasStock = row.stockCount !== undefined && row.stockCount !== '' && row.stockCount !== null;
+            const stockCountNum = Number(row.stockCount);
+            const stockHtml = hasStock
+                ? (stockCountNum > 0
+                    ? `<div style="font-size: 11px; color: #555; margin-top: 2px;">${row.stockCount} stuks</div>`
+                    : `<div style="font-size: 11px; color: #b91c1c; font-weight: bold; margin-top: 2px;">Uitverkocht</div>`)
+                : '';
+
+            const hasKeg = Boolean(row.kegPrice);
+            const hasKegStock = row.kegStockCount !== undefined && row.kegStockCount !== '' && row.kegStockCount !== null;
+            const kegStockNum = Number(row.kegStockCount);
+            const kegStockHtml = hasKeg && hasKegStock
+                ? (kegStockNum > 0
+                    ? `<div style="font-size: 11px; color: #555; margin-top: 2px;">${row.kegStockCount} vaten</div>`
+                    : `<div style="font-size: 11px; color: #b91c1c; font-weight: bold; margin-top: 2px;">Uitverkocht</div>`)
+                : '';
+
+            return `
                     <tr>
-                        <td class="beer-img-cell">${row.imageUrl ? `<img src="${row.imageUrl}" alt="${row.name}" class="beer-image">` : ''}</td>
-                        <td class="beer-name-cell">${row.name}</td>
-                        <td class="beer-desc-cell">${row.description}</td>
+                        <td style="padding: 10px 8px; text-align: center; vertical-align: middle; border-bottom: 1px solid #eee; width: 60px;">
+                            ${row.imageUrl ? `<img src="${row.imageUrl}" alt="${row.name}" style="width: 50px; height: 50px; object-fit: cover; display: block; margin: 0 auto; border: 1px solid #000;">` : ''}
+                        </td>
+                        <td style="padding: 10px 8px; font-weight: bold; vertical-align: middle; border-bottom: 1px solid #eee; color: #111;">
+                            ${row.name}
+                        </td>
+                        <td style="padding: 10px 8px; color: #555; font-size: 0.88em; vertical-align: middle; border-bottom: 1px solid #eee;">
+                            ${row.description}
+                        </td>
+                        <td style="padding: 10px 8px; text-align: right; vertical-align: middle; border-bottom: 1px solid #eee; white-space: nowrap;">
+                            <strong style="color: #15803d; font-size: 0.95em;">${b2bPriceVal}</strong>
+                            ${stockHtml}
+                        </td>
+                        <td style="padding: 10px 8px; text-align: right; vertical-align: middle; border-bottom: 1px solid #eee; white-space: nowrap;">
+                            ${hasKeg ? `<strong style="color: #b45309; font-size: 0.95em;">${row.kegPrice}</strong>${kegStockHtml}` : '<span style="color: #999; font-size: 0.9em;">NVT</span>'}
+                        </td>
                     </tr>
-    `).join('');
+            `;
+        }
+
+        const hasStock = row.stockCount !== undefined && row.stockCount !== '' && row.stockCount !== null;
+        const stockCountNum = Number(row.stockCount);
+        const stockBadge = hasStock
+            ? (stockCountNum > 0
+                ? `<div style="font-size: 11px; color: #666; margin-top: 2px;">${row.stockCount} op voorraad</div>`
+                : `<div style="font-size: 11px; color: #b91c1c; font-weight: bold; margin-top: 2px;">Uitverkocht</div>`)
+            : '';
+
+        return `
+                    <tr>
+                        <td class="beer-img-cell" style="padding: 8px 10px 8px 0; vertical-align: middle; width: 70px; border-bottom: 1px solid #eee;">
+                            ${row.imageUrl ? `<img src="${row.imageUrl}" alt="${row.name}" class="beer-image" style="width: 70px; height: 70px; object-fit: cover; display: block; border: 2px solid #000;">` : ''}
+                        </td>
+                        <td class="beer-name-cell" style="padding: 8px 12px; font-weight: bold; vertical-align: middle; border-bottom: 1px solid #eee;">
+                            ${row.name}
+                        </td>
+                        <td class="beer-desc-cell" style="padding: 8px 12px; color: #555; font-size: 0.9em; vertical-align: middle; border-bottom: 1px solid #eee;">
+                            ${row.description}
+                        </td>
+                        <td style="padding: 8px 12px; text-align: right; vertical-align: middle; border-bottom: 1px solid #eee; white-space: nowrap;">
+                            <strong style="color: #234c37; font-size: 1em;">${row.bottlePrice}</strong>
+                            ${stockBadge}
+                        </td>
+                    </tr>
+        `;
+    }).join('');
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -334,14 +405,44 @@ function buildNewsletterHtml(payload: NewsletterPayload): string {
         ${payload.stockRows.length > 0 ? `
         <section>
             ${payload.stockHeading ? `<h2>${payload.stockHeading}</h2>` : ''}
-            <table>
+            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                ${isCommercial ? `
+                <thead>
+                    <tr>
+                        <th style="width: 60px; padding: 10px 8px; background-color: #f2f2f2; border-bottom: 2px solid #000; text-align: center;"></th>
+                        <th style="padding: 10px 8px; background-color: #f2f2f2; border-bottom: 2px solid #000; text-align: left; font-size: 0.9em; color: #111;">Bier</th>
+                        <th style="padding: 10px 8px; background-color: #f2f2f2; border-bottom: 2px solid #000; text-align: left; font-size: 0.9em; color: #111;">Beschrijving</th>
+                        <th style="padding: 10px 8px; background-color: #f2f2f2; border-bottom: 2px solid #000; text-align: right; font-size: 0.9em; color: #111; white-space: nowrap;">Fles (B2B)</th>
+                        <th style="padding: 10px 8px; background-color: #f2f2f2; border-bottom: 2px solid #000; text-align: right; font-size: 0.9em; color: #111; white-space: nowrap;">Vat (20L)</th>
+                    </tr>
+                </thead>
+                ` : `
+                <thead>
+                    <tr>
+                        <th style="width: 70px; padding: 8px 10px 8px 0; background-color: #f2f2f2; border-bottom: 2px solid #000; text-align: left;"></th>
+                        <th style="padding: 8px 12px; background-color: #f2f2f2; border-bottom: 2px solid #000; text-align: left; font-size: 0.9em; color: #111;">Bier</th>
+                        <th style="padding: 8px 12px; background-color: #f2f2f2; border-bottom: 2px solid #000; text-align: left; font-size: 0.9em; color: #111;">Beschrijving</th>
+                        <th style="padding: 8px 12px; background-color: #f2f2f2; border-bottom: 2px solid #000; text-align: right; font-size: 0.9em; color: #111;">Prijs</th>
+                    </tr>
+                </thead>
+                `}
                 <tbody>
                     ${stockRowsHtml}
                 </tbody>
             </table>
+            ${isCommercial ? `
+            <p style="margin-top: 14px; margin-bottom: 0; font-size: 0.85em; color: #555; font-style: italic;">
+                * Prijzen zijn exclusief BTW. Vaten worden geleverd in 20L KeyKeg.
+            </p>
+            <div style="text-align: left; margin-top: 25px; margin-bottom: 10px;">
+                <a href="mailto:info@manenbrouw.be?subject=B2B%20Bestelling%20-%20Man%20%26%20Brouw" style="display: inline-block; background-color: #56c99b; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; font-size: 1em; border: 2px solid black; box-shadow: 4px 4px 0px 0px #000; margin-right: 10px; margin-bottom: 8px;">Plaats een B2B bestelling per mail</a>
+                <a href="tel:0032472766499" style="display: inline-block; background-color: #f2f2f2; color: #333; padding: 12px 20px; text-decoration: none; font-weight: bold; font-size: 1em; border: 2px solid black; box-shadow: 4px 4px 0px 0px #000; margin-bottom: 8px;">Bel: +32 4 72 766 499</a>
+            </div>
+            ` : `
             <div style="text-align: left; margin-top: 25px; margin-bottom: 10px;">
                 <a href="https://manenbrouw.be/shop" style="display: inline-block; background-color: #56c99b; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; font-size: 1em; border: 2px solid black; box-shadow: 4px 4px 0px 0px #000;">Bestel in onze webshop</a>
             </div>
+            `}
         </section>
         ` : ''}
 

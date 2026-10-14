@@ -117,34 +117,26 @@ export async function getProductById(id: string) {
 
 export async function createProduct(data: any) {
     try {
-        const { images, btwCategory, ...rest } = data
+        const { images, btwCategory, b2bPrice, kegPrice, kegStockCount, stockCount, price, ...rest } = data
 
-        // Try to create with btwCategory first
-        try {
-            await prisma.product.create({
-                data: {
-                    ...rest,
-                    images: JSON.stringify(images),
-                    ...(btwCategory !== undefined && { btwCategory }),
-                },
-            })
-        } catch (error: any) {
-            // If column doesn't exist (P2022), retry without btwCategory
-            if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
-                console.log('btwCategory column does not exist yet, creating product without it')
-                await prisma.product.create({
-                    data: {
-                        ...rest,
-                        images: JSON.stringify(images),
-                    },
-                })
-            } else {
-                throw error
-            }
+        const parsedData = {
+            ...rest,
+            price: parseFloat(price),
+            b2bPrice: b2bPrice !== undefined && b2bPrice !== "" && b2bPrice !== null ? parseFloat(b2bPrice) : null,
+            kegPrice: kegPrice !== undefined && kegPrice !== "" && kegPrice !== null ? parseFloat(kegPrice) : null,
+            stockCount: stockCount !== undefined && stockCount !== "" && stockCount !== null ? parseInt(stockCount, 10) : 0,
+            kegStockCount: kegStockCount !== undefined && kegStockCount !== "" && kegStockCount !== null ? parseInt(kegStockCount, 10) : 0,
+            images: JSON.stringify(images),
+            ...(btwCategory !== undefined && { btwCategory }),
         }
+
+        await prisma.product.create({
+            data: parsedData,
+        })
 
         revalidatePath('/shop')
         revalidatePath('/admin/dashboard')
+        revalidatePath('/admin/products')
         return { success: true }
     } catch (error) {
         console.error('Failed to create product:', error)
@@ -154,19 +146,52 @@ export async function createProduct(data: any) {
 
 export async function updateProduct(id: string, data: any) {
     try {
-        const { images, ...rest } = data
+        const { images, b2bPrice, kegPrice, kegStockCount, stockCount, price, ...rest } = data
+        
+        const updateData: any = {
+            ...rest,
+            ...(images !== undefined && { images: JSON.stringify(images) }),
+            ...(price !== undefined && { price: parseFloat(price) }),
+            ...(b2bPrice !== undefined && {
+                b2bPrice: b2bPrice !== "" && b2bPrice !== null ? parseFloat(b2bPrice) : null,
+            }),
+            ...(kegPrice !== undefined && {
+                kegPrice: kegPrice !== "" && kegPrice !== null ? parseFloat(kegPrice) : null,
+            }),
+            ...(stockCount !== undefined && {
+                stockCount: stockCount !== "" && stockCount !== null ? parseInt(stockCount, 10) : 0,
+            }),
+            ...(kegStockCount !== undefined && {
+                kegStockCount: kegStockCount !== "" && kegStockCount !== null ? parseInt(kegStockCount, 10) : 0,
+            }),
+        }
+
         await prisma.product.update({
             where: { id },
-            data: {
-                ...rest,
-                images: JSON.stringify(images),
-            },
+            data: updateData,
         })
         revalidatePath('/shop')
         revalidatePath('/admin/dashboard')
+        revalidatePath('/admin/products')
         return { success: true }
     } catch (error) {
         console.error('Failed to update product:', error)
+        return { success: false, error }
+    }
+}
+
+export async function updateKegStockCount(id: string, count: number) {
+    try {
+        await prisma.product.update({
+            where: { id },
+            data: { kegStockCount: count },
+        })
+        revalidatePath('/shop')
+        revalidatePath('/admin/dashboard')
+        revalidatePath('/admin/products')
+        return { success: true }
+    } catch (error) {
+        console.error('Failed to update keg stock count:', error)
         return { success: false, error }
     }
 }

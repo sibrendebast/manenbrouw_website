@@ -15,17 +15,20 @@ model Product {
   style       String?
   abv         String?
   volume      String?
-  price       Float
-  description String
-  images      String
-  inStock     Boolean     @default(true)
-  stockCount  Int         @default(0)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  btwCategory Int?        @default(21)
-  isHidden    Boolean     @default(false)
-  category    ProductType @default(BEER)
-  OrderItem   OrderItem[]
+  price         Float
+  b2bPrice      Float?
+  kegPrice      Float?
+  kegStockCount Int?        @default(0)
+  description   String
+  images        String
+  inStock       Boolean     @default(true)
+  stockCount    Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  btwCategory   Int?        @default(21)
+  isHidden      Boolean     @default(false)
+  category      ProductType @default(BEER)
+  OrderItem     OrderItem[]
 }
 
 model Order {

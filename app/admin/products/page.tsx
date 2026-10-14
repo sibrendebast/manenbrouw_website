@@ -15,9 +15,12 @@ const EMPTY_FORM = {
     abv: "",
     volume: "33cl",
     price: "",
+    b2bPrice: "",
+    kegPrice: "",
     description: "",
     images: [] as string[],
     stockCount: 0,
+    kegStockCount: 0,
     btwCategory: 21,
 };
 
@@ -85,10 +88,13 @@ export default function AdminProductsPage() {
             abv: newProduct.abv,
             volume: newProduct.volume,
             price: parseFloat(newProduct.price),
+            b2bPrice: newProduct.b2bPrice ? parseFloat(newProduct.b2bPrice) : null,
+            kegPrice: newProduct.kegPrice ? parseFloat(newProduct.kegPrice) : null,
             description: newProduct.description,
             images: newProduct.images,
             inStock: true,
-            stockCount: Number(newProduct.stockCount),
+            stockCount: Number(newProduct.stockCount || 0),
+            kegStockCount: Number(newProduct.kegStockCount || 0),
             btwCategory: Number(newProduct.btwCategory),
         });
         if (result.success) {
@@ -173,15 +179,22 @@ export default function AdminProductsPage() {
                                             <p className="font-black text-brewery-dark text-sm leading-tight truncate">
                                                 {product.name}
                                             </p>
-                                            <span className={`shrink-0 text-xs font-bold px-2 py-0.5 rounded-full ${
-                                                product.isHidden
-                                                    ? "bg-gray-100 text-gray-500"
-                                                    : product.inStock
-                                                        ? "bg-green-100 text-green-800"
-                                                        : "bg-red-100 text-red-800"
-                                            }`}>
-                                                {product.isHidden ? "Hidden" : product.inStock ? `${product.stockCount} in stock` : "Out of stock"}
-                                            </span>
+                                            <div className="flex flex-col items-end gap-1 shrink-0">
+                                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                                                    product.isHidden
+                                                        ? "bg-gray-100 text-gray-500"
+                                                        : product.inStock
+                                                            ? "bg-green-100 text-green-800"
+                                                            : "bg-red-100 text-red-800"
+                                                }`}>
+                                                    {product.isHidden ? "Hidden" : product.inStock ? `${product.stockCount ?? 0} stuks` : "Out of stock"}
+                                                </span>
+                                                {(product.kegStockCount > 0 || product.kegPrice) && (
+                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                                                        {product.kegStockCount ?? 0} vaten
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <p className="text-xs text-gray-400 font-semibold capitalize mt-0.5">
                                             {product.category?.toLowerCase()} {product.style ? `· ${product.style}` : ""} {product.abv ? `· ${product.abv}` : ""}
@@ -190,9 +203,23 @@ export default function AdminProductsPage() {
 
                                     {/* Price + actions */}
                                     <div className="flex items-center justify-between mt-2">
-                                        <span className="font-black text-brewery-dark text-base">
-                                            €{product.price.toFixed(2)}
-                                        </span>
+                                        <div className="flex flex-col">
+                                            <span className="font-black text-brewery-dark text-base leading-tight">
+                                                €{product.price.toFixed(2)}
+                                            </span>
+                                            <div className="flex flex-wrap gap-x-2 text-[11px] font-medium mt-0.5">
+                                                {product.b2bPrice && (
+                                                    <span className="text-emerald-700 font-bold">
+                                                        B2B: €{Number(product.b2bPrice).toFixed(2)}
+                                                    </span>
+                                                )}
+                                                {product.kegPrice && (
+                                                    <span className="text-amber-800 font-bold">
+                                                        Vat: €{Number(product.kegPrice).toFixed(2)}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
                                         <div className="flex gap-1.5">
                                             <Link
                                                 href={`/admin/products/${product.id}`}
@@ -328,13 +355,14 @@ export default function AdminProductsPage() {
                                     </div>
                                 )}
                                 <div className={["BEER", "GLASS", "GIFTBOX"].includes(newProduct.category) ? "" : "col-span-2"}>
-                                    <label className="block text-sm font-bold mb-1">Price (€)</label>
+                                    <label className="block text-sm font-bold mb-1">Prijs Consument (€)</label>
                                     <input
                                         required
                                         type="number"
                                         step="0.01"
                                         value={newProduct.price}
                                         onChange={e => setNewProduct({ ...newProduct, price: e.target.value })}
+                                        placeholder="bijv. 3.50"
                                         className="w-full px-3 py-2.5 border-2 border-black focus:outline-none focus:border-brewery-green text-base"
                                     />
                                 </div>
@@ -342,12 +370,15 @@ export default function AdminProductsPage() {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-sm font-bold mb-1">Stock Count</label>
+                                    <label className="block text-sm font-bold mb-1">
+                                        B2B Flesprijs (€) <span className="text-xs text-gray-400 font-normal">(optioneel)</span>
+                                    </label>
                                     <input
-                                        required
                                         type="number"
-                                        value={newProduct.stockCount}
-                                        onChange={e => setNewProduct({ ...newProduct, stockCount: parseInt(e.target.value) })}
+                                        step="0.01"
+                                        value={newProduct.b2bPrice}
+                                        onChange={e => setNewProduct({ ...newProduct, b2bPrice: e.target.value })}
+                                        placeholder="bijv. 2.10"
                                         className="w-full px-3 py-2.5 border-2 border-black focus:outline-none focus:border-brewery-green text-base"
                                     />
                                 </div>
@@ -366,6 +397,46 @@ export default function AdminProductsPage() {
                                     </select>
                                 </div>
                             </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-sm font-bold mb-1">Flesvoorraad (stuks)</label>
+                                    <input
+                                        required
+                                        type="number"
+                                        value={newProduct.stockCount}
+                                        onChange={e => setNewProduct({ ...newProduct, stockCount: parseInt(e.target.value) || 0 })}
+                                        className="w-full px-3 py-2.5 border-2 border-black focus:outline-none focus:border-brewery-green text-base"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-1">Vatvoorraad (vaten)</label>
+                                    <input
+                                        type="number"
+                                        value={newProduct.kegStockCount}
+                                        onChange={e => setNewProduct({ ...newProduct, kegStockCount: parseInt(e.target.value) || 0 })}
+                                        placeholder="0"
+                                        className="w-full px-3 py-2.5 border-2 border-black focus:outline-none focus:border-brewery-green text-base"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Keg / Vat details */}
+                            {newProduct.category === "BEER" && (
+                                <div className="p-3 border-2 border-dashed border-gray-400 bg-amber-50/50 rounded">
+                                    <label className="block text-xs font-bold text-amber-900 mb-1 uppercase tracking-wide">
+                                        Vatprijs / Keg price (€) <span className="text-gray-500 font-normal lowercase">(voor horeca)</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={newProduct.kegPrice}
+                                        onChange={e => setNewProduct({ ...newProduct, kegPrice: e.target.value })}
+                                        placeholder="bijv. 85.00"
+                                        className="w-full px-3 py-2 border-2 border-black bg-white focus:outline-none focus:border-brewery-green text-sm"
+                                    />
+                                </div>
+                            )}
 
                             {/* Image upload */}
                             <div>

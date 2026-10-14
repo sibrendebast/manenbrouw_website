@@ -24,12 +24,14 @@ const convertProductToStockRow = (product: any): NewsletterStockRow => {
     let firstImage = '';
     if (product.images) {
         try {
-            const parsed = JSON.parse(product.images);
+            const parsed = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
             if (Array.isArray(parsed) && parsed.length > 0) {
                 firstImage = parsed[0];
             }
         } catch (e) {
-            firstImage = product.images.split(',')[0] || '';
+            firstImage = Array.isArray(product.images)
+                ? product.images[0] || ''
+                : (typeof product.images === 'string' ? product.images.split(',')[0] || '' : '');
         }
     }
 
@@ -45,12 +47,23 @@ const convertProductToStockRow = (product: any): NewsletterStockRow => {
     const abvString = product.abv ? (product.abv.includes('%') ? product.abv : `${product.abv}%`) : '';
     const descriptionParts = [product.style, abvString].filter(Boolean);
 
+    const b2bStr = product.b2bPrice !== null && product.b2bPrice !== undefined
+        ? `€${Number(product.b2bPrice).toFixed(2)}`
+        : '';
+    const kegStr = product.kegPrice !== null && product.kegPrice !== undefined
+        ? `€${Number(product.kegPrice).toFixed(2)}`
+        : '';
+
     return {
         id: product.id,
         name: product.name,
         description: descriptionParts.join(', '),
         imageUrl: firstImage,
-        bottlePrice: product.inStock ? `€${product.price.toFixed(2)}` : 'SOLD OUT'
+        bottlePrice: product.inStock ? `€${Number(product.price).toFixed(2)}` : 'Uitverkocht',
+        b2bPrice: b2bStr,
+        stockCount: product.stockCount ?? 0,
+        kegPrice: kegStr,
+        kegStockCount: product.kegStockCount ?? 0
     };
 };
 
@@ -222,7 +235,7 @@ function ComposeNewsletterContent() {
         }
     };
 
-    const updateStockRow = (id: string, field: keyof NewsletterStockRow, value: string) => {
+    const updateStockRow = (id: string, field: keyof NewsletterStockRow, value: any) => {
         handlePayloadChange("stockRows", payload.stockRows.map(r => r.id === id ? { ...r, [field]: value } : r));
     };
 
@@ -666,18 +679,106 @@ function ComposeNewsletterContent() {
 
                                     {payload.stockRows.length > 0 && (
                                         <div className="mt-6">
-                                            <p className="text-sm font-semibold mb-2">Geselecteerde Bieren (Aanpassen):</p>
-                                            <div className="space-y-2">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <p className="text-sm font-semibold">Geselecteerde Bieren (Aanpassen per bier):</p>
+                                                {payload.targetAudience === 'COMMERCIAL' && (
+                                                    <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded border border-emerald-300">
+                                                        B2B &amp; Keg modus
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="space-y-3">
                                                 {payload.stockRows.map(row => (
-                                                    <div key={row.id} className="flex items-center gap-2 p-2 border bg-gray-50">
-                                                        <span className="font-semibold text-sm w-1/3 truncate">{row.name}</span>
-                                                        <input
-                                                            type="text"
-                                                            value={row.description}
-                                                            onChange={e => updateStockRow(row.id, 'description', e.target.value)}
-                                                            className="border p-1 text-sm flex-1"
-                                                            placeholder="Beschrijving"
-                                                        />
+                                                    <div key={row.id} className="p-3 border-2 border-black bg-gray-50 space-y-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="font-black text-sm text-brewery-dark truncate">{row.name}</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handlePayloadChange("stockRows", payload.stockRows.filter(r => r.id !== row.id))}
+                                                                className="text-xs text-red-600 hover:text-red-800 font-bold"
+                                                            >
+                                                                Verwijderen
+                                                            </button>
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-semibold text-gray-600 mb-0.5">Beschrijving</label>
+                                                            <input
+                                                                type="text"
+                                                                value={row.description}
+                                                                onChange={e => updateStockRow(row.id, 'description', e.target.value)}
+                                                                className="w-full border p-1.5 text-sm bg-white"
+                                                                placeholder="bijv. Saison, 6.0%"
+                                                            />
+                                                        </div>
+
+                                                        {payload.targetAudience === 'COMMERCIAL' ? (
+                                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                                                                <div>
+                                                                    <label className="block text-xs font-bold text-emerald-800 mb-0.5">B2B Flesprijs</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={row.b2bPrice || ''}
+                                                                        onChange={e => updateStockRow(row.id, 'b2bPrice', e.target.value)}
+                                                                        className="w-full border p-1 text-xs bg-white font-mono"
+                                                                        placeholder="bijv. €2.10"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-xs font-bold text-gray-700 mb-0.5">Flesvoorraad</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        value={row.stockCount ?? ''}
+                                                                        onChange={e => updateStockRow(row.id, 'stockCount', e.target.value)}
+                                                                        className="w-full border p-1 text-xs bg-white font-mono"
+                                                                        placeholder="bijv. 48"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-xs font-bold text-amber-800 mb-0.5">Vatprijs (KeyKeg)</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={row.kegPrice || ''}
+                                                                        onChange={e => updateStockRow(row.id, 'kegPrice', e.target.value)}
+                                                                        className="w-full border p-1 text-xs bg-white font-mono"
+                                                                        placeholder="bijv. €85.00"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-xs font-bold text-amber-900 mb-0.5">Vatvoorraad</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        value={row.kegStockCount ?? ''}
+                                                                        onChange={e => updateStockRow(row.id, 'kegStockCount', e.target.value)}
+                                                                        className="w-full border p-1 text-xs bg-white font-mono"
+                                                                        placeholder="bijv. 3"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="grid grid-cols-2 gap-2 pt-1">
+                                                                <div>
+                                                                    <label className="block text-xs font-bold text-gray-700 mb-0.5">Flesprijs</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={row.bottlePrice}
+                                                                        onChange={e => updateStockRow(row.id, 'bottlePrice', e.target.value)}
+                                                                        className="w-full border p-1 text-xs bg-white font-mono"
+                                                                        placeholder="bijv. €3.50"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-xs font-bold text-gray-700 mb-0.5">Voorraad (optioneel)</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        value={row.stockCount ?? ''}
+                                                                        onChange={e => updateStockRow(row.id, 'stockCount', e.target.value)}
+                                                                        className="w-full border p-1 text-xs bg-white font-mono"
+                                                                        placeholder="bijv. 50"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 ))}
                                             </div>
@@ -802,18 +903,32 @@ function ComposeNewsletterContent() {
                             <section>
                                 <div className="flex justify-between items-center border-b pb-2 mb-4">
                                     <h2 className="text-xl font-bold">Afsluiting (Optioneel)</h2>
-                                    {(payload.outroHeading || payload.outroBody) && (
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                handlePayloadChange('outroHeading', '');
-                                                handlePayloadChange('outroBody', '');
-                                            }}
-                                            className="text-red-500 hover:text-red-700 text-xs font-semibold"
-                                        >
-                                            Sectie leegmaken
-                                        </button>
-                                    )}
+                                    <div className="flex items-center gap-2">
+                                        {payload.targetAudience === 'COMMERCIAL' && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    handlePayloadChange('outroHeading', 'Cheers');
+                                                    handlePayloadChange('outroBody', 'Om te bestellen, beantwoord gewoon deze e-mail met welke bieren en/of vaten je wenst te ontvangen en in welke hoeveelheid. Daarna bevestigen we je bestelling en bezorgen we de factuur/offerte.\n\nCheers,\nSibren & Tom\nHet Man & Brouw team');
+                                                }}
+                                                className="text-xs bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold px-2 py-1 rounded border border-emerald-300"
+                                            >
+                                                B2B bestelsjabloon
+                                            </button>
+                                        )}
+                                        {(payload.outroHeading || payload.outroBody) && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    handlePayloadChange('outroHeading', '');
+                                                    handlePayloadChange('outroBody', '');
+                                                }}
+                                                className="text-red-500 hover:text-red-700 text-xs font-semibold"
+                                            >
+                                                Sectie leegmaken
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="space-y-4">
                                     <div>

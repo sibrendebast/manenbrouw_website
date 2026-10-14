@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN     "b2bPrice" DOUBLE PRECISION,
+ADD COLUMN     "kegPrice" DOUBLE PRECISION,
+ADD COLUMN     "kegStockCount" INTEGER DEFAULT 0;

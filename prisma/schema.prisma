@@ -524,3 +524,46 @@ model Newsletter {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
+
+// ─── Tastings & Bookings ─────────────────────────────────────────────────────
+
+enum TastingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum TastingPaymentStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+  REFUNDED
+}
+
+model TastingBooking {
+  id              String               @id @default(uuid())
+  bookingNumber   String?              @unique
+  customerName    String
+  customerEmail   String
+  customerPhone   String?
+  requestedDate   DateTime
+  scheduledDate   DateTime?
+  scheduledTime   String?
+  peopleCount     Int
+  formula         String
+  keepGlass       Boolean              @default(false)
+  locationType    String               @default("Brouwerij")
+  address         String?
+  totalPrice      Float?
+  amountPaid      Float                @default(0.0)
+  paymentStatus   TastingPaymentStatus @default(UNPAID)
+  paymentMethod   String?
+  invoiceUrl      String?
+  customerMessage String?
+  adminNotes      String?
+  status          TastingStatus        @default(PENDING)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+}
+

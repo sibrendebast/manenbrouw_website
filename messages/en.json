@@ -356,7 +356,9 @@
             "questions": "Questions?",
             "name": "Name",
             "email": "Email address",
+            "phone": "Phone number (optional)",
             "date": "Preferred date",
+            "time": "Preferred start time (optional)",
             "people": "Number of people",
             "formula": "Choose your formula",
             "formula4": "Basic (4 beers - €20 pp)",
@@ -372,6 +374,8 @@
             "error": "Oops! Something went wrong.",
             "namePlaceholder": "John Doe",
             "emailPlaceholder": "john@example.com",
+            "phonePlaceholder": "e.g. +32 491 23 45 67",
+            "timePlaceholder": "e.g. 14:00 or 19:30",
             "peoplePlaceholder": "e.g. 10",
             "messagePlaceholder": "Tell us about your group or event..."
         }

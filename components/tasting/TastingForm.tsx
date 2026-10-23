@@ -11,7 +11,9 @@ type TastingMessages = {
         title: string;
         name: string;
         email: string;
+        phone?: string;
         date: string;
+        time?: string;
         people: string;
         formula: string;
         formula4: string;
@@ -29,6 +31,8 @@ type TastingMessages = {
         messagePlaceholder: string;
         namePlaceholder: string;
         emailPlaceholder: string;
+        phonePlaceholder?: string;
+        timePlaceholder?: string;
     };
 };
 
@@ -39,6 +43,7 @@ export default function TastingForm() {
     const [isPending, setIsPending] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [locationType, setLocationType] = useState<string>("Brouwerij");
 
     if (!tasting) return null;
 
@@ -108,7 +113,16 @@ export default function TastingForm() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                    <label className="text-sm font-black tracking-wider">{tasting.form.phone || "Telefoonnummer"}</label>
+                    <input
+                        type="tel"
+                        name="phone"
+                        placeholder={tasting.form.phonePlaceholder || "bv. 0491 23 45 67"}
+                        className="w-full p-4 border-2 border-black focus:bg-brewery-green/5 outline-none transition-colors"
+                    />
+                </div>
                 <div className="space-y-2">
                     <label className="text-sm font-black tracking-wider">{tasting.form.date} *</label>
                     <input
@@ -119,16 +133,26 @@ export default function TastingForm() {
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-black tracking-wider">{tasting.form.people} *</label>
+                    <label className="text-sm font-black tracking-wider">{tasting.form.time || "Startuur"}</label>
                     <input
-                        type="number"
-                        name="people"
-                        min="1"
-                        required
-                        placeholder={tasting.form.peoplePlaceholder}
+                        type="text"
+                        name="time"
+                        placeholder={tasting.form.timePlaceholder || "bv. 14:00 of 19:30"}
                         className="w-full p-4 border-2 border-black focus:bg-brewery-green/5 outline-none transition-colors"
                     />
                 </div>
+            </div>
+
+            <div className="space-y-2">
+                <label className="text-sm font-black tracking-wider">{tasting.form.people} *</label>
+                <input
+                    type="number"
+                    name="people"
+                    min="1"
+                    required
+                    placeholder={tasting.form.peoplePlaceholder}
+                    className="w-full p-4 border-2 border-black focus:bg-brewery-green/5 outline-none transition-colors"
+                />
             </div>
 
             <div className="space-y-4 pt-4">
@@ -148,15 +172,36 @@ export default function TastingForm() {
             <div className="space-y-4">
                 <label className="text-sm font-black tracking-wider block mb-2">{tasting.form.location} *</label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <label className="border-2 border-black p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors has-[:checked]:bg-brewery-green has-[:checked]:text-white group">
-                        <input type="radio" name="location" value="Brouwerij" required className="accent-black h-5 w-5" />
+                    <label 
+                        onClick={() => setLocationType("Brouwerij")}
+                        className="border-2 border-black p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors has-[:checked]:bg-brewery-green has-[:checked]:text-white group"
+                    >
+                        <input type="radio" name="location" value="Brouwerij" defaultChecked required className="accent-black h-5 w-5" />
                         <span className="font-bold">{tasting.form.atBrewery}</span>
                     </label>
-                    <label className="border-2 border-black p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors has-[:checked]:bg-brewery-green has-[:checked]:text-white group">
+                    <label 
+                        onClick={() => setLocationType("Op verplaatsing")}
+                        className="border-2 border-black p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors has-[:checked]:bg-brewery-green has-[:checked]:text-white group"
+                    >
                         <input type="radio" name="location" value="Op verplaatsing" required className="accent-black h-5 w-5" />
                         <span className="font-bold">{tasting.form.otherLocation}</span>
                     </label>
                 </div>
+                {locationType === "Op verplaatsing" && (
+                    <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="space-y-2 pt-2"
+                    >
+                        <label className="text-sm font-black tracking-wider">Adres van de locatie</label>
+                        <input
+                            type="text"
+                            name="address"
+                            placeholder="Straat en huisnummer, postcode, gemeente"
+                            className="w-full p-4 border-2 border-black focus:bg-brewery-green/5 outline-none transition-colors"
+                        />
+                    </motion.div>
+                )}
             </div>
 
             <div className="pt-4 flex items-center gap-4">

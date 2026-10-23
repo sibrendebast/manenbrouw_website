@@ -22,7 +22,151 @@ export interface EventTicketItem {
     eventId: string;
 }
 
-type CartItemUnion = CartItem | EventTicketItem;
+export type CartItemUnion = CartItem | EventTicketItem;
+
+export interface CartStockIssue {
+    id: string;
+    name: string;
+    type: "product" | "ticket";
+    reason: "not_found" | "hidden" | "out_of_stock" | "insufficient_stock";
+    availableStock?: number;
+    requestedQuantity: number;
+    message: string;
+}
+
+export async function validateCartStock(cartItems: CartItemUnion[], locale: string = "nl"): Promise<{
+    valid: boolean;
+    issues: CartStockIssue[];
+    error?: string;
+}> {
+    const issues: CartStockIssue[] = [];
+
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+        return { valid: true, issues: [] };
+    }
+
+    for (const item of cartItems) {
+        if (!item.quantity || typeof item.quantity !== "number" || !Number.isInteger(item.quantity) || item.quantity <= 0 || item.quantity > 100) {
+            issues.push({
+                id: item.id,
+                name: (item as any).name || (item as any).title || item.id,
+                type: item.itemType === "ticket" ? "ticket" : "product",
+                reason: "not_found",
+                requestedQuantity: item.quantity,
+                message: locale === "en" ? "Invalid item quantity in cart." : "Ongeldig aantal stuks in winkelwagen.",
+            });
+            continue;
+        }
+
+        if (item.itemType === "product") {
+            try {
+                const product = await safeGetProduct(item.id);
+                if (!product) {
+                    issues.push({
+                        id: item.id,
+                        name: (item as any).name || item.id,
+                        type: "product",
+                        reason: "not_found",
+                        requestedQuantity: item.quantity,
+                        message: locale === "en"
+                            ? `Product "${(item as any).name || item.id}" was not found.`
+                            : `Product "${(item as any).name || item.id}" niet gevonden.`,
+                    });
+                    continue;
+                }
+
+                if (product.isHidden) {
+                    issues.push({
+                        id: item.id,
+                        name: product.name,
+                        type: "product",
+                        reason: "hidden",
+                        requestedQuantity: item.quantity,
+                        message: locale === "en"
+                            ? `"${product.name}" is no longer available.`
+                            : `"${product.name}" is niet meer beschikbaar.`,
+                    });
+                    continue;
+                }
+
+                if (!product.inStock || product.stockCount <= 0) {
+                    issues.push({
+                        id: item.id,
+                        name: product.name,
+                        type: "product",
+                        reason: "out_of_stock",
+                        availableStock: 0,
+                        requestedQuantity: item.quantity,
+                        message: locale === "en"
+                            ? `"${product.name}" is out of stock.`
+                            : `"${product.name}" is momenteel uitverkocht.`,
+                    });
+                    continue;
+                }
+
+                if (product.stockCount < item.quantity) {
+                    issues.push({
+                        id: item.id,
+                        name: product.name,
+                        type: "product",
+                        reason: "insufficient_stock",
+                        availableStock: product.stockCount,
+                        requestedQuantity: item.quantity,
+                        message: locale === "en"
+                            ? `Insufficient stock for "${product.name}". Only ${product.stockCount} available.`
+                            : `Onvoldoende voorraad voor "${product.name}". Er zijn nog ${product.stockCount} stuks beschikbaar.`,
+                    });
+                }
+            } catch (err) {
+                console.error("Error validating product stock:", err);
+            }
+        } else if (item.itemType === "ticket") {
+            try {
+                const event = await prisma.event.findUnique({
+                    where: { id: item.eventId },
+                });
+                if (!event || (event as any).isHidden) {
+                    issues.push({
+                        id: item.id,
+                        name: item.title,
+                        type: "ticket",
+                        reason: "hidden",
+                        requestedQuantity: item.quantity,
+                        message: locale === "en"
+                            ? `Event "${item.title}" is no longer available.`
+                            : `Evenement "${item.title}" is niet meer beschikbaar.`,
+                    });
+                    continue;
+                }
+                if (event.capacity !== null && event.capacity !== undefined) {
+                    const remaining = event.capacity - (event.ticketsSold || 0);
+                    if (remaining < item.quantity) {
+                        issues.push({
+                            id: item.id,
+                            name: event.title,
+                            type: "ticket",
+                            reason: remaining <= 0 ? "out_of_stock" : "insufficient_stock",
+                            availableStock: Math.max(0, remaining),
+                            requestedQuantity: item.quantity,
+                            message: remaining <= 0
+                                ? (locale === "en" ? `Tickets for "${event.title}" are sold out.` : `Tickets voor "${event.title}" zijn uitverkocht.`)
+                                : (locale === "en" ? `Only ${remaining} tickets left for "${event.title}".` : `Nog slechts ${remaining} tickets beschikbaar voor "${event.title}".`),
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error("Error validating event tickets:", err);
+            }
+        }
+    }
+
+    const firstIssue = issues[0];
+    return {
+        valid: issues.length === 0,
+        issues,
+        error: firstIssue ? firstIssue.message : undefined,
+    };
+}
 
 export async function placeOrder(formData: FormData, cartItems: CartItemUnion[]) {
     const customerName = formData.get("customerName") as string;
@@ -42,6 +186,10 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
         return { success: false, error: "Missing required fields" };
     }
 
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+        return { success: false, error: locale === "en" ? "Cart is empty" : "Winkelwagen is leeg" };
+    }
+
     // Check if there are any products that require shipping
     const hasProducts = cartItems.some(item => item.itemType === "product");
 
@@ -54,48 +202,25 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
     }
 
     try {
-        // ── Deduplication ─────────────────────────────────────────────────────
-        // If the customer already has a pending_payment order created within the
-        // last 30 minutes (same email + phone), reuse it instead of creating a
-        // new one. This prevents duplicate rows caused by double-clicks, going
-        // back from Stripe, or retrying after a cancelled session.
-        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-        const existingOrder = await prisma.order.findFirst({
-            where: {
-                customerEmail,
-                customerPhone,
-                status: "pending_payment",
-                createdAt: { gte: thirtyMinutesAgo },
-            },
-            orderBy: { createdAt: "desc" },
-        });
-
-        if (existingOrder) {
-            console.log(`Reusing existing pending_payment order ${existingOrder.id} for ${customerEmail}`);
-            return { success: true, orderId: existingOrder.id };
-        }
-        // ─────────────────────────────────────────────────────────────────────
-
-        if (!Array.isArray(cartItems) || cartItems.length === 0) {
-            return { success: false, error: "Cart is empty" };
+        // ── 1. Validate Stock and Availability across all items ───────────────
+        const stockValidation = await validateCartStock(cartItems, locale);
+        if (!stockValidation.valid) {
+            return {
+                success: false,
+                error: stockValidation.error || (locale === "en" ? "One or more items in your cart are no longer available." : "Een of meerdere items in je winkelwagen zijn niet meer beschikbaar."),
+            };
         }
 
-        // Recalculate total to prevent tampering
+        // Recalculate total directly from database product/event data to prevent tampering
         let totalAmount = 0;
         const orderItemsData = [];
         const ticketData = [];
 
         for (const item of cartItems) {
-            // Strictly validate quantity is positive integer <= 100
-            if (!item.quantity || typeof item.quantity !== "number" || !Number.isInteger(item.quantity) || item.quantity <= 0 || item.quantity > 100) {
-                return { success: false, error: "Invalid item quantity in cart" };
-            }
-
             if (item.itemType === "product") {
                 const product = await safeGetProduct(item.id);
-
                 if (!product) {
-                    throw new Error(`Product not found: ${item.id}`);
+                    return { success: false, error: `Product not found: ${item.id}` };
                 }
 
                 totalAmount += product.price * item.quantity;
@@ -110,12 +235,8 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                     where: { id: item.eventId },
                 });
 
-                if (!event) {
-                    throw new Error(`Event not found: ${item.eventId}`);
-                }
-
-                if (!event.isPaid || !event.ticketPrice) {
-                    throw new Error(`Event is not a paid event: ${item.eventId}`);
+                if (!event || !event.isPaid || !event.ticketPrice) {
+                    return { success: false, error: `Event ticket unavailable: ${item.eventId}` };
                 }
 
                 // Check if early-bird pricing applies
@@ -144,45 +265,62 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                 ? JSON.stringify({ street, city, zip, country })
                 : "";
 
-        // Try to create order with btwCategory, fall back if column doesn't exist
+        // ── 2. Deduplication ─────────────────────────────────────────────────
+        // If customer already has a pending_payment order created within the last
+        // 30 minutes, update its items and total with fresh validated data instead
+        // of creating duplicate rows.
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+        const existingOrder = await prisma.order.findFirst({
+            where: {
+                customerEmail,
+                customerPhone,
+                status: "pending_payment",
+                createdAt: { gte: thirtyMinutesAgo },
+            },
+            orderBy: { createdAt: "desc" },
+        });
+
         let order;
-        try {
-            // Generate order number
+        if (existingOrder) {
+            console.log(`Updating existing pending_payment order ${existingOrder.id} with validated cart items`);
+            await prisma.orderItem.deleteMany({ where: { orderId: existingOrder.id } });
+            await prisma.eventTicket.deleteMany({ where: { orderId: existingOrder.id } });
+
+            try {
+                order = await prisma.order.update({
+                    where: { id: existingOrder.id },
+                    data: {
+                        locale,
+                        comment,
+                        shippingAddress,
+                        shippingMethod: hasProducts ? shippingMethod : "pickup",
+                        totalAmount,
+                        items: orderItemsData.length > 0 ? { create: orderItemsData } : undefined,
+                        tickets: ticketData.length > 0 ? { create: ticketData } : undefined,
+                    },
+                });
+            } catch (error: any) {
+                if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
+                    const orderItemsWithoutBtw = orderItemsData.map(({ btwCategory, ...rest }) => rest);
+                    order = await prisma.order.update({
+                        where: { id: existingOrder.id },
+                        data: {
+                            locale,
+                            comment,
+                            shippingAddress,
+                            shippingMethod: hasProducts ? shippingMethod : "pickup",
+                            totalAmount,
+                            items: orderItemsWithoutBtw.length > 0 ? { create: orderItemsWithoutBtw } : undefined,
+                            tickets: ticketData.length > 0 ? { create: ticketData } : undefined,
+                        },
+                    });
+                } else {
+                    throw error;
+                }
+            }
+        } else {
             const orderNumber = await generateOrderNumber();
-
-            order = await prisma.order.create({
-                data: {
-                    orderNumber,
-                    locale,
-                    comment,
-                    customerName,
-                    customerEmail,
-                    customerPhone,
-                    shippingAddress,
-                    shippingMethod: hasProducts ? shippingMethod : "pickup",
-                    totalAmount,
-                    status: "pending_payment",
-                    items: orderItemsData.length > 0 ? {
-                        create: orderItemsData,
-                    } : undefined,
-                    tickets: ticketData.length > 0 ? {
-                        create: ticketData,
-                    } : undefined,
-                },
-            });
-        } catch (error: any) {
-            // If btwCategory column doesn't exist in OrderItem, retry without it
-            if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
-                // Remove btwCategory from order items data
-                const orderItemsDataWithoutBtw = orderItemsData.map(item => ({
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    price: item.price,
-                }));
-
-                // Generate order number for fallback
-                const orderNumber = await generateOrderNumber();
-
+            try {
                 order = await prisma.order.create({
                     data: {
                         orderNumber,
@@ -195,16 +333,32 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                         shippingMethod: hasProducts ? shippingMethod : "pickup",
                         totalAmount,
                         status: "pending_payment",
-                        items: orderItemsDataWithoutBtw.length > 0 ? {
-                            create: orderItemsDataWithoutBtw,
-                        } : undefined,
-                        tickets: ticketData.length > 0 ? {
-                            create: ticketData,
-                        } : undefined,
+                        items: orderItemsData.length > 0 ? { create: orderItemsData } : undefined,
+                        tickets: ticketData.length > 0 ? { create: ticketData } : undefined,
                     },
                 });
-            } else {
-                throw error;
+            } catch (error: any) {
+                if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
+                    const orderItemsWithoutBtw = orderItemsData.map(({ btwCategory, ...rest }) => rest);
+                    order = await prisma.order.create({
+                        data: {
+                            orderNumber,
+                            locale,
+                            comment,
+                            customerName,
+                            customerEmail,
+                            customerPhone,
+                            shippingAddress,
+                            shippingMethod: hasProducts ? shippingMethod : "pickup",
+                            totalAmount,
+                            status: "pending_payment",
+                            items: orderItemsWithoutBtw.length > 0 ? { create: orderItemsWithoutBtw } : undefined,
+                            tickets: ticketData.length > 0 ? { create: ticketData } : undefined,
+                        },
+                    });
+                } else {
+                    throw error;
+                }
             }
         }
 
@@ -230,7 +384,6 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
                 });
             } catch (error) {
                 console.error("Failed to subscribe to newsletter:", error);
-                // Don't fail the order if newsletter subscription fails
             }
         }
 

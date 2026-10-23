@@ -60,19 +60,73 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Validate stock for all products in the database order
+        // Validate stock and visibility for all products in the database order
         for (const orderItem of order.items) {
             const product = orderItem.product;
-            if (!product.inStock || product.stockCount < orderItem.quantity) {
+
+            if (product.isHidden) {
                 return NextResponse.json(
                     {
-                        error: `Insufficient stock for ${product.name}. Only ${product.stockCount} available.`,
+                        error: `Het product "${product.name}" is niet meer beschikbaar.`,
+                        code: 'PRODUCT_HIDDEN',
+                        product: product.name,
+                    },
+                    { status: 400 }
+                );
+            }
+
+            if (!product.inStock || product.stockCount <= 0) {
+                return NextResponse.json(
+                    {
+                        error: `Het product "${product.name}" is momenteel uitverkocht.`,
+                        code: 'OUT_OF_STOCK',
+                        product: product.name,
+                        available: 0
+                    },
+                    { status: 400 }
+                );
+            }
+
+            if (product.stockCount < orderItem.quantity) {
+                return NextResponse.json(
+                    {
+                        error: `Onvoldoende voorraad voor "${product.name}". Er zijn nog ${product.stockCount} stuks beschikbaar.`,
                         code: 'INSUFFICIENT_STOCK',
                         product: product.name,
                         available: product.stockCount
                     },
                     { status: 400 }
                 );
+            }
+        }
+
+        // Validate tickets for events in the database order
+        for (const ticket of order.tickets) {
+            const event = ticket.event;
+            if (event.isHidden) {
+                return NextResponse.json(
+                    {
+                        error: `Evenement "${event.title}" is niet meer beschikbaar.`,
+                        code: 'EVENT_HIDDEN',
+                        event: event.title,
+                    },
+                    { status: 400 }
+                );
+            }
+
+            if (event.capacity !== null && event.capacity !== undefined) {
+                const availableTickets = event.capacity - (event.ticketsSold || 0);
+                if (availableTickets < ticket.quantity) {
+                    return NextResponse.json(
+                        {
+                            error: `Niet genoeg tickets voor "${event.title}". Nog ${Math.max(0, availableTickets)} beschikbaar.`,
+                            code: 'INSUFFICIENT_TICKETS',
+                            event: event.title,
+                            available: Math.max(0, availableTickets),
+                        },
+                        { status: 400 }
+                    );
+                }
             }
         }
 

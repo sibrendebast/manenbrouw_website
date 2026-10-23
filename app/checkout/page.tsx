@@ -2,10 +2,11 @@
 
 import { useState, useEffect, type ChangeEvent } from "react";
 import { useCartStore } from "@/store/cartStore";
-import { placeOrder } from "@/app/actions/checkout";
+import { placeOrder, validateCartStock, type CartStockIssue } from "@/app/actions/checkout";
 import { calculateBtwBreakdown } from "@/lib/btw";
 import Link from "next/link";
 import Image from "next/image";
+import { AlertTriangle } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
 
 type CheckoutFormValues = {
@@ -40,6 +41,8 @@ export default function CheckoutPage() {
     const [paymentMethod, setPaymentMethod] = useState("card");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
+    const [stockIssues, setStockIssues] = useState<CartStockIssue[]>([]);
+    const [isValidatingStock, setIsValidatingStock] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [formValues, setFormValues] = useState<CheckoutFormValues>(DEFAULT_FORM_VALUES);
     const { t, locale } = useI18n();
@@ -109,6 +112,34 @@ export default function CheckoutPage() {
         localStorage.setItem(CHECKOUT_FORM_STORAGE_KEY, payload);
     }, [formValues, shippingMethod, paymentMethod, mounted, items]);
 
+    useEffect(() => {
+        if (!mounted || items.length === 0) {
+            setStockIssues([]);
+            return;
+        }
+
+        let cancelled = false;
+        setIsValidatingStock(true);
+        validateCartStock(items, locale)
+            .then((result) => {
+                if (!cancelled) {
+                    setStockIssues(result.issues);
+                }
+            })
+            .catch((err) => {
+                console.error("Failed to check cart stock:", err);
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setIsValidatingStock(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [items, locale, mounted]);
+
     const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value, type } = event.target;
         // Check if it's a checkbox input
@@ -153,10 +184,23 @@ export default function CheckoutPage() {
 
     const handleSubmit = async (formData: FormData) => {
         if (isSubmitting) return; // prevent double-submits
+        if (stockIssues.length > 0) {
+            setError(stockIssues[0].message);
+            return;
+        }
+
         setIsSubmitting(true);
         setError("");
 
         try {
+            // Instant pre-validation of current stock & visibility
+            const validation = await validateCartStock(items, locale);
+            if (!validation.valid) {
+                setStockIssues(validation.issues);
+                setError(validation.error || t("checkout.stockErrorMessage"));
+                setIsSubmitting(false);
+                return;
+            }
             // Add shipping method to formData
             formData.append("shippingMethod", shippingMethod);
             formData.append("locale", locale);
@@ -213,6 +257,33 @@ export default function CheckoutPage() {
         <div className="bg-white min-h-screen py-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h1 className="text-3xl font-bold text-brewery-dark mb-8">{t("checkout.title")}</h1>
+
+                {stockIssues.length > 0 && (
+                    <div className="bg-red-50 border-2 border-red-600 p-6 mb-8 shadow-sm" role="alert">
+                        <div className="flex items-start gap-4">
+                            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                                <h3 className="font-bold text-red-800 text-lg">
+                                    {t("checkout.stockErrorTitle")}
+                                </h3>
+                                <p className="text-sm text-red-700 mt-1">
+                                    {t("checkout.stockErrorMessage")}
+                                </p>
+                                <ul className="mt-3 list-disc list-inside text-sm text-red-800 font-semibold space-y-1">
+                                    {stockIssues.map((issue) => (
+                                        <li key={issue.id}>{issue.message}</li>
+                                    ))}
+                                </ul>
+                                <Link
+                                    href="/cart"
+                                    className="inline-block mt-4 bg-red-600 hover:bg-red-700 text-white font-bold text-sm px-5 py-2.5 border-2 border-black transition-colors"
+                                >
+                                    {t("checkout.returnToCart")}
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Checkout Form */}
@@ -466,39 +537,56 @@ export default function CheckoutPage() {
 
                             <h2 className="text-xl font-bold text-brewery-dark mb-6">{t("cart.orderSummary")}</h2>
                             <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">
-                                {items.map((item: any) => (
-                                    <div key={item.id} className="flex justify-between items-center border-b border-gray-200 pb-4 last:border-0 last:pb-0">
-                                        <div className="flex items-center">
-                                            <div className="relative w-16 h-16 mr-4 bg-gray-100 border border-black overflow-hidden flex-shrink-0">
-                                                {item.itemType === "product" ? (
-                                                    <Image
-                                                        src={(() => {
-                                                            const images = getProductImages(item);
-                                                            return (!images || images.length === 0 || images[0].includes("placehold.co")) ? "/logo.png" : images[0];
-                                                        })()}
-                                                        alt={(item as any).name || (item as any).title}
-                                                        fill
-                                                        className="object-cover"
-                                                        onError={(e) => {
-                                                            const target = e.target as HTMLImageElement;
-                                                            target.srcset = "/logo.png";
-                                                            target.src = "/logo.png";
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full bg-brewery-green/10 border-2 border-brewery-green flex items-center justify-center">
-                                                        <span className="text-2xl">🎟️</span>
-                                                    </div>
-                                                )}
+                                {items.map((item: any) => {
+                                    const issue = stockIssues.find((i) => i.id === item.id);
+                                    return (
+                                        <div
+                                            key={item.id}
+                                            className={`flex justify-between items-center border-b pb-4 last:border-0 last:pb-0 ${
+                                                issue ? "border-red-400 bg-red-50/50 p-2 rounded" : "border-gray-200"
+                                            }`}
+                                        >
+                                            <div className="flex items-center">
+                                                <div className="relative w-16 h-16 mr-4 bg-gray-100 border border-black overflow-hidden flex-shrink-0">
+                                                    {item.itemType === "product" ? (
+                                                        <Image
+                                                            src={(() => {
+                                                                const images = getProductImages(item);
+                                                                return (!images || images.length === 0 || images[0].includes("placehold.co")) ? "/logo.png" : images[0];
+                                                            })()}
+                                                            alt={(item as any).name || (item as any).title}
+                                                            fill
+                                                            className="object-cover"
+                                                            onError={(e) => {
+                                                                const target = e.target as HTMLImageElement;
+                                                                target.srcset = "/logo.png";
+                                                                target.src = "/logo.png";
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-brewery-green/10 border-2 border-brewery-green flex items-center justify-center">
+                                                            <span className="text-2xl">🎟️</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-medium text-brewery-dark">{item.itemType === "product" ? item.name : item.title}</h3>
+                                                    <p className="text-sm text-gray-500">{t("common.quantity")}: {item.quantity}</p>
+                                                    {issue && (
+                                                        <span className="inline-block bg-red-100 text-red-800 border border-red-400 text-xs px-2 py-0.5 font-bold mt-1">
+                                                            {issue.reason === "out_of_stock"
+                                                                ? (locale === "en" ? "Out of stock" : "Uitverkocht")
+                                                                : issue.reason === "insufficient_stock"
+                                                                ? (locale === "en" ? `Only ${issue.availableStock} left` : `Nog ${issue.availableStock} over`)
+                                                                : (locale === "en" ? "Not available" : "Niet meer beschikbaar")}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h3 className="font-medium text-brewery-dark">{item.itemType === "product" ? item.name : item.title}</h3>
-                                                <p className="text-sm text-gray-500">{t("common.quantity")}: {item.quantity}</p>
-                                            </div>
+                                            <span className="font-medium text-brewery-dark">€{(item.price * item.quantity).toFixed(2)}</span>
                                         </div>
-                                        <span className="font-medium text-brewery-dark">€{(item.price * item.quantity).toFixed(2)}</span>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
 
                             <div className="border-t border-gray-200 pt-4 space-y-2">
@@ -577,10 +665,14 @@ export default function CheckoutPage() {
                             <button
                                 type="submit"
                                 form="checkout-form"
-                                disabled={isSubmitting}
-                                className="w-full bg-brewery-green text-white font-bold py-4 hover:bg-opacity-90 transition-colors disabled:opacity-50 border-2 border-black mt-6"
+                                disabled={isSubmitting || stockIssues.length > 0 || isValidatingStock}
+                                className="w-full bg-brewery-green text-white font-bold py-4 hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed border-2 border-black mt-6"
                             >
-                                {isSubmitting ? t("checkout.processing") : `${t("checkout.placeOrder")} - €${total.toFixed(2)}`}
+                                {isSubmitting
+                                    ? t("checkout.processing")
+                                    : stockIssues.length > 0
+                                    ? t("checkout.resolveStockIssues")
+                                    : `${t("checkout.placeOrder")} - €${total.toFixed(2)}`}
                             </button>
                         </div>
                     </div>

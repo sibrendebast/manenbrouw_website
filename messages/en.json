@@ -89,10 +89,17 @@
         "calculatedAtCheckout": "Calculated at checkout",
         "total": "Total",
         "proceedToCheckout": "Proceed to Checkout",
-        "continueShopping": "Continue Shopping"
+        "continueShopping": "Continue Shopping",
+        "stockIssuesTitle": "Cannot Proceed to Checkout",
+        "stockIssuesMessage": "Some items in your cart are out of stock or no longer available. Please remove or update them to continue.",
+        "cannotProceed": "Items Unavailable"
     },
     "checkout": {
         "title": "Checkout",
+        "stockErrorTitle": "Items Unavailable",
+        "stockErrorMessage": "One or more items in your cart cannot be purchased because they are out of stock or no longer available:",
+        "returnToCart": "Return to cart to adjust items",
+        "resolveStockIssues": "Resolve cart issues to checkout",
         "shippingMethod": "Shipping Method",
         "shipment": "Shipment (Belgium only)",
         "pickup": "Pick up at brewery",

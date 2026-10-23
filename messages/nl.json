@@ -89,10 +89,17 @@
         "calculatedAtCheckout": "Berekend bij afrekenen",
         "total": "Totaal",
         "proceedToCheckout": "Afrekenen",
-        "continueShopping": "Verder Winkelen"
+        "continueShopping": "Verder Winkelen",
+        "stockIssuesTitle": "Bestellen niet mogelijk",
+        "stockIssuesMessage": "Sommige artikelen in je winkelwagen zijn uitverkocht of niet meer beschikbaar. Verwijder of wijzig ze om door te gaan.",
+        "cannotProceed": "Artikelen niet beschikbaar"
     },
     "checkout": {
         "title": "Afrekenen",
+        "stockErrorTitle": "Artikelen niet beschikbaar",
+        "stockErrorMessage": "Een of meerdere artikelen in je bestelling kunnen niet worden gekocht omdat ze zijn uitverkocht of niet meer beschikbaar zijn:",
+        "returnToCart": "Winkelwagen aanpassen",
+        "resolveStockIssues": "Pas winkelwagen aan om te bestellen",
         "shippingMethod": "Verzendmethode",
         "shipment": "Verzending (alleen België)",
         "pickup": "Ophalen bij brouwerij",

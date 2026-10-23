@@ -13,12 +13,12 @@ export async function safeGetProduct(id: string) {
         // If btwCategory column doesn't exist, use raw query
         if (error?.code === 'P2022' && error?.meta?.column === 'btwCategory') {
             const products = await prisma.$queryRaw`
-                SELECT id, slug, name, style, abv, volume, price, description, images, "inStock", "stockCount", "createdAt", "updatedAt"
+                SELECT id, slug, name, style, abv, volume, price, description, images, "inStock", "stockCount", "isHidden", "createdAt", "updatedAt"
                 FROM "Product"
                 WHERE id = ${id}
                 LIMIT 1
             ` as any[];
-            return products.length > 0 ? { ...products[0], btwCategory: 21 } : null;
+            return products.length > 0 ? { ...products[0], btwCategory: 21, isHidden: products[0].isHidden ?? false } : null;
         }
         throw error;
     }

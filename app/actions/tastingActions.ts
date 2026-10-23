@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { resend, FROM_EMAIL, ADMIN_EMAIL } from "@/lib/email";
 import { revalidatePath } from "next/cache";
 import { sendNotificationToAdmins } from "@/app/actions/notificationActions";
+import { sendTelegramTastingNotification } from "@/lib/telegram";
 import { requireAdminSession } from "@/lib/session";
 
 import { calculateEstimatedPrice, TastingStatusType, TastingPaymentStatusType } from "@/lib/tastingUtils";
@@ -104,6 +105,13 @@ export async function submitTastingRequest(formData: FormData) {
                 <p>Met vriendelijke groeten,<br />Het Man & Brouw team</p>
             `
         });
+
+        // Notify admins via Telegram
+        try {
+            await sendTelegramTastingNotification(booking);
+        } catch (tgErr) {
+            console.error('Failed to send Telegram tasting notification:', tgErr);
+        }
 
         // Notify admins via web-push
         try {

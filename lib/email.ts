@@ -19,7 +19,7 @@ export const FROM_EMAIL = cleanEnvVar(process.env.FROM_EMAIL) || 'Man & Brouw <o
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'info@manenbrouw.be';
 
 // Type definition for order with items included
-type OrderWithItems = {
+export type OrderWithItems = {
     id: string;
     orderNumber?: string | null;
     locale?: string;
@@ -30,6 +30,7 @@ type OrderWithItems = {
     shippingMethod: string;
     paymentMethod: string;
     totalAmount: number;
+    comment?: string | null;
     createdAt: Date;
     items: {
         product: {
@@ -72,7 +73,7 @@ export async function sendOrderConfirmationEmail(order: OrderWithItems, invoiceP
             to: [order.customerEmail],
             bcc: ['revenue@accountable.eu'],
             subject,
-            react: OrderInvoice({ order }),
+            react: OrderInvoice({ order, isAdminCopy: false }),
             attachments,
         });
 
@@ -97,11 +98,15 @@ export async function sendAdminOrderNotification(order: OrderWithItems) {
     }
 
     try {
+        const hasComment = Boolean(order.comment && order.comment.trim());
+        const commentBadge = hasComment ? " [MET OPMERKING]" : "";
+        const subject = `New Order Placed #${order.orderNumber || order.id.slice(0, 8)} - ${order.customerName}${commentBadge}`;
+
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
             to: [ADMIN_EMAIL],
-            subject: `New Order Placed #${order.orderNumber || order.id.slice(0, 8)} - ${order.customerName}`,
-            react: OrderInvoice({ order }),
+            subject,
+            react: OrderInvoice({ order, isAdminCopy: true }),
         });
 
         if (error) {

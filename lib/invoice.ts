@@ -254,6 +254,18 @@ export async function generateInvoice(order: OrderWithItems): Promise<Buffer> {
     doc.setLineWidth(0.5);
     doc.rect(totalsBoxX, totalsBoxY, totalsBoxWidth, totalsBoxHeight);
 
+    // Customer note on invoice if present
+    if (order.comment && order.comment.trim()) {
+        const commentBoxWidth = totalsBoxX - margin - 10;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.text("Opmerking van klant:", margin, totalsBoxY + 5);
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(8);
+        const splitComment = doc.splitTextToSize(order.comment.trim(), commentBoxWidth);
+        doc.text(splitComment, margin, totalsBoxY + 11);
+    }
+
     // Totals Text
     const textRightX = pageWidth - margin - 5;
     const labelX = totalsBoxX + 5;

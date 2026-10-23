@@ -3,6 +3,7 @@
 import webPush from "web-push";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession } from "@/lib/session";
+import { sendTelegramAdminAlert } from "@/lib/telegram";
 
 webPush.setVapidDetails(
     "mailto:admin@manenbrouw.be",
@@ -37,7 +38,18 @@ export async function subscribeUser(subscription: webPush.PushSubscription) {
     }
 }
 
-export async function sendNotificationToAdmins(message: string, url: string = "/admin/orders") {
+export async function sendNotificationToAdmins(
+    message: string,
+    url: string = "/admin/orders",
+    options?: { sendTelegram?: boolean }
+) {
+    if (options?.sendTelegram) {
+        try {
+            await sendTelegramAdminAlert("Admin Notificatie", message, url);
+        } catch (tgErr) {
+            console.error("Failed to send Telegram alert from sendNotificationToAdmins:", tgErr);
+        }
+    }
     try {
         const subscriptions = await prisma.pushSubscription.findMany();
 

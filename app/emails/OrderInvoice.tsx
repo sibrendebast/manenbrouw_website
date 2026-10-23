@@ -29,6 +29,7 @@ interface OrderInvoiceProps {
         shippingMethod: string;
         paymentMethod: string;
         totalAmount: number;
+        comment?: string | null;
         items: {
             product: {
                 name: string;
@@ -46,6 +47,7 @@ interface OrderInvoiceProps {
             totalPrice: number;
         }[];
     };
+    isAdminCopy?: boolean;
 }
 
 // Simple translation dictionary for email
@@ -68,7 +70,9 @@ const translations = {
         footer: "Thank you for your business!<br />If you have any questions, please contact us at info@manenbrouw.be",
         orderNumber: "Order #",
         nA: "N/A",
-        ticket: "Ticket"
+        ticket: "Ticket",
+        customerNote: "Customer Note",
+        adminAlertHeader: "Customer Note Included",
     },
     nl: {
         invoiceTitle: "Factuur",
@@ -88,11 +92,13 @@ const translations = {
         footer: "Bedankt voor je bestelling!<br />Vragen? Mail naar info@manenbrouw.be",
         orderNumber: "Bestelling #",
         nA: "N/A",
-        ticket: "Ticket"
+        ticket: "Ticket",
+        customerNote: "Opmerking van klant",
+        adminAlertHeader: "Opmerking van de klant",
     }
 };
 
-export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
+export const OrderInvoice = ({ order, isAdminCopy }: OrderInvoiceProps) => {
     const locale = (order.locale as 'en' | 'nl') || 'nl';
     const t = translations[locale] || translations.nl;
 
@@ -153,6 +159,16 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
 
                     <Hr style={hr} />
 
+                    {isAdminCopy && order.comment && order.comment.trim() && (
+                        <>
+                            <Section style={adminAlertBox}>
+                                <Text style={adminAlertTitle}>⚠️ {t.adminAlertHeader}</Text>
+                                <Text style={adminAlertBody}>"{order.comment.trim()}"</Text>
+                            </Section>
+                            <Hr style={hr} />
+                        </>
+                    )}
+
                     <Section>
                         <Row>
                             <Column>
@@ -188,6 +204,15 @@ export const OrderInvoice = ({ order }: OrderInvoiceProps) => {
                             {order.paymentMethod || t.nA}
                         </Text>
                     </Section>
+
+                    {order.comment && order.comment.trim() && (
+                        <Section style={{ marginTop: "16px" }}>
+                            <Text style={subHeading}>{t.customerNote}:</Text>
+                            <Text style={commentParagraph}>
+                                {order.comment.trim()}
+                            </Text>
+                        </Section>
+                    )}
 
                     <Hr style={hr} />
 
@@ -339,4 +364,40 @@ const footer = {
     fontSize: "14px",
     marginTop: "20px",
     textAlign: "center" as const,
+};
+
+const adminAlertBox = {
+    backgroundColor: "#fffbeb",
+    border: "2px solid #f59e0b",
+    borderRadius: "6px",
+    padding: "16px 20px",
+    margin: "12px 0 16px",
+};
+
+const adminAlertTitle = {
+    fontSize: "14px",
+    fontWeight: "bold",
+    color: "#b45309",
+    margin: "0 0 6px",
+    letterSpacing: "0.5px",
+    textTransform: "uppercase" as const,
+};
+
+const adminAlertBody = {
+    fontSize: "16px",
+    fontWeight: "bold",
+    color: "#1c1917",
+    margin: "0",
+    lineHeight: "24px",
+    whiteSpace: "pre-wrap" as const,
+};
+
+const commentParagraph = {
+    ...paragraph,
+    backgroundColor: "#f9fafb",
+    border: "1px solid #e5e7eb",
+    borderRadius: "4px",
+    padding: "12px",
+    fontStyle: "italic",
+    whiteSpace: "pre-wrap" as const,
 };

@@ -19,21 +19,22 @@ export async function POST(req: NextRequest) {
         );
     }
 
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!webhookSecret) {
+        console.error("STRIPE_WEBHOOK_SECRET is not configured.");
+        return NextResponse.json(
+            { error: "Webhook secret is not configured on server" },
+            { status: 500 }
+        );
+    }
+
     let event;
 
     try {
-        // In production, you'll need to set STRIPE_WEBHOOK_SECRET
-        // For now, we'll parse the event without verification for testing
-        event = JSON.parse(body);
-
-        // In production, uncomment this:
-        // event = stripe.webhooks.constructEvent(
-        //   body,
-        //   signature,
-        //   process.env.STRIPE_WEBHOOK_SECRET!
-        // );
-    } catch (error) {
-        console.error("Webhook signature verification failed:", error);
+        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    } catch (error: any) {
+        console.error("Webhook signature verification failed:", error?.message || error);
         return NextResponse.json(
             { error: "Webhook signature verification failed" },
             { status: 400 }

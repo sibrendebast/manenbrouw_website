@@ -76,12 +76,21 @@ export async function placeOrder(formData: FormData, cartItems: CartItemUnion[])
         }
         // ─────────────────────────────────────────────────────────────────────
 
+        if (!Array.isArray(cartItems) || cartItems.length === 0) {
+            return { success: false, error: "Cart is empty" };
+        }
+
         // Recalculate total to prevent tampering
         let totalAmount = 0;
         const orderItemsData = [];
         const ticketData = [];
 
         for (const item of cartItems) {
+            // Strictly validate quantity is positive integer <= 100
+            if (!item.quantity || typeof item.quantity !== "number" || !Number.isInteger(item.quantity) || item.quantity <= 0 || item.quantity > 100) {
+                return { success: false, error: "Invalid item quantity in cart" };
+            }
+
             if (item.itemType === "product") {
                 const product = await safeGetProduct(item.id);
 

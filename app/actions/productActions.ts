@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { requireAdminSession } from '@/lib/session'
 
 export async function getProducts() {
     try {
@@ -116,6 +117,7 @@ export async function getProductById(id: string) {
 }
 
 export async function createProduct(data: any) {
+    await requireAdminSession()
     try {
         const { images, btwCategory, b2bPrice, kegPrice, kegStockCount, stockCount, price, ...rest } = data
 
@@ -145,6 +147,7 @@ export async function createProduct(data: any) {
 }
 
 export async function updateProduct(id: string, data: any) {
+    await requireAdminSession()
     try {
         const { images, b2bPrice, kegPrice, kegStockCount, stockCount, price, ...rest } = data
         
@@ -181,6 +184,7 @@ export async function updateProduct(id: string, data: any) {
 }
 
 export async function updateKegStockCount(id: string, count: number) {
+    await requireAdminSession()
     try {
         await prisma.product.update({
             where: { id },
@@ -197,6 +201,7 @@ export async function updateKegStockCount(id: string, count: number) {
 }
 
 export async function deleteProduct(id: string) {
+    await requireAdminSession()
     try {
         await prisma.product.delete({
             where: { id },
@@ -211,6 +216,7 @@ export async function deleteProduct(id: string) {
 }
 
 export async function updateStock(id: string, inStock: boolean) {
+    await requireAdminSession()
     try {
         await prisma.product.update({
             where: { id },
@@ -226,6 +232,7 @@ export async function updateStock(id: string, inStock: boolean) {
 }
 
 export async function updateStockCount(id: string, count: number) {
+    await requireAdminSession()
     try {
         await prisma.product.update({
             where: { id },
@@ -241,6 +248,7 @@ export async function updateStockCount(id: string, count: number) {
 }
 
 export async function updatePrice(id: string, price: number) {
+    await requireAdminSession()
     try {
         await prisma.product.update({
             where: { id },
@@ -256,6 +264,7 @@ export async function updatePrice(id: string, price: number) {
 }
 
 export async function toggleHidden(id: string, isHidden: boolean) {
+    await requireAdminSession()
     try {
         await prisma.product.update({
             where: { id },

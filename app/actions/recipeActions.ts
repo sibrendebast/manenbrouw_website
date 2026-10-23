@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { berekenAlles, berekenGevraagd } from '@/lib/brewing-calcs'
 import type { BrewingStap, IngredientType, Prisma } from '@prisma/client'
+import { requireAdminSession } from '@/lib/session'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -123,6 +124,7 @@ function berekenCache(input: RecipeInput) {
 // ─── Read ─────────────────────────────────────────────────────────────────────
 
 export async function getRecipes() {
+  await requireAdminSession()
   try {
     const recipes = await prisma.recipe.findMany({
       orderBy: { createdAt: 'desc' },
@@ -153,6 +155,7 @@ export async function getRecipes() {
 }
 
 export async function getRecipe(id: string) {
+  await requireAdminSession()
   try {
     const recipe = await prisma.recipe.findUnique({
       where: { id },
@@ -181,6 +184,7 @@ export async function getRecipe(id: string) {
 export async function createRecipe(): Promise<{
   success: boolean; id?: string; error?: string
 }> {
+  await requireAdminSession()
   try {
     const recipe = await prisma.recipe.create({
       data: {
@@ -203,6 +207,7 @@ export async function updateRecipe(
   id: string,
   input: RecipeInput
 ): Promise<{ success: boolean; error?: string }> {
+  await requireAdminSession()
   try {
     const cache = berekenCache(input)
 
@@ -274,6 +279,7 @@ export async function updateRecipe(
 // ─── Delete ───────────────────────────────────────────────────────────────────
 
 export async function deleteRecipe(id: string): Promise<{ success: boolean; error?: string }> {
+  await requireAdminSession()
   try {
     await prisma.recipe.delete({ where: { id } })
     revalidatePath('/admin/brouwadministratie/receptuur')

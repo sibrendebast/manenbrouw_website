@@ -9,6 +9,7 @@ import {
   StockDeviationAction,
   AuditActionType,
 } from '@prisma/client';
+import { requireAdminSession } from '@/lib/session';
 
 // ═════════════════════════════════════════════════════════════════════════════
 // HELPER: Convert Decimal to number for client serialization

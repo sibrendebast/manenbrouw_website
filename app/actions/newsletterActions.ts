@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { resend, FROM_EMAIL, ADMIN_EMAIL } from "@/lib/email";
 import { revalidatePath } from "next/cache";
+import { requireAdminSession } from "@/lib/session";
 
 export type NewsletterStory = {
     id: string;
@@ -496,6 +497,7 @@ export async function generateNewsletterHtml(payload: NewsletterPayload) {
 }
 
 export async function sendNewsletterPreview(payload: NewsletterPayload) {
+    await requireAdminSession();
     let html = buildNewsletterHtml(payload);
     // Automatically translate local URLs to production for email readability
     html = html.replace(/http:\/\/localhost:\d+/g, 'https://www.manenbrouw.be');
@@ -527,6 +529,7 @@ export async function sendNewsletterPreview(payload: NewsletterPayload) {
 }
 
 export async function sendNewsletterToTarget(payload: NewsletterPayload, targetAudience: NewsletterTargetAudience = 'ALL') {
+    await requireAdminSession();
     let html = buildNewsletterHtml(payload);
     // Automatically translate local URLs to production for email readability
     html = html.replace(/http:\/\/localhost:\d+/g, 'https://www.manenbrouw.be');
@@ -592,6 +595,7 @@ export async function sendNewsletterToAll(payload: NewsletterPayload) {
 }
 
 export async function deleteSubscriber(id: string) {
+    await requireAdminSession();
     try {
         await prisma.newsletterSubscriber.delete({
             where: { id }
@@ -605,6 +609,7 @@ export async function deleteSubscriber(id: string) {
 }
 
 export async function updateSubscriberCommercial(id: string, isCommercial: boolean) {
+    await requireAdminSession();
     try {
         const updated = await prisma.newsletterSubscriber.update({
             where: { id },
@@ -619,6 +624,7 @@ export async function updateSubscriberCommercial(id: string, isCommercial: boole
 }
 
 export async function getSubscriberCounts() {
+    await requireAdminSession();
     try {
         const [total, commercial] = await Promise.all([
             prisma.newsletterSubscriber.count(),
@@ -669,6 +675,7 @@ export async function subscribeToNewsletter(formData: FormData) {
 }
 
 export async function addSubscriberManual(formData: FormData) {
+    await requireAdminSession();
     const email = (formData.get('email') as string || '').trim().toLowerCase();
     const firstName = (formData.get('firstName') as string || '').trim() || null;
     const lastName = (formData.get('lastName') as string || '').trim() || null;
@@ -724,6 +731,7 @@ export async function unsubscribeByEmail(email: string) {
 }
 
 export async function getNewsletters() {
+    await requireAdminSession();
     try {
         return await prisma.newsletter.findMany({
             orderBy: {
@@ -737,6 +745,7 @@ export async function getNewsletters() {
 }
 
 export async function getNewsletterById(id: string) {
+    await requireAdminSession();
     try {
         const newsletter = await prisma.newsletter.findUnique({
             where: { id }
@@ -756,6 +765,7 @@ export async function getNewsletterById(id: string) {
 }
 
 export async function saveNewsletterDraft(id: string | null, title: string, payload: NewsletterPayload, targetAudience: NewsletterTargetAudience = 'ALL') {
+    await requireAdminSession();
     try {
         const audience = targetAudience || payload.targetAudience || 'ALL';
         const dataToSave = {
@@ -786,6 +796,7 @@ export async function saveNewsletterDraft(id: string | null, title: string, payl
 }
 
 export async function sendNewsletterToTargetWithSave(id: string | null, payload: NewsletterPayload, targetAudience: NewsletterTargetAudience = 'ALL') {
+    await requireAdminSession();
     const audience = targetAudience || payload.targetAudience || 'ALL';
     const sendResult = await sendNewsletterToTarget(payload, audience);
     if (!sendResult.success) {
@@ -826,6 +837,7 @@ export async function sendNewsletterToAllWithSave(id: string | null, payload: Ne
 }
 
 export async function deleteNewsletter(id: string) {
+    await requireAdminSession();
     try {
         await prisma.newsletter.delete({
             where: { id }

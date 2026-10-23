@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
+import { setAdminSession, clearAdminSession, requireAdminSession } from "@/lib/session";
 
 export async function loginAction(prevState: any, formData: FormData) {
     const username = formData.get("username") as string;
@@ -27,6 +28,8 @@ export async function loginAction(prevState: any, formData: FormData) {
             return { success: false, error: "Invalid credentials" };
         }
 
+        await setAdminSession(user.id, user.username);
+
         return { success: true };
     } catch (error) {
         console.error("Login error:", error);
@@ -34,7 +37,19 @@ export async function loginAction(prevState: any, formData: FormData) {
     }
 }
 
+export async function logoutAction() {
+    try {
+        await clearAdminSession();
+        return { success: true };
+    } catch (error) {
+        console.error("Logout error:", error);
+        return { success: false, error: "Failed to logout" };
+    }
+}
+
 export async function createAdminUser(prevState: any, formData: FormData) {
+    await requireAdminSession();
+
     const username = formData.get("username") as string;
     const password = formData.get("password") as string;
 
@@ -69,8 +84,9 @@ export async function createAdminUser(prevState: any, formData: FormData) {
 }
 
 export async function deleteAdminUser(id: string) {
+    await requireAdminSession();
+
     try {
-        // Prevent deleting the last user or specific implementation if needed
         const count = await prisma.adminUser.count();
         if (count <= 1) {
             return { success: false, error: "Cannot delete the last admin user" };
@@ -89,6 +105,8 @@ export async function deleteAdminUser(id: string) {
 }
 
 export async function updateAdminPassword(id: string, formData: FormData) {
+    await requireAdminSession();
+
     const currentPassword = formData.get("currentPassword") as string;
     const newPassword = formData.get("newPassword") as string;
 
@@ -129,6 +147,8 @@ export async function updateAdminPassword(id: string, formData: FormData) {
 }
 
 export async function getAdminUsers() {
+    await requireAdminSession();
+
     try {
         const users = await prisma.adminUser.findMany({
             select: {

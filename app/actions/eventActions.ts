@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireAdminSession } from "@/lib/session";
 
 export async function getEvents() {
     try {
@@ -44,6 +45,7 @@ export async function createEvent(data: {
     ticketType?: "INTERNAL" | "EXTERNAL" | "AT_DOOR";
     externalTicketUrl?: string;
 }) {
+    await requireAdminSession();
     try {
         const event = await prisma.event.create({
             data: {
@@ -86,6 +88,7 @@ export async function updateEvent(id: string, data: {
     ticketType?: "INTERNAL" | "EXTERNAL" | "AT_DOOR";
     externalTicketUrl?: string;
 }) {
+    await requireAdminSession();
     try {
         const event = await prisma.event.update({
             where: { id },
@@ -115,6 +118,7 @@ export async function updateEvent(id: string, data: {
 }
 
 export async function deleteEvent(id: string) {
+    await requireAdminSession();
     try {
         await prisma.event.delete({
             where: { id }
@@ -129,6 +133,7 @@ export async function deleteEvent(id: string) {
 }
 
 export async function toggleEventHidden(id: string, isHidden: boolean) {
+    await requireAdminSession();
     try {
         await prisma.event.update({
             where: { id },

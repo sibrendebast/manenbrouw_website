@@ -2,6 +2,7 @@
 
 import webPush from "web-push";
 import { prisma } from "@/lib/prisma";
+import { requireAdminSession } from "@/lib/session";
 
 webPush.setVapidDetails(
     "mailto:admin@manenbrouw.be",
@@ -10,12 +11,8 @@ webPush.setVapidDetails(
 );
 
 export async function subscribeUser(subscription: webPush.PushSubscription) {
+    const session = await requireAdminSession();
     try {
-        // Determine the admin ID (For now, we'll associate with the first admin or passed ID)
-        // Ideally, pass the authenticated admin's ID contextually
-        const admins = await prisma.adminUser.findMany();
-        if (admins.length === 0) return { success: false, error: "No admin found" };
-
         // Check if subscription already exists
         const existing = await prisma.pushSubscription.findFirst({
             where: { endpoint: subscription.endpoint },
@@ -29,7 +26,7 @@ export async function subscribeUser(subscription: webPush.PushSubscription) {
             data: {
                 endpoint: subscription.endpoint,
                 keys: JSON.parse(JSON.stringify(subscription.keys)),
-                adminId: admins[0].id, // Default to first admin for now or current logged in 
+                adminId: session.userId,
             },
         });
 

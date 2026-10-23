@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { resend, FROM_EMAIL, ADMIN_EMAIL } from "@/lib/email";
 import { revalidatePath } from "next/cache";
 import { sendNotificationToAdmins } from "@/app/actions/notificationActions";
+import { requireAdminSession } from "@/lib/session";
 
 import { calculateEstimatedPrice, TastingStatusType, TastingPaymentStatusType } from "@/lib/tastingUtils";
 export type { TastingStatusType, TastingPaymentStatusType };
@@ -123,6 +124,7 @@ export async function submitTastingRequest(formData: FormData) {
 }
 
 export async function getTastings(filters?: { status?: string; search?: string }) {
+    await requireAdminSession();
     try {
         const whereClause: any = {};
 
@@ -156,6 +158,7 @@ export async function getTastings(filters?: { status?: string; search?: string }
 }
 
 export async function getTastingStats() {
+    await requireAdminSession();
     try {
         const allBookings: any[] = await prisma.tastingBooking.findMany();
 
@@ -215,6 +218,7 @@ export async function updateTasting(id: string, data: {
     status?: TastingStatusType;
     customerPhone?: string | null;
 }) {
+    await requireAdminSession();
     try {
         const updatePayload: any = { ...data };
 
@@ -267,6 +271,7 @@ export async function createManualTasting(data: {
     adminNotes?: string;
     status?: TastingStatusType;
 }) {
+    await requireAdminSession();
     try {
         const bookingNumber = await generateBookingNumber();
         const scheduledDate = new Date(data.scheduledDate);
@@ -312,6 +317,7 @@ export async function createManualTasting(data: {
 }
 
 export async function deleteTasting(id: string) {
+    await requireAdminSession();
     try {
         await prisma.tastingBooking.delete({
             where: { id }

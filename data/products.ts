@@ -11,6 +11,7 @@ export interface Product {
     inStock: boolean;
     stockCount?: number;
     btwCategory?: number; // BTW/VAT percentage: 0, 6, 12, or 21 (default: 21)
+    isHidden?: boolean;
 }
 
 export const products: Product[] = [

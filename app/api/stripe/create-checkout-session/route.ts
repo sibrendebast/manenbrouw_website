@@ -33,25 +33,96 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Validate stock for all products in cart
-        for (const item of cartItems) {
-            if (item.itemType === "product") {
-                const product = await safeGetProduct(item.id);
-
-                if (!product) {
-                    return NextResponse.json(
-                        { error: `Product ${item.name} no longer exists` },
-                        { status: 400 }
-                    );
+        // Fetch and verify the order directly from the database
+        const order = await prisma.order.findUnique({
+            where: { id: orderId },
+            include: {
+                items: {
+                    include: { product: true }
+                },
+                tickets: {
+                    include: { event: true }
                 }
+            }
+        });
 
-                if (!product.inStock || product.stockCount < item.quantity) {
+        if (!order) {
+            return NextResponse.json(
+                { error: "Order not found" },
+                { status: 404 }
+            );
+        }
+
+        if (order.status !== "pending_payment" && order.status !== "pending") {
+            return NextResponse.json(
+                { error: "Order is already processed or invalid" },
+                { status: 400 }
+            );
+        }
+
+        // Validate stock and visibility for all products in the database order
+        for (const orderItem of order.items) {
+            const product = orderItem.product;
+
+            if (product.isHidden) {
+                return NextResponse.json(
+                    {
+                        error: `Het product "${product.name}" is niet meer beschikbaar.`,
+                        code: 'PRODUCT_HIDDEN',
+                        product: product.name,
+                    },
+                    { status: 400 }
+                );
+            }
+
+            if (!product.inStock || product.stockCount <= 0) {
+                return NextResponse.json(
+                    {
+                        error: `Het product "${product.name}" is momenteel uitverkocht.`,
+                        code: 'OUT_OF_STOCK',
+                        product: product.name,
+                        available: 0
+                    },
+                    { status: 400 }
+                );
+            }
+
+            if (product.stockCount < orderItem.quantity) {
+                return NextResponse.json(
+                    {
+                        error: `Onvoldoende voorraad voor "${product.name}". Er zijn nog ${product.stockCount} stuks beschikbaar.`,
+                        code: 'INSUFFICIENT_STOCK',
+                        product: product.name,
+                        available: product.stockCount
+                    },
+                    { status: 400 }
+                );
+            }
+        }
+
+        // Validate tickets for events in the database order
+        for (const ticket of order.tickets) {
+            const event = ticket.event;
+            if (event.isHidden) {
+                return NextResponse.json(
+                    {
+                        error: `Evenement "${event.title}" is niet meer beschikbaar.`,
+                        code: 'EVENT_HIDDEN',
+                        event: event.title,
+                    },
+                    { status: 400 }
+                );
+            }
+
+            if (event.capacity !== null && event.capacity !== undefined) {
+                const availableTickets = event.capacity - (event.ticketsSold || 0);
+                if (availableTickets < ticket.quantity) {
                     return NextResponse.json(
                         {
-                            error: `Insufficient stock for ${item.name}. Only ${product.stockCount} available.`,
-                            code: 'INSUFFICIENT_STOCK',
-                            product: item.name,
-                            available: product.stockCount
+                            error: `Niet genoeg tickets voor "${event.title}". Nog ${Math.max(0, availableTickets)} beschikbaar.`,
+                            code: 'INSUFFICIENT_TICKETS',
+                            event: event.title,
+                            available: Math.max(0, availableTickets),
                         },
                         { status: 400 }
                     );
@@ -68,35 +139,47 @@ export async function POST(req: NextRequest) {
             paymentMethodTypes.push("card");
         }
 
-        // Create line items for Stripe
-        const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = cartItems.map(
-            (item: any) => {
-                const btwCategory = item.itemType === "product" ? (item.btwCategory || 21) : 21;
-                return {
-                    price_data: {
-                        currency: "eur",
-                        product_data: {
-                            name: item.itemType === "product" ? item.name : item.title,
-                            description: item.itemType === "product" 
-                                ? `${item.style} (BTW ${btwCategory}%)`
-                                : `Event at ${item.location}`,
-                        },
-                        unit_amount: Math.round(item.price * 100), // Convert to cents
-                        tax_behavior: "inclusive", // Price includes tax
-                    },
-                    quantity: item.quantity,
-                };
-            }
-        );
+        // Build line items directly from verified database order (tamper-proof)
+        const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
-        // Add shipping as a line item if applicable
-        if (shippingMethod === "shipment") {
+        for (const orderItem of order.items) {
             lineItems.push({
                 price_data: {
                     currency: "eur",
                     product_data: {
-                        name: "Shipping",
-                        description: "Delivery to Belgium",
+                        name: orderItem.product.name,
+                        description: `${orderItem.product.style || ""} (BTW ${orderItem.btwCategory || 21}%)`.trim(),
+                    },
+                    unit_amount: Math.round(orderItem.price * 100),
+                    tax_behavior: "inclusive",
+                },
+                quantity: orderItem.quantity,
+            });
+        }
+
+        for (const ticket of order.tickets) {
+            const unitPrice = ticket.quantity > 0 ? (ticket.totalPrice / ticket.quantity) : ticket.totalPrice;
+            lineItems.push({
+                price_data: {
+                    currency: "eur",
+                    product_data: {
+                        name: ticket.event.title,
+                        description: `Event at ${ticket.event.location}`,
+                    },
+                    unit_amount: Math.round(unitPrice * 100),
+                    tax_behavior: "inclusive",
+                },
+                quantity: ticket.quantity,
+            });
+        }
+
+        if (order.shippingMethod === "shipment" && order.items.length > 0) {
+            lineItems.push({
+                price_data: {
+                    currency: "eur",
+                    product_data: {
+                        name: "Verzending",
+                        description: "Levering binnen België",
                     },
                     unit_amount: 1000, // €10 in cents
                 },

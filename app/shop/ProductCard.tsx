@@ -20,8 +20,11 @@ export default function ProductCard({ product }: ProductCardProps) {
     const addItem = useCartStore((state) => state.addItem);
     const { t } = useI18n();
 
+    const stockCount = typeof product.stockCount === "number" ? product.stockCount : 0;
+    // In the store, people can only buy bottles: if bottles <= 0, the beer is out of stock
+    const isInStock = Boolean(product.inStock && stockCount > 0);
+
     const handleIncrement = () => {
-        const stockCount = product.stockCount || 0;
         if (quantity < stockCount) {
             setQuantity((prev) => prev + 1);
         }
@@ -32,6 +35,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     };
 
     const handleAddToCart = () => {
+        if (!isInStock) return;
         addItem(product, quantity);
         setIsAdded(true);
         setTimeout(() => {
@@ -169,8 +173,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </>
                 )}
 
-                {!product.inStock && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
+                {!isInStock && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none z-10">
                         <span className="bg-red-600 text-white px-4 py-2 font-bold transform -rotate-12 border-2 border-white">
                             {t("shop.outOfStock")}
                         </span>
@@ -189,15 +193,18 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <p className="text-sm text-gray-500 font-semibold mb-2">
                     {[product.style, product.volume, product.abv].filter(Boolean).join(" • ")}
                 </p>
-                {product.inStock && product.stockCount !== undefined && (
-                    <p className={`text-xs font-bold mb-4 ${product.stockCount < 6 ? 'text-red-500' : 'text-gray-600'}`}>
-                        {product.stockCount < 6 ? t("shop.almostGone") : t("shop.inStock")}
+                {isInStock ? (
+                    <p className={`text-xs font-bold mb-4 ${stockCount < 6 ? 'text-red-500' : 'text-gray-600'}`}>
+                        {stockCount < 6 ? t("shop.almostGone") : t("shop.inStock")}
+                    </p>
+                ) : (
+                    <p className="text-xs font-bold mb-4 text-red-600">
+                        {t("shop.outOfStock")}
                     </p>
                 )}
 
                 <div className="mt-auto space-y-4">
-
-                    {product.inStock ? (
+                    {isInStock ? (
                         <div className="flex flex-row gap-2 items-center">
                             <div className="flex items-center justify-between border-2 border-black h-11 flex-shrink-0">
                                 <button
@@ -211,7 +218,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                                 <button
                                     onClick={handleIncrement}
                                     className="p-1 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    disabled={quantity >= (product.stockCount || 0)}
+                                    disabled={quantity >= stockCount}
                                 >
                                     <Plus className="h-4 w-4 text-brewery-green" />
                                 </button>

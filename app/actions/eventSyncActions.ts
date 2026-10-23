@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireAdminSession } from "@/lib/session";
 
 /**
  * Recalculates the ticketsSold field for all events based on paid orders.
@@ -9,6 +10,7 @@ import { revalidatePath } from "next/cache";
  * that might have incorrectly affected the denormalized ticketsSold field.
  */
 export async function syncAllActiveEventsTicketCounts() {
+    await requireAdminSession();
     try {
         const events = await prisma.event.findMany();
         

@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import type { Prisma } from '@prisma/client'
+import { requireAdminSession } from '@/lib/session'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -58,6 +59,7 @@ async function genereerBrouwnummer(): Promise<string> {
 }
 
 export async function getVolgendBrouwnummer(): Promise<string> {
+    await requireAdminSession()
     const jaar = new Date().getFullYear()
     const seq = await prisma.brouwSequence.findUnique({
         where: { jaar }
@@ -88,6 +90,7 @@ export async function getVolgendBrouwnummer(): Promise<string> {
 // ─── Read ─────────────────────────────────────────────────────────────────────
 
 export async function getBrouwsels() {
+    await requireAdminSession()
     try {
         const brouwsels = await prisma.brouwsel.findMany({
             orderBy: { datum: 'desc' },
@@ -108,6 +111,7 @@ export async function getBrouwsels() {
 }
 
 export async function getBrouwsel(id: string) {
+    await requireAdminSession()
     try {
         const brouwsel = await prisma.brouwsel.findUnique({
             where: { id },
@@ -128,6 +132,7 @@ export async function getBrouwsel(id: string) {
 export async function createBrouwsel(input: BrouwselInput): Promise<{
     success: boolean; id?: string; error?: string
 }> {
+    await requireAdminSession()
     try {
         const brouwnummer = input.brouwnummer || await genereerBrouwnummer()
         const brouwsel = await prisma.brouwsel.create({
@@ -159,6 +164,7 @@ export async function updateBrouwsel(
     id: string,
     input: BrouwselInput
 ): Promise<{ success: boolean; error?: string }> {
+    await requireAdminSession()
     try {
         await prisma.brouwsel.update({
             where: { id },
@@ -187,6 +193,7 @@ export async function updateBrouwsel(
 // ─── Delete ───────────────────────────────────────────────────────────────────
 
 export async function deleteBrouwsel(id: string): Promise<{ success: boolean; error?: string }> {
+    await requireAdminSession()
     try {
         await prisma.brouwsel.delete({ where: { id } })
         revalidatePath('/admin/brouwadministratie/brouwsels')

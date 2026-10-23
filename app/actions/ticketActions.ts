@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireAdminSession } from "@/lib/session";
 
 export async function createTicketPurchase(data: {
     eventId: string;
@@ -11,6 +12,7 @@ export async function createTicketPurchase(data: {
     quantity: number;
     totalPrice: number;
 }) {
+    await requireAdminSession();
     try {
         const ticket = await prisma.eventTicket.create({
             data: {
@@ -44,6 +46,7 @@ export async function createTicketPurchase(data: {
 }
 
 export async function getEventTickets(eventId: string) {
+    await requireAdminSession();
     try {
         const tickets = await prisma.eventTicket.findMany({
             where: { eventId },

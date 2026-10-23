@@ -2,8 +2,11 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireAdminSession } from "@/lib/session";
 
 export async function getOrders() {
+    await requireAdminSession();
+
     try {
         const orders = await prisma.order.findMany({
             select: {
@@ -45,6 +48,8 @@ export async function getOrders() {
 }
 
 export async function updateOrderStatus(orderId: string, status: string) {
+    await requireAdminSession();
+
     try {
         await prisma.order.update({
             where: { id: orderId },
@@ -58,6 +63,8 @@ export async function updateOrderStatus(orderId: string, status: string) {
 }
 
 export async function deleteOrder(orderId: string) {
+    await requireAdminSession();
+
     try {
         await prisma.order.delete({
             where: { id: orderId },

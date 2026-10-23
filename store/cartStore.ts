@@ -39,6 +39,12 @@ export const useCartStore = create<CartState>()(
                 const items = get().items;
                 const existingItem = items.find((item) => item.id === product.id && item.itemType === "product");
 
+                // Do not allow adding hidden or out-of-stock items
+                if (product.isHidden || !product.inStock || (product.stockCount !== undefined && product.stockCount <= 0)) {
+                    console.warn(`Cannot add "${product.name}". Product is unavailable or out of stock.`);
+                    return;
+                }
+
                 // Check stock availability
                 const stockCount = product.stockCount || 0;
                 const currentQuantityInCart = existingItem ? existingItem.quantity : 0;

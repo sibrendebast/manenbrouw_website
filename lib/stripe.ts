@@ -5,7 +5,7 @@ import Stripe from "stripe";
 const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
 
 export const stripe = new Stripe(stripeKey, {
-    apiVersion: "2025-11-17.clover",
+    apiVersion: "2026-02-25.clover",
     typescript: true,
 });
 

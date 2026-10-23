@@ -23,6 +23,10 @@ export default function ProductDetails({ product }: { product: any }) {
     const [selectedImage, setSelectedImage] = useState<string>('');
     const [direction, setDirection] = useState(0);
 
+    const stockCount = typeof product?.stockCount === "number" ? product.stockCount : 0;
+    // In the store, people can only buy bottles: if bottles <= 0, the product is out of stock
+    const isInStock = Boolean(product?.inStock && stockCount > 0);
+
     const variants = {
         enter: (direction: number) => ({
             x: direction > 0 ? '100%' : '-100%',
@@ -53,7 +57,7 @@ export default function ProductDetails({ product }: { product: any }) {
     }, [product]);
 
     const handleAddToCart = () => {
-        if (!product) return;
+        if (!product || !isInStock) return;
         addItem(product, quantity);
         setIsAdded(true);
         setTimeout(() => setIsAdded(false), 2000);
@@ -162,6 +166,15 @@ export default function ProductDetails({ product }: { product: any }) {
                                     </button>
                                 </>
                             )}
+
+                            {/* Out of stock overlay */}
+                            {!isInStock && (
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none z-10">
+                                    <span className="bg-red-600 text-white px-6 py-2.5 font-bold text-lg transform -rotate-12 border-2 border-white shadow-lg">
+                                        {t("shop.outOfStock")}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                         {/* Thumbnail Gallery */}
                         {product.images && product.images.length > 1 && (
@@ -208,9 +221,13 @@ export default function ProductDetails({ product }: { product: any }) {
                             <p className="text-3xl font-bold text-brewery-green mb-2">
                                 €{product.price.toFixed(2)}
                             </p>
-                            {product.inStock && product.stockCount !== undefined && (
-                                <p className={`text-sm font-bold ${product.stockCount < 6 ? 'text-red-500' : 'text-gray-600'}`}>
-                                    {product.stockCount < 6 ? t("shop.almostGone") : t("shop.inStock")}
+                            {isInStock ? (
+                                <p className={`text-sm font-bold ${stockCount < 6 ? 'text-red-500' : 'text-gray-600'}`}>
+                                    {stockCount < 6 ? t("shop.almostGone") : t("shop.inStock")}
+                                </p>
+                            ) : (
+                                <p className="text-sm font-bold text-red-600">
+                                    {t("shop.outOfStock")}
                                 </p>
                             )}
                         </div>
@@ -223,8 +240,8 @@ export default function ProductDetails({ product }: { product: any }) {
                             <div className="flex items-center border-2 border-black w-fit">
                                 <button
                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    className="p-4 hover:bg-gray-100 transition-colors border-r-2 border-black"
-                                    disabled={!product.inStock}
+                                    className="p-4 hover:bg-gray-100 transition-colors border-r-2 border-black disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={!isInStock}
                                 >
                                     <Minus className="h-5 w-5 text-gray-600" />
                                 </button>
@@ -233,13 +250,12 @@ export default function ProductDetails({ product }: { product: any }) {
                                 </span>
                                 <button
                                     onClick={() => {
-                                        const stockCount = product.stockCount || 0;
                                         if (quantity < stockCount) {
                                             setQuantity(quantity + 1);
                                         }
                                     }}
                                     className="p-4 hover:bg-gray-100 transition-colors border-l-2 border-black disabled:opacity-50 disabled:cursor-not-allowed"
-                                    disabled={!product.inStock || (product.stockCount !== undefined && quantity >= product.stockCount)}
+                                    disabled={!isInStock || quantity >= stockCount}
                                 >
                                     <Plus className="h-5 w-5 text-gray-600" />
                                 </button>
@@ -247,15 +263,15 @@ export default function ProductDetails({ product }: { product: any }) {
 
                             <button
                                 onClick={handleAddToCart}
-                                disabled={!product.inStock}
-                                className={`flex-grow md:flex-grow-0 flex items-center justify-center px-8 py-4 font-bold text-lg transition-all transform active:scale-95 border-2 border-black ${product.inStock
+                                disabled={!isInStock}
+                                className={`flex-grow md:flex-grow-0 flex items-center justify-center px-8 py-4 font-bold text-lg transition-all transform active:scale-95 border-2 border-black ${isInStock
                                     ? isAdded
                                         ? "bg-green-600 text-white"
                                         : "bg-brewery-dark text-white hover:bg-opacity-90"
                                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                                     }`}
                             >
-                                {product.inStock ? (
+                                {isInStock ? (
                                     isAdded ? (
                                         <>
                                             <Check className="h-6 w-6 mr-2" /> {t("productDetails.addedToCart")}

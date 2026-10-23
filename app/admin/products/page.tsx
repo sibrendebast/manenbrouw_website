@@ -183,11 +183,11 @@ export default function AdminProductsPage() {
                                                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                                                     product.isHidden
                                                         ? "bg-gray-100 text-gray-500"
-                                                        : product.inStock
+                                                        : (product.inStock && (product.stockCount ?? 0) > 0)
                                                             ? "bg-green-100 text-green-800"
                                                             : "bg-red-100 text-red-800"
                                                 }`}>
-                                                    {product.isHidden ? "Hidden" : product.inStock ? `${product.stockCount ?? 0} stuks` : "Out of stock"}
+                                                    {product.isHidden ? "Hidden" : (product.inStock && (product.stockCount ?? 0) > 0) ? `${product.stockCount ?? 0} stuks` : "Out of stock"}
                                                 </span>
                                                 {(product.kegStockCount > 0 || product.kegPrice) && (
                                                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">

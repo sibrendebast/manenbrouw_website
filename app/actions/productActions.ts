@@ -4,13 +4,25 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { requireAdminSession } from '@/lib/session'
 
+function normalizeProductStock(p: any) {
+    const stockCount = p.stockCount !== undefined && p.stockCount !== null ? Number(p.stockCount) : 0;
+    // In the store, customers can only buy bottles (stockCount).
+    // If bottle stock is 0 or less, the product cannot be in stock for the store, even if kegs exist.
+    const isStoreInStock = Boolean(p.inStock && stockCount > 0);
+    return {
+        ...p,
+        stockCount,
+        inStock: isStoreInStock,
+    };
+}
+
 export async function getProducts() {
     try {
         const products = await prisma.product.findMany({
             orderBy: { createdAt: 'desc' },
         })
         return products.map((p: any) => ({
-            ...p,
+            ...normalizeProductStock(p),
             images: JSON.parse(p.images) as string[],
             btwCategory: p.btwCategory ?? 21, // Default to 21 if not set
         }))
@@ -26,7 +38,7 @@ export async function getProducts() {
                     ORDER BY "createdAt" DESC
                 ` as any[]
                 return products.map((p: any) => ({
-                    ...p,
+                    ...normalizeProductStock(p),
                     images: JSON.parse(p.images) as string[],
                     btwCategory: 21, // Default to 21 when column doesn't exist
                 }))
@@ -47,7 +59,7 @@ export async function getProduct(slug: string) {
         })
         if (!product) return null
         return {
-            ...product,
+            ...normalizeProductStock(product),
             images: JSON.parse(product.images) as string[],
             btwCategory: (product as any).btwCategory ?? 21,
         }
@@ -65,7 +77,7 @@ export async function getProduct(slug: string) {
                 if (products.length === 0) return null
                 const product = products[0]
                 return {
-                    ...product,
+                    ...normalizeProductStock(product),
                     images: JSON.parse(product.images) as string[],
                     btwCategory: 21,
                 }
@@ -86,7 +98,7 @@ export async function getProductById(id: string) {
         })
         if (!product) return null
         return {
-            ...product,
+            ...normalizeProductStock(product),
             images: JSON.parse(product.images) as string[],
             btwCategory: (product as any).btwCategory ?? 21,
         }
@@ -102,7 +114,7 @@ export async function getProductById(id: string) {
                 if (products.length === 0) return null
                 const product = products[0]
                 return {
-                    ...product,
+                    ...normalizeProductStock(product),
                     images: JSON.parse(product.images) as string[],
                     btwCategory: 21,
                 }
@@ -121,14 +133,18 @@ export async function createProduct(data: any) {
     try {
         const { images, btwCategory, b2bPrice, kegPrice, kegStockCount, stockCount, price, ...rest } = data
 
+        const parsedStockCount = stockCount !== undefined && stockCount !== "" && stockCount !== null ? parseInt(stockCount, 10) : 0;
+
         const parsedData = {
             ...rest,
             price: parseFloat(price),
             b2bPrice: b2bPrice !== undefined && b2bPrice !== "" && b2bPrice !== null ? parseFloat(b2bPrice) : null,
             kegPrice: kegPrice !== undefined && kegPrice !== "" && kegPrice !== null ? parseFloat(kegPrice) : null,
-            stockCount: stockCount !== undefined && stockCount !== "" && stockCount !== null ? parseInt(stockCount, 10) : 0,
+            stockCount: parsedStockCount,
             kegStockCount: kegStockCount !== undefined && kegStockCount !== "" && kegStockCount !== null ? parseInt(kegStockCount, 10) : 0,
             images: JSON.stringify(images),
+            // In the store, people can only buy bottles: if bottles <= 0, inStock cannot be true
+            inStock: Boolean(rest.inStock && parsedStockCount > 0),
             ...(btwCategory !== undefined && { btwCategory }),
         }
 
@@ -150,6 +166,7 @@ export async function updateProduct(id: string, data: any) {
     await requireAdminSession()
     try {
         const { images, b2bPrice, kegPrice, kegStockCount, stockCount, price, ...rest } = data
+        const parsedStockCount = stockCount !== undefined && stockCount !== "" && stockCount !== null ? parseInt(stockCount, 10) : undefined;
         
         const updateData: any = {
             ...rest,
@@ -161,12 +178,17 @@ export async function updateProduct(id: string, data: any) {
             ...(kegPrice !== undefined && {
                 kegPrice: kegPrice !== "" && kegPrice !== null ? parseFloat(kegPrice) : null,
             }),
-            ...(stockCount !== undefined && {
-                stockCount: stockCount !== "" && stockCount !== null ? parseInt(stockCount, 10) : 0,
+            ...(parsedStockCount !== undefined && {
+                stockCount: parsedStockCount,
             }),
             ...(kegStockCount !== undefined && {
                 kegStockCount: kegStockCount !== "" && kegStockCount !== null ? parseInt(kegStockCount, 10) : 0,
             }),
+        }
+
+        // If bottle stock is 0 or less, ensure inStock is marked false for store purchases
+        if (parsedStockCount !== undefined && parsedStockCount <= 0) {
+            updateData.inStock = false;
         }
 
         await prisma.product.update({
@@ -218,12 +240,16 @@ export async function deleteProduct(id: string) {
 export async function updateStock(id: string, inStock: boolean) {
     await requireAdminSession()
     try {
+        const product = await prisma.product.findUnique({ where: { id }, select: { stockCount: true } })
+        const effectiveInStock = Boolean(inStock && (product?.stockCount ?? 0) > 0)
+
         await prisma.product.update({
             where: { id },
-            data: { inStock },
+            data: { inStock: effectiveInStock },
         })
         revalidatePath('/shop')
         revalidatePath('/admin/dashboard')
+        revalidatePath('/admin/products')
         return { success: true }
     } catch (error) {
         console.error('Failed to update stock:', error)
@@ -236,10 +262,14 @@ export async function updateStockCount(id: string, count: number) {
     try {
         await prisma.product.update({
             where: { id },
-            data: { stockCount: count },
+            data: { 
+                stockCount: count,
+                ...(count <= 0 && { inStock: false }),
+            },
         })
         revalidatePath('/shop')
         revalidatePath('/admin/dashboard')
+        revalidatePath('/admin/products')
         return { success: true }
     } catch (error) {
         console.error('Failed to update stock count:', error)

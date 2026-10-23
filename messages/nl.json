@@ -342,8 +342,8 @@
             "price": "+ €5 p.p."
         },
         "info": {
-            "minimumTitle": "Groepsgrootte",
-            "minimumText": "Minimum €150 per groep.",
+            "minimumTitle": "Groepsgrootte & Minimum",
+            "minimumText": "Minimum €150 per groep. Is je groep kleiner? Geen probleem: het resterende bedrag van het minimumbedrag kan je na de proeverij gewoon gebruiken om bieren aan te kopen om mee naar huis te nemen!",
             "locationTitle": "Locatie",
             "breweryText": "Normaal gezien in onze brouwerij in Wilsele, inclusief een rondleiding.",
             "onLocationText": "Op locatie is ook mogelijk! Gratis binnen 10km van Leuven, daarbuiten prijs op aanvraag.",

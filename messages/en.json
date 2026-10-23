@@ -342,8 +342,8 @@
             "price": "+ €5 pp"
         },
         "info": {
-            "minimumTitle": "Group Size",
-            "minimumText": "Minimum €150 per group.",
+            "minimumTitle": "Group Size & Minimum",
+            "minimumText": "Minimum €150 per group. Is your group smaller? No problem: any remaining amount up to the €150 minimum can be used after the tasting to purchase beers to take home!",
             "locationTitle": "Location",
             "breweryText": "Usually held at our brewery in Wilsele, including a tour.",
             "onLocationText": "On location is also possible! Free within 10km of Leuven, otherwise price on request.",

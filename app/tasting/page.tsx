@@ -47,6 +47,10 @@ type TastingMessages = {
         messagePlaceholder: string;
         namePlaceholder: string;
         emailPlaceholder: string;
+        phonePlaceholder?: string;
+        timePlaceholder?: string;
+        phone?: string;
+        time?: string;
     };
 };
 

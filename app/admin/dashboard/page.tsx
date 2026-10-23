@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
-import { Package, Beer, LogOut, Mail, Calendar, Users, Bell, BellOff, FlaskConical } from "lucide-react";
+import { Package, Beer, LogOut, Mail, Calendar, Users, Bell, BellOff, FlaskConical, Wine } from "lucide-react";
 import Link from "next/link";
 import { subscribeUser } from "@/app/actions/notificationActions";
+import { getTastingStats } from "@/app/actions/tastingActions";
 
 function urlBase64ToUint8Array(base64String: string) {
     const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -28,17 +29,21 @@ export default function AdminDashboard() {
     const [mounted, setMounted] = useState(false);
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [pendingTastings, setPendingTastings] = useState(0);
 
     useEffect(() => {
         setMounted(true);
         if (!isAuthenticated) {
             router.push("/admin/login");
-        } else if ("serviceWorker" in navigator) {
-            // Check if already subscribed
-            navigator.serviceWorker.ready.then(async (registration) => {
-                const subscription = await registration.pushManager.getSubscription();
-                setIsSubscribed(!!subscription);
-            });
+        } else {
+            getTastingStats().then((s) => setPendingTastings(s.pendingCount)).catch(() => {});
+            if ("serviceWorker" in navigator) {
+                // Check if already subscribed
+                navigator.serviceWorker.ready.then(async (registration) => {
+                    const subscription = await registration.pushManager.getSubscription();
+                    setIsSubscribed(!!subscription);
+                });
+            }
         }
     }, [isAuthenticated, router]);
 
@@ -222,6 +227,29 @@ export default function AdminDashboard() {
                             </h2>
                             <p className="text-gray-600">
                                 Receptuur, voorraad grondstoffen &amp; producten, logboek
+                            </p>
+                        </div>
+                    </Link>
+
+                    {/* Proeverijen & Tastings Card */}
+                    <Link
+                        href="/admin/tastings"
+                        className="bg-white p-8 border-2 border-black hover:border-brewery-green transition-all group relative overflow-hidden"
+                    >
+                        {pendingTastings > 0 && (
+                            <div className="absolute top-3 right-3 bg-amber-500 text-white font-black text-xs px-2.5 py-1 rounded-full shadow-md animate-pulse">
+                                {pendingTastings} {pendingTastings === 1 ? 'nieuwe aanvraag' : 'nieuwe aanvragen'}
+                            </div>
+                        )}
+                        <div className="flex flex-col items-center text-center">
+                            <div className="bg-brewery-dark p-6 mb-6 group-hover:bg-brewery-green transition-colors">
+                                <Wine className="h-16 w-16 text-white" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-brewery-dark mb-3">
+                                Proeverijen &amp; Tastings
+                            </h2>
+                            <p className="text-gray-600">
+                                Beheer aanvragen, boekingen, datums en betalingen
                             </p>
                         </div>
                     </Link>

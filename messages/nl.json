@@ -342,8 +342,8 @@
             "price": "+ €5 p.p."
         },
         "info": {
-            "minimumTitle": "Groepsgrootte",
-            "minimumText": "Minimum €150 per groep.",
+            "minimumTitle": "Groepsgrootte & Minimum",
+            "minimumText": "Minimum €150 per groep. Is je groep kleiner? Geen probleem: het resterende bedrag van het minimumbedrag kan je na de proeverij gewoon gebruiken om bieren aan te kopen om mee naar huis te nemen!",
             "locationTitle": "Locatie",
             "breweryText": "Normaal gezien in onze brouwerij in Wilsele, inclusief een rondleiding.",
             "onLocationText": "Op locatie is ook mogelijk! Gratis binnen 10km van Leuven, daarbuiten prijs op aanvraag.",
@@ -356,7 +356,9 @@
             "questions": "Vragen?",
             "name": "Naam",
             "email": "E-mailadres",
+            "phone": "Telefoonnummer (optioneel)",
             "date": "Gewenste datum",
+            "time": "Voorkeur startuur (optioneel)",
             "people": "Aantal personen",
             "formula": "Kies je formule",
             "formula4": "Basis (4 bieren - €20 p.p.)",
@@ -372,6 +374,8 @@
             "error": "Oeps! Er ging iets mis.",
             "namePlaceholder": "Jan Janssens",
             "emailPlaceholder": "jan@voorbeeld.be",
+            "phonePlaceholder": "bv. 0491 23 45 67",
+            "timePlaceholder": "bv. 14:00 of 19:30",
             "peoplePlaceholder": "bv. 10",
             "messagePlaceholder": "Vertel ons over je groep of event..."
         }

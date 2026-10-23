@@ -342,8 +342,8 @@
             "price": "+ €5 pp"
         },
         "info": {
-            "minimumTitle": "Group Size",
-            "minimumText": "Minimum €150 per group.",
+            "minimumTitle": "Group Size & Minimum",
+            "minimumText": "Minimum €150 per group. Is your group smaller? No problem: any remaining amount up to the €150 minimum can be used after the tasting to purchase beers to take home!",
             "locationTitle": "Location",
             "breweryText": "Usually held at our brewery in Wilsele, including a tour.",
             "onLocationText": "On location is also possible! Free within 10km of Leuven, otherwise price on request.",
@@ -356,7 +356,9 @@
             "questions": "Questions?",
             "name": "Name",
             "email": "Email address",
+            "phone": "Phone number (optional)",
             "date": "Preferred date",
+            "time": "Preferred start time (optional)",
             "people": "Number of people",
             "formula": "Choose your formula",
             "formula4": "Basic (4 beers - €20 pp)",
@@ -372,6 +374,8 @@
             "error": "Oops! Something went wrong.",
             "namePlaceholder": "John Doe",
             "emailPlaceholder": "john@example.com",
+            "phonePlaceholder": "e.g. +32 491 23 45 67",
+            "timePlaceholder": "e.g. 14:00 or 19:30",
             "peoplePlaceholder": "e.g. 10",
             "messagePlaceholder": "Tell us about your group or event..."
         }
